@@ -1,5 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Кошик — {{ site_settings.site_name }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{% endblock %}
 {% block content %}
 <div class="container">
   <div class="section-card">
@@ -12,19 +16,51 @@
           </thead>
           <tbody>
           {% for row in lines %}
+            {% with sku=row.item.sku %}
             <tr>
               <td>
-                <a href="{% url 'catalog:product' row.item.sku.group.slug %}?sku={{ row.item.sku.article }}">{{ row.item.sku.name }}</a>
-                <div style="font-size:12px;color:var(--color-text-muted)">{{ row.item.sku.article }}</div>
+                <a href="{% url 'catalog:product' sku.group.slug %}?sku={{ sku.article }}">{{ sku.name }}</a>
+                <div style="font-size:12px;color:var(--color-text-muted)">{{ sku.article }}</div>
               </td>
-              <td>{{ row.item.sku.size_label }}</td>
-              <td>{{ row.item.sku.price }} ₴</td>
+              <td>{{ sku.size_label }}</td>
+              <td>{{ sku.price }} ₴</td>
               <td>
-                <form class="qty-form" method="post" action="{% url 'cart:update' row.item.id %}">
+                <form class="qty-form qty-form--stepper" method="post" action="{% url 'cart:update' row.item.id %}" data-cart-qty>
                   {% csrf_token %}
-                  <input type="number" name="qty" value="{{ row.item.quantity }}" step="{{ row.item.sku.min_party }}" min="{{ row.item.sku.min_party }}">
+                  <div class="qty-stepper" role="group" aria-label="Кількість">
+                    <button
+                      class="qty-stepper__btn"
+                      type="button"
+                      data-qty-delta="-{{ sku.min_party }}"
+                      aria-label="Зменшити"
+                      {% if row.item.quantity <= sku.min_party %}disabled{% endif %}
+                    >−</button>
+                    <input
+                      class="qty-stepper__input"
+                      type="number"
+                      name="qty"
+                      value="{{ row.item.quantity }}"
+                      step="{{ sku.min_party }}"
+                      min="{{ sku.min_party }}"
+                      {% if row.max_qty is not None %}max="{{ row.max_qty }}"{% endif %}
+                      inputmode="numeric"
+                      enterkeyhint="done"
+                      aria-label="Кількість"
+                      data-qty-input
+                    >
+                    <button
+                      class="qty-stepper__btn"
+                      type="button"
+                      data-qty-delta="{{ sku.min_party }}"
+                      aria-label="Збільшити"
+                      {% if row.max_qty is not None and row.item.quantity >= row.max_qty %}disabled{% endif %}
+                    >+</button>
+                  </div>
                   <button class="btn btn--sm btn--ghost" type="submit">OK</button>
                 </form>
+                {% if sku.stock_qty is not None %}
+                <div class="qty-stock-hint">Залишок: {{ sku.stock_qty }} шт</div>
+                {% endif %}
               </td>
               <td><strong>{{ row.line_total }} ₴</strong></td>
               <td>
@@ -34,6 +70,7 @@
                 </form>
               </td>
             </tr>
+            {% endwith %}
           {% empty %}
             <tr><td colspan="6" class="empty-state">Кошик порожній.</td></tr>
           {% endfor %}
@@ -49,4 +86,7 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/cart-qty.js' %}" defer></script>
 {% endblock %}

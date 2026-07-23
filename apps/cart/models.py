@@ -73,6 +73,11 @@ class CartItem(models.Model):
             raise ValidationError(
                 {"quantity": f"Кількість має бути кратна {min_party}."}
             )
+        stock_qty = self.sku.stock_qty
+        if stock_qty is not None and self.quantity > stock_qty:
+            raise ValidationError(
+                {"quantity": f"Доступно лише {stock_qty} шт."}
+            )
 
 
 class WishlistItem(models.Model):

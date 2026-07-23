@@ -1,18 +1,33 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Акції — {{ site_settings.site_name }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
 {% block content %}
 <div class="container">
   <div class="section-card">
     <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Акції</h1></div>
-    <div class="section-body content-split" style="display:grid">
-      {% for p in promotions %}
-      <a class="promo-teaser" href="{% url 'content:promo_detail' p.slug %}">
-        <h3>{{ p.title }}</h3>
-        <p>{{ p.body|truncatewords:30 }}</p>
-      </a>
-      {% empty %}
+    <div class="section-body">
+      {% if promotions %}
+      <div class="content-split" style="display:grid;margin-bottom:24px">
+        {% for p in promotions %}
+        <a class="promo-teaser" href="{% url 'content:promo_detail' p.slug %}">
+          <h3>{{ p.title }}</h3>
+          <p>{{ p.body|truncatewords:30 }}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if promo_products %}
+      <h2 style="margin:0 0 16px;font-size:16px;text-transform:uppercase">Акційні пропозиції</h2>
+      <div class="product-grid">
+        {% for g in promo_products %}
+          {% include "includes/product_card.html" %}
+        {% endfor %}
+      </div>
+      {% elif not promotions %}
       <p class="empty-state">Активних акцій немає.</p>
-      {% endfor %}
+      {% endif %}
     </div>
   </div>
 </div>

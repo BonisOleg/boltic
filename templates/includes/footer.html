@@ -11,7 +11,7 @@
     <div class="footer-grid">
       <div class="footer-col footer-col--catalog">
         <h3>Каталог</h3>
-        <ul class="footer-catalog-list">
+        <ul>
           {% for cat in nav_categories|slice:":6" %}
           <li><a href="{% url 'catalog:category' path=cat.url_path %}">{{ cat.name }}</a></li>
           {% endfor %}
@@ -36,6 +36,33 @@
           <li><a href="{% url 'content:news_list' %}">Новини</a></li>
         </ul>
       </div>
+      {% if site_settings.phone or site_settings.email or site_settings.address or site_settings.social_json %}
+      <div class="footer-col footer-col--contacts">
+        <h3>Контакти</h3>
+        <ul class="footer-contacts">
+          {% if site_settings.phone %}
+          <li><a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a></li>
+          {% endif %}
+          {% if site_settings.email %}
+          <li><a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a></li>
+          {% endif %}
+          {% if site_settings.address %}
+          <li class="footer-contacts__address">{{ site_settings.address }}</li>
+          {% endif %}
+        </ul>
+        {% if site_settings.social_json %}
+        <ul class="footer-social">
+          {% for name, url in site_settings.social_json.items %}
+          {% if url %}
+          <li>
+            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ name }}">{{ name }}</a>
+          </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
 
     <div class="footer-bottom">

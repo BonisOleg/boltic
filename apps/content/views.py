@@ -21,6 +21,7 @@ class PromoListView(TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["promotions"] = selectors.active_promotions()
+        ctx["promo_products"] = selectors.promo_products()
         return ctx
 
 
@@ -29,7 +30,14 @@ class PromoDetailView(View):
         promo = selectors.get_promotion(slug)
         if promo is None:
             raise Http404
-        return render(request, "content/promo_detail.html", {"promo": promo})
+        return render(
+            request,
+            "content/promo_detail.html",
+            {
+                "promo": promo,
+                "promo_products": selectors.promotion_groups(promo),
+            },
+        )
 
 
 class NewsListView(TemplateView):

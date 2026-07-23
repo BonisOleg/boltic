@@ -2,24 +2,34 @@
   <div class="product-card__media">
     <div class="product-card__marks">
       {% if g.is_promo %}<span class="badge badge--promo">Акція</span>{% endif %}
-      {% if g.is_top %}<span class="badge">Топ</span>{% endif %}
+      {% if g.is_top %}<span class="badge badge--top">Топ</span>{% endif %}
     </div>
-    <a href="{% url 'catalog:product' g.slug %}">
+    <a class="product-card__img-link" href="{% url 'catalog:product' g.slug %}">
       {% if g.primary_images %}
-        <img src="{{ g.primary_images.0.image.url }}" alt="{{ g.primary_images.0.alt|default:g.name }}" loading="lazy" width="240" height="180">
+        <img src="{{ g.primary_images.0.image.url }}" alt="{{ g.primary_images.0.alt|default:g.name }}" loading="lazy" width="280" height="210" decoding="async">
       {% else %}
         {% with im=g.images.all|first %}
           {% if im %}
-            <img src="{{ im.image.url }}" alt="{{ im.alt|default:g.name }}" loading="lazy" width="240" height="180">
+            <img src="{{ im.image.url }}" alt="{{ im.alt|default:g.name }}" loading="lazy" width="280" height="210" decoding="async">
           {% else %}
-            <div class="product-card__placeholder">Б</div>
+            <div class="product-card__placeholder" aria-hidden="true">
+              <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="24" cy="24" r="8"/>
+                <path d="M10 28h28M14 20h20M18 14h12"/>
+              </svg>
+            </div>
           {% endif %}
         {% endwith %}
       {% endif %}
     </a>
   </div>
   <div class="product-card__body">
-    <h3 class="product-card__title"><a href="{% url 'catalog:product' g.slug %}">{{ g.name }}</a></h3>
+    <h3 class="product-card__title">
+      <a href="{% url 'catalog:product' g.slug %}">{{ g.name }}</a>
+    </h3>
+    {% if g.standard %}
+    <p class="product-card__spec">{{ g.standard }}{% if g.material %} · {{ g.material }}{% endif %}</p>
+    {% endif %}
     <ul class="product-card__meta">
       {% if g.standard %}<li><span>Стандарт</span><strong>{{ g.standard }}</strong></li>{% endif %}
       {% if g.material %}<li><span>Матеріал</span><strong>{{ g.material }}</strong></li>{% endif %}
@@ -28,6 +38,6 @@
     <div class="product-card__price">
       {% if g.price_from %}від {{ g.price_from|floatformat:2 }} <span>грн / шт</span>{% else %}—{% endif %}
     </div>
-    <a class="btn btn--sm" href="{% url 'catalog:product' g.slug %}">Купити в асортименті</a>
+    <a class="btn btn--sm btn--block product-card__buy" href="{% url 'catalog:product' g.slug %}">Купити в асортименті</a>
   </div>
 </article>

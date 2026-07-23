@@ -183,7 +183,7 @@ button {
 }
 
 .btn--sm {
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 13px;
 }
 
@@ -226,15 +226,23 @@ button {
 }
 
 .badge {
-  display: inline-block;
-  padding: 2px 8px;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  font-size: 10px;
   font-weight: 700;
   font-family: var(--font-display);
   text-transform: uppercase;
-  border-radius: var(--radius-pill);
+  letter-spacing: 0.02em;
+  border-radius: 4px;
   background: var(--color-accent);
   color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.badge--top {
+  background: var(--color-secondary);
+  color: #fff;
 }
 
 .badge--promo {

@@ -26,3 +26,23 @@ def normalize_qty(qty: int, min_party: int) -> int:
     if remainder == 0:
         return qty
     return qty + (min_party - remainder)
+
+
+def max_orderable_qty(min_party: int, stock_qty: int | None) -> int | None:
+    """Макс. кількість для замовлення (кратна партії). None = без ліміту."""
+    if stock_qty is None:
+        return None
+    if min_party < 1:
+        min_party = 1
+    return (int(stock_qty) // min_party) * min_party
+
+
+def clamp_qty(qty: int, min_party: int, stock_qty: int | None) -> int:
+    """Нормалізувати qty і обмежити залишком (0 якщо залишку менше мін. партії)."""
+    qty = normalize_qty(int(qty), min_party)
+    max_q = max_orderable_qty(min_party, stock_qty)
+    if max_q is None:
+        return qty
+    if max_q < min_party:
+        return 0
+    return min(qty, max_q)

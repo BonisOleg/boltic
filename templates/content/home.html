@@ -14,16 +14,22 @@
     {% if slides %}
       {% for s in slides %}
       <div class="hero-slide">
-        <h{% if forloop.first %}1{% else %}2{% endif %}>{{ s.title|default:site_settings.site_name }}</h{% if forloop.first %}1{% else %}2{% endif %}>
-        {% if s.body %}<p>{{ s.body|truncatewords:40 }}</p>{% endif %}
-        <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Всі види кріплень</a>
+        <div class="hero-slide__content">
+          <h{% if forloop.first %}1{% else %}2{% endif %}>{{ s.title|default:site_settings.site_name }}</h{% if forloop.first %}1{% else %}2{% endif %}>
+          {% if s.body %}<p>{{ s.body|truncatewords:40 }}</p>{% endif %}
+          <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Всі види кріплень</a>
+        </div>
+        <div class="hero-slide__visual" aria-hidden="true"></div>
       </div>
       {% endfor %}
     {% else %}
       <div class="hero-slide">
-        <h1>{{ site_settings.site_name }}</h1>
-        <p>Інтернет-магазин кріплення. Болти, гайки, самонарізи, анкери та системи кріплення.</p>
-        <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Перейти в каталог</a>
+        <div class="hero-slide__content">
+          <h1>{{ site_settings.site_name }} — всі види кріплень</h1>
+          <p>Інтернет-магазин кріплення. Болти, гайки, самонарізи, анкери та системи кріплення.</p>
+          <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Перейти в каталог</a>
+        </div>
+        <div class="hero-slide__visual" aria-hidden="true"></div>
       </div>
     {% endif %}
   </div>
@@ -34,8 +40,18 @@
     <div class="advantages__grid">
       {% for a in advantages %}
       <div class="advantage-item">
-        <div class="advantage-item__icon">{{ forloop.counter }}</div>
-        <div>
+        <div class="advantage-item__icon" aria-hidden="true">
+          {% if forloop.counter == 1 %}
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          {% elif forloop.counter == 2 %}
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="17.5" cy="17.5" r="1.5"/></svg>
+          {% elif forloop.counter == 3 %}
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/></svg>
+          {% else %}
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          {% endif %}
+        </div>
+        <div class="advantage-item__text">
           <strong>{{ a.title }}</strong>
           <span>{{ a.text }}</span>
         </div>

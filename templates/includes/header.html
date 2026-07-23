@@ -3,6 +3,7 @@
   <div class="header-top">
     <div class="header-top__hours">
       {% if site_settings.order_hours %}<span>прийом замовлень: {{ site_settings.order_hours }}</span>{% endif %}
+      {% if site_settings.order_hours and site_settings.processing_hours %}<span class="header-top__sep" aria-hidden="true"></span>{% endif %}
       {% if site_settings.processing_hours %}<span>обробка: {{ site_settings.processing_hours }}</span>{% endif %}
     </div>
     <nav>
@@ -16,24 +17,32 @@
 
   <div class="header-bottom container" style="max-width:none;position:relative">
     <a class="logo-block" href="{% url 'content:home' %}" aria-label="{{ site_settings.site_name }}">
-      <img src="{% static 'img/logo.png' %}" alt="{{ site_settings.site_name }}" width="200" height="42">
+      <img src="{% static 'img/logo.png' %}" alt="{{ site_settings.site_name }}" width="160" height="34">
     </a>
 
-    <button type="button" class="catalog-btn" data-catalog-toggle>
-      ≡ Каталог
-    </button>
+    <div class="header-search-cluster">
+      <button type="button" class="catalog-btn" data-catalog-toggle>
+        <span class="catalog-btn__icon" aria-hidden="true">≡</span>
+        Каталог
+      </button>
 
-    <form class="search-form" action="{% url 'catalog:search' %}" method="get" role="search">
-      <label class="sr-only" for="q">Пошук</label>
-      <input id="q" type="search" name="q" value="{{ request.GET.q }}" placeholder="Я шукаю" autocomplete="off"
-             hx-get="{% url 'catalog:search' %}?suggest=1"
-             hx-trigger="keyup changed delay:300ms"
-             hx-target="#search-suggest"
-             hx-include="this"
-             hx-swap="innerHTML">
-      <button type="submit" aria-label="Шукати">⌕</button>
-      <div id="search-suggest" class="search-suggest"></div>
-    </form>
+      <form class="search-form" action="{% url 'catalog:search' %}" method="get" role="search">
+        <label class="sr-only" for="q">Пошук</label>
+        <input id="q" type="search" name="q" value="{{ request.GET.q }}" placeholder="Я шукаю" autocomplete="off"
+               hx-get="{% url 'catalog:search' %}?suggest=1"
+               hx-trigger="keyup changed delay:300ms"
+               hx-target="#search-suggest"
+               hx-include="this"
+               hx-swap="innerHTML">
+        <button type="submit" aria-label="Шукати">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"/>
+            <path d="M16.5 16.5L21 21"/>
+          </svg>
+        </button>
+        <div id="search-suggest" class="search-suggest"></div>
+      </form>
+    </div>
 
     <div class="action-menu action-menu--header">
       {% include "includes/header_actions.html" %}

@@ -3,8 +3,21 @@ from django.utils import timezone
 
 from apps.cart.models import Cart, CartItem, WishlistItem
 from apps.catalog.models import ProductSKU
-from apps.catalog.pricing import line_total, normalize_qty
+from apps.catalog.pricing import clamp_qty, line_total, max_orderable_qty, normalize_qty
 from apps.core.exceptions import CartError
+
+
+def _enforce_stock(sku: ProductSKU, qty: int) -> int:
+    """Повернути qty у межах залишку або кинути CartError."""
+    max_q = max_orderable_qty(sku.min_party, sku.stock_qty)
+    qty = normalize_qty(qty, sku.min_party)
+    if max_q is None:
+        return qty
+    if max_q < sku.min_party:
+        raise CartError("Товару немає в наявності")
+    if qty > max_q:
+        raise CartError(f"Доступно лише {max_q} шт.")
+    return qty
 
 
 def _ensure_session(request) -> str:
@@ -32,15 +45,19 @@ def cart_item_count(request) -> int:
 
 
 def sync_cart(cart: Cart) -> list[str]:
-    """Прибрати неактивні SKU; нормалізувати qty. Повертає повідомлення."""
+    """Прибрати неактивні SKU; нормалізувати qty і залишок. Повертає повідомлення."""
     messages: list[str] = []
-    for item in cart.items.select_related("sku").all():
+    for item in cart.items.select_related("sku", "sku__group").all():
         sku = item.sku
         if not sku.is_active or not sku.group.is_active:
             item.delete()
             messages.append(f"Видалено недоступний товар {sku.article}")
             continue
-        new_qty = normalize_qty(item.quantity, sku.min_party)
+        new_qty = clamp_qty(item.quantity, sku.min_party, sku.stock_qty)
+        if new_qty == 0:
+            item.delete()
+            messages.append(f"Видалено: {sku.article} — немає в наявності")
+            continue
         if new_qty != item.quantity:
             item.quantity = new_qty
             item.save(update_fields=["quantity"])
@@ -49,16 +66,16 @@ def sync_cart(cart: Cart) -> list[str]:
 
 
 def cart_totals(cart: Cart) -> dict:
-    items = list(cart.items.select_related("sku").all())
-    lines = []
-    subtotal = 0
+    items = list(cart.items.select_related("sku", "sku__group").all())
     from decimal import Decimal
 
     subtotal = Decimal("0.00")
+    lines = []
     for item in items:
         lt = line_total(item.sku.price, item.quantity)
         subtotal += lt
-        lines.append({"item": item, "line_total": lt})
+        max_qty = max_orderable_qty(item.sku.min_party, item.sku.stock_qty)
+        lines.append({"item": item, "line_total": lt, "max_qty": max_qty})
     return {"lines": lines, "subtotal": subtotal}
 
 
@@ -73,14 +90,14 @@ def add_item(request, *, sku_id: int, qty: int) -> CartItem:
         raise CartError("Товар не знайдено")
     qty = normalize_qty(int(qty), sku.min_party)
     cart = resolve_cart(request)
-    item, created = CartItem.objects.get_or_create(
-        cart=cart,
-        sku=sku,
-        defaults={"quantity": qty},
-    )
-    if not created:
-        item.quantity = normalize_qty(item.quantity + qty, sku.min_party)
+    item = CartItem.objects.filter(cart=cart, sku=sku).first()
+    desired = (item.quantity + qty) if item else qty
+    desired = _enforce_stock(sku, desired)
+    if item:
+        item.quantity = desired
         item.save(update_fields=["quantity"])
+    else:
+        item = CartItem.objects.create(cart=cart, sku=sku, quantity=desired)
     cart.updated_at = timezone.now()
     cart.save(update_fields=["updated_at"])
     return item
@@ -100,7 +117,7 @@ def update_item(request, *, item_id: int, qty: int) -> CartItem:
     if qty <= 0:
         item.delete()
         raise CartError("Позицію видалено")
-    item.quantity = normalize_qty(qty, item.sku.min_party)
+    item.quantity = _enforce_stock(item.sku, qty)
     item.save(update_fields=["quantity"])
     return item
 
@@ -124,14 +141,18 @@ def merge_on_login(request, user) -> None:
     user_cart, _ = Cart.objects.get_or_create(user=user)
     for item in session_cart.items.select_related("sku"):
         existing = user_cart.items.filter(sku=item.sku).first()
+        desired = (existing.quantity + item.quantity) if existing else item.quantity
+        desired = clamp_qty(desired, item.sku.min_party, item.sku.stock_qty)
+        if desired == 0:
+            item.delete()
+            continue
         if existing:
-            existing.quantity = normalize_qty(
-                existing.quantity + item.quantity, item.sku.min_party
-            )
+            existing.quantity = desired
             existing.save(update_fields=["quantity"])
+            item.delete()
         else:
             item.cart = user_cart
-            item.quantity = normalize_qty(item.quantity, item.sku.min_party)
+            item.quantity = desired
             item.save(update_fields=["cart", "quantity"])
     session_cart.delete()
 

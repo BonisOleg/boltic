@@ -61,6 +61,17 @@ def _primary_prefetch():
     )
 
 
+def promo_products(*, limit: int | None = None):
+    qs = annotate_price_from(
+        ProductGroup.objects.filter(is_active=True, is_promo=True).prefetch_related(
+            _primary_prefetch()
+        )
+    )
+    if limit is not None:
+        return qs[:limit]
+    return qs
+
+
 def home_context():
     now = timezone.now()
     blocks = _blocks_map()
@@ -77,11 +88,7 @@ def home_context():
             _primary_prefetch()
         )
     )[:12]
-    promos_groups = annotate_price_from(
-        ProductGroup.objects.filter(is_active=True, is_promo=True).prefetch_related(
-            _primary_prefetch()
-        )
-    )[:12]
+    promos_groups = promo_products(limit=12)
     news = NewsPost.objects.filter(is_published=True).order_by(
         "-published_at", "-id"
     )[:4]
@@ -136,7 +143,13 @@ def active_promotions():
 
 
 def get_promotion(slug: str):
-    return active_promotions().filter(slug=slug).prefetch_related("groups").first()
+    return active_promotions().filter(slug=slug).first()
+
+
+def promotion_groups(promo: Promotion):
+    return annotate_price_from(
+        promo.groups.filter(is_active=True).prefetch_related(_primary_prefetch())
+    )
 
 
 def published_news():
