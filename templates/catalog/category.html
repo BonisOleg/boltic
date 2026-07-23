@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} — {{ site_settings.site_name }}{% endblock %}
+{% block extra_head %}<link rel="canonical" href="/katalog/{{ canonical_path }}">{% endblock %}
+{% block content %}
+<div class="container">
+  <h1 style="text-transform:uppercase">{{ category.name }}</h1>
+
+  {% if children %}
+  <div class="child-cats">
+    {% for ch in children %}
+    <a href="{% url 'catalog:category' path=ch.url_path %}">{{ ch.name }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="catalog-layout">
+    <aside class="facets">
+      <h3>Фільтри</h3>
+      <form method="get"
+            hx-get="{{ request.path }}"
+            hx-target="#product-grid"
+            hx-push-url="true"
+            hx-trigger="change">
+        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        {% for attr in facet_attributes %}
+        <div class="facet-group" data-facet-group>
+          <div class="facet-group__title">{{ attr.name }}</div>
+          <div class="facet-group__list">
+            {% for val in attr.values.all %}
+            <label>
+              <input type="checkbox" name="{{ attr.code }}" value="{{ val.slug }}"
+                {% for code, slugs in selected_facets.items %}{% if code == attr.code and val.slug in slugs %}checked{% endif %}{% endfor %}>
+              {{ val.value }}
+            </label>
+            {% empty %}
+            <span class="facet-group__empty">Немає значень</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% empty %}
+        <p style="color:var(--color-text-muted);font-size:13px">Фільтри зʼявляться після налаштування фасетів.</p>
+        {% endfor %}
+      </form>
+    </aside>
+
+    <div>
+      <div class="catalog-toolbar">
+        <form method="get" style="display:flex;gap:8px;align-items:center">
+          {% for code, values in selected_facets.items %}
+            {% for v in values %}<input type="hidden" name="{{ code }}" value="{{ v }}">{% endfor %}
+          {% endfor %}
+          <label for="sort">Сортування</label>
+          <select id="sort" name="sort" class="form-control" style="max-width:180px"
+                  onchange="this.form.requestSubmit()"
+                  hx-get="{{ request.path }}"
+                  hx-target="#product-grid"
+                  hx-push-url="true"
+                  hx-include="closest form">
+            <option value="name" {% if sort == "name" %}selected{% endif %}>За назвою</option>
+            <option value="price" {% if sort == "price" %}selected{% endif %}>За ціною</option>
+            <option value="new" {% if sort == "new" %}selected{% endif %}>Новинки</option>
+          </select>
+        </form>
+      </div>
+      <div id="product-grid">
+        {% include "catalog/partials/product_grid.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

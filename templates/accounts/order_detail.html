@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Замовлення {{ order.number }} — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px">Замовлення {{ order.number }}</h1></div>
+    <div class="section-body">
+      <p>Статус: {{ order.get_status_display }} · Оплата: {{ order.get_payment_status_display }}</p>
+      <p>{{ order.customer_name }} · {{ order.phone }}{% if order.email %} · {{ order.email }}{% endif %}</p>
+      {% if order.shipping_address %}<p>{{ order.shipping_address }}</p>{% endif %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Артикул</th><th>Назва</th><th>Розмір</th><th>Ціна</th><th>К-сть</th><th>Сума</th></tr></thead>
+          <tbody>
+          {% for item in order.items.all %}
+            <tr>
+              <td>{{ item.article }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.size_label }}</td>
+              <td>{{ item.unit_price }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.line_total }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:12px"><strong>Разом: {{ order.total }} грн</strong></p>
+      <a class="btn btn--ghost" href="{% url 'accounts:orders' %}">← До списку</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

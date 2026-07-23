@@ -1,0 +1,218 @@
+/* PDP: фільтр асортименту SKU */
+
+.sku-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--color-border) 35%, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.sku-filter__search {
+  position: relative;
+}
+
+.sku-filter__search input[type="search"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 40px 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.sku-filter__search input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.sku-filter__search input[type="search"]:focus {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.sku-filter__clear-q {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sku-filter__clear-q[hidden] {
+  display: none;
+}
+
+.sku-filter__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sku-filter__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.sku-filter__chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  padding: 2px 2px 6px;
+  margin: 0 -2px;
+}
+
+.sku-filter__chip {
+  flex: 0 0 auto;
+  min-height: 40px;
+  min-width: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sku-filter__chip:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+}
+
+.sku-filter__chip.is-active {
+  background: color-mix(in srgb, var(--color-primary) 16%, #fff);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.sku-filter__chip:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.sku-filter__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  min-height: 28px;
+}
+
+.sku-filter__stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.sku-filter__stock input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.sku-filter__count {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-left: auto;
+}
+
+.sku-filter__reset {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sku-filter__reset[hidden] {
+  display: none;
+}
+
+.sku-filter__empty {
+  margin: 0 0 12px;
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.sku-filter__empty[hidden] {
+  display: none;
+}
+
+.data-table--sku tr.is-filtered-out {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .sku-filter {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .sku-filter__chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding-bottom: 2px;
+  }
+
+  .sku-filter__chip {
+    min-height: 36px;
+  }
+
+  .sku-filter__stock {
+    min-height: 36px;
+  }
+}

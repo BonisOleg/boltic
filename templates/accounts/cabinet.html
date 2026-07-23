@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Кабінет — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card" style="max-width:560px">
+    <div class="section-head"><h1 style="margin:0;font-size:22px">Кабінет</h1></div>
+    <div class="section-body">
+      <p>Вітаємо, {{ user.username }}!</p>
+      <ul style="list-style:none;padding:0;margin:0">
+        <li style="margin-bottom:10px"><a class="btn" href="{% url 'accounts:orders' %}">Мої замовлення</a></li>
+        <li style="margin-bottom:10px"><a class="btn btn--ghost" href="{% url 'accounts:profile' %}">Профіль</a></li>
+        <li style="margin-bottom:10px"><a class="btn btn--ghost" href="{% url 'cart:wishlist' %}">Бажане</a></li>
+        <li><a class="btn btn--ghost" href="{% url 'accounts:logout' %}">Вихід</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

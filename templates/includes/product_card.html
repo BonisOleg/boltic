@@ -1,0 +1,33 @@
+<article class="product-card">
+  <div class="product-card__media">
+    <div class="product-card__marks">
+      {% if g.is_promo %}<span class="badge badge--promo">Акція</span>{% endif %}
+      {% if g.is_top %}<span class="badge">Топ</span>{% endif %}
+    </div>
+    <a href="{% url 'catalog:product' g.slug %}">
+      {% if g.primary_images %}
+        <img src="{{ g.primary_images.0.image.url }}" alt="{{ g.primary_images.0.alt|default:g.name }}" loading="lazy" width="240" height="180">
+      {% else %}
+        {% with im=g.images.all|first %}
+          {% if im %}
+            <img src="{{ im.image.url }}" alt="{{ im.alt|default:g.name }}" loading="lazy" width="240" height="180">
+          {% else %}
+            <div class="product-card__placeholder">Б</div>
+          {% endif %}
+        {% endwith %}
+      {% endif %}
+    </a>
+  </div>
+  <div class="product-card__body">
+    <h3 class="product-card__title"><a href="{% url 'catalog:product' g.slug %}">{{ g.name }}</a></h3>
+    <ul class="product-card__meta">
+      {% if g.standard %}<li><span>Стандарт</span><strong>{{ g.standard }}</strong></li>{% endif %}
+      {% if g.material %}<li><span>Матеріал</span><strong>{{ g.material }}</strong></li>{% endif %}
+      {% if g.coating %}<li><span>Покриття</span><strong>{{ g.coating }}</strong></li>{% endif %}
+    </ul>
+    <div class="product-card__price">
+      {% if g.price_from %}від {{ g.price_from|floatformat:2 }} <span>грн / шт</span>{% else %}—{% endif %}
+    </div>
+    <a class="btn btn--sm" href="{% url 'catalog:product' g.slug %}">Купити в асортименті</a>
+  </div>
+</article>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ promo.title }} — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px">{{ promo.title }}</h1></div>
+    <div class="section-body">
+      <div class="prose">{{ promo.body|linebreaks }}</div>
+      {% if promo.groups.all %}
+      <h2 style="margin-top:24px;font-size:16px;text-transform:uppercase">Товари акції</h2>
+      <div class="product-grid">
+        {% for g in promo.groups.all %}
+          {% include "includes/product_card.html" %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

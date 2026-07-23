@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Реєстрація — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card" style="max-width:420px;margin:0 auto">
+    <div class="section-head"><h1 style="margin:0;font-size:22px">Реєстрація</h1></div>
+    <div class="section-body">
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="field">
+          {{ field.label_tag }}{{ field }}
+          {% if field.errors %}<div style="color:var(--color-danger);font-size:13px">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        {% if form.non_field_errors %}<div style="color:var(--color-danger)">{{ form.non_field_errors }}</div>{% endif %}
+        <button class="btn btn--block" type="submit">Створити акаунт</button>
+      </form>
+      <p style="margin-top:16px">Вже є акаунт? <a href="{% url 'accounts:login' %}">Увійти</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

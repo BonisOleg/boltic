@@ -1,0 +1,46 @@
+{% load static %}
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-brand">
+      <a class="footer-logo" href="{% url 'content:home' %}" aria-label="{{ site_settings.site_name }}">
+        <img src="{% static 'img/logo.png' %}" alt="{{ site_settings.site_name }}" width="160" height="34" decoding="async">
+      </a>
+      <a class="footer-cabinet" href="{% url 'accounts:cabinet' %}">Кабінет</a>
+    </div>
+
+    <div class="footer-grid">
+      <div class="footer-col footer-col--catalog">
+        <h3>Каталог</h3>
+        <ul class="footer-catalog-list">
+          {% for cat in nav_categories|slice:":6" %}
+          <li><a href="{% url 'catalog:category' path=cat.url_path %}">{{ cat.name }}</a></li>
+          {% endfor %}
+          <li><a href="{% url 'catalog:root' %}">Увесь каталог</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Покупцям</h3>
+        <ul>
+          <li><a href="{% url 'content:oplata_i_dostavka' %}">Оплата і доставка</a></li>
+          <li><a href="{% url 'content:povernennya_ta_obmin' %}">Повернення та обмін</a></li>
+          <li><a href="{% url 'content:promo_list' %}">Акції</a></li>
+          <li><a href="{% url 'catalog:brand_list' %}">Бренди</a></li>
+          <li><a href="{% url 'content:contacts' %}">Контакти</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Інформація</h3>
+        <ul>
+          <li><a href="{% url 'content:publichnyy_dohovir' %}">Публічний договір</a></li>
+          <li><a href="{% url 'content:polityka_konfidentsiynosti' %}">Політика конфіденційності</a></li>
+          <li><a href="{% url 'content:news_list' %}">Новини</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© {% now "Y" %} {{ site_settings.site_name }}. Всі види кріплень.</span>
+      <a class="footer-credit" href="https://www.prometeylabs.com/" target="_blank" rel="noopener noreferrer">Розроблено PrometeyLabs</a>
+    </div>
+  </div>
+</footer>

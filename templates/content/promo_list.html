@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Акції — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Акції</h1></div>
+    <div class="section-body content-split" style="display:grid">
+      {% for p in promotions %}
+      <a class="promo-teaser" href="{% url 'content:promo_detail' p.slug %}">
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.body|truncatewords:30 }}</p>
+      </a>
+      {% empty %}
+      <p class="empty-state">Активних акцій немає.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

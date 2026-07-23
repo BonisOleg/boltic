@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Контакти — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Контакти</h1></div>
+    <div class="section-body">
+      {% if site_settings.phone or site_settings.email or site_settings.address %}
+      <p>
+        {% if site_settings.phone %}<a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a>{% endif %}
+        {% if site_settings.email %} · <a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>{% endif %}
+      </p>
+      {% if site_settings.address %}<p>{{ site_settings.address }}</p>{% endif %}
+      {% endif %}
+
+      <div class="l1-grid" style="margin-top:16px">
+        {% for b in branches %}
+        <div class="l1-card" style="display:block;text-align:left;text-transform:none;font-weight:400">
+          <strong style="font-family:var(--font-display);text-transform:uppercase">{{ b.name }}</strong><br>
+          {{ b.address }}<br>
+          <a href="tel:{{ b.phone }}">{{ b.phone }}</a>
+          {% if b.email %}<br><a href="mailto:{{ b.email }}">{{ b.email }}</a>{% endif %}
+          {% if b.map_url %}<br><a href="{{ b.map_url }}" target="_blank" rel="noopener">На карті</a>{% endif %}
+        </div>
+        {% empty %}
+        <p class="empty-state">Філії зʼявляться після наповнення CMS.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

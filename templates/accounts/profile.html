@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Профіль — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card" style="max-width:520px">
+    <div class="section-head"><h1 style="margin:0;font-size:22px">Профіль</h1></div>
+    <div class="section-body">
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="field">
+          {{ field.label_tag }}{{ field }}
+          {% if field.errors %}<div style="color:var(--color-danger);font-size:13px">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <button class="btn" type="submit">Зберегти</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

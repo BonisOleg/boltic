@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ site_settings.site_name }} — всі види кріплень{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
+{% block main_class %}page-main--flush{% endblock %}
+{% block content %}
+
+<section class="hero-slider" aria-label="Головний банер">
+  {% if slides|length > 1 %}
+  <button type="button" class="hero-nav hero-nav--prev" data-hero-prev aria-label="Назад">‹</button>
+  <button type="button" class="hero-nav hero-nav--next" data-hero-next aria-label="Далі">›</button>
+  {% endif %}
+  <div class="hero-slider__track" data-hero-track>
+    {% if slides %}
+      {% for s in slides %}
+      <div class="hero-slide">
+        <h{% if forloop.first %}1{% else %}2{% endif %}>{{ s.title|default:site_settings.site_name }}</h{% if forloop.first %}1{% else %}2{% endif %}>
+        {% if s.body %}<p>{{ s.body|truncatewords:40 }}</p>{% endif %}
+        <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Всі види кріплень</a>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="hero-slide">
+        <h1>{{ site_settings.site_name }}</h1>
+        <p>Інтернет-магазин кріплення. Болти, гайки, самонарізи, анкери та системи кріплення.</p>
+        <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Перейти в каталог</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="advantages">
+  <div class="container">
+    <div class="advantages__grid">
+      {% for a in advantages %}
+      <div class="advantage-item">
+        <div class="advantage-item__icon">{{ forloop.counter }}</div>
+        <div>
+          <strong>{{ a.title }}</strong>
+          <span>{{ a.text }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="container home-rail">
+
+  <section class="section-card">
+    <div class="section-head">
+      <h2>Каталог</h2>
+      <a href="{% url 'catalog:root' %}">усі категорії</a>
+    </div>
+    <div class="section-body">
+      <div class="l1-rail">
+        {% for c in categories %}
+        <a class="l1-card" href="{% url 'catalog:category' path=c.url_path %}">{{ c.name }}</a>
+        {% empty %}
+        <p class="empty-state">Категорії зʼявляться після наповнення каталогу.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {% if promo_products %}
+  <section class="section-card">
+    <div class="section-head">
+      <h2>Акційні пропозиції</h2>
+      <a href="{% url 'content:promo_list' %}">всі акції</a>
+    </div>
+    <div class="section-body">
+      <div class="product-rail">
+        {% for g in promo_products %}
+          {% include "includes/product_card.html" %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% elif promotions %}
+  <section class="section-card">
+    <div class="section-head">
+      <h2>Акції</h2>
+      <a href="{% url 'content:promo_list' %}">всі акції</a>
+    </div>
+    <div class="section-body content-split">
+      {% for p in promotions %}
+      <a class="promo-teaser" href="{% url 'content:promo_detail' p.slug %}">
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.body|truncatewords:24 }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if top_products %}
+  <section class="section-card">
+    <div class="section-head">
+      <h2>Лідери продажів</h2>
+      <a href="{% url 'catalog:root' %}">до каталогу</a>
+    </div>
+    <div class="section-body">
+      <div class="product-rail">
+        {% for g in top_products %}
+          {% include "includes/product_card.html" %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if news_posts or promotions %}
+  <section class="section-card">
+    <div class="section-head">
+      <h2>Новини та акції</h2>
+      <a href="{% url 'content:news_list' %}">всі новини</a>
+    </div>
+    <div class="section-body content-split">
+      {% for n in news_posts %}
+      <a class="news-card" href="{% url 'content:news_detail' n.slug %}">
+        <h3>{{ n.title }}</h3>
+        {% if n.published_at %}<time datetime="{{ n.published_at|date:'c' }}">{{ n.published_at|date:"d.m.Y" }}</time>{% endif %}
+      </a>
+      {% endfor %}
+      {% for p in promotions|slice:":3" %}
+      <a class="promo-teaser" href="{% url 'content:promo_detail' p.slug %}">
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.body|truncatewords:20 }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="seo-block">
+    {% if seo_block %}
+      <h1>{{ seo_block.title|default:site_settings.site_name }}</h1>
+      <div class="prose">{{ seo_block.body|linebreaks }}</div>
+    {% else %}
+      <h1>Інтернет-магазин кріплення {{ site_settings.site_name }}. Надійне кріплення для бездоганного результату</h1>
+      <div class="prose">
+        <p>Вітаємо на сайті {{ site_settings.site_name }}. У каталозі — болти, гайки, самонарізи, анкери, заклепки та інші види кріплень із зручним підбором за розміром і характеристиками.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="services-row">
+    {% for s in services %}
+      {% if s.url_name %}
+      <a class="service-card" href="{% url s.url_name %}">
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </a>
+      {% else %}
+      <div class="service-card">
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </section>
+
+</div>
+{% endblock %}

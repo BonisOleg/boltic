@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Пошук{% if q %}: {{ q }}{% endif %} — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px">Пошук</h1></div>
+    <div class="section-body">
+      <form method="get" class="search-form" style="max-width:560px;margin-bottom:20px">
+        <input type="search" name="q" value="{{ q }}" placeholder="Я шукаю" class="form-control">
+        <button type="submit" aria-label="Шукати">⌕</button>
+      </form>
+
+      {% if q %}
+      <h2 style="font-size:16px;text-transform:uppercase">Товарні групи</h2>
+      <div class="product-grid" style="margin-bottom:24px">
+        {% for g in groups %}
+          {% include "includes/product_card.html" %}
+        {% empty %}<p class="empty-state">Нічого не знайдено серед груп.</p>{% endfor %}
+      </div>
+
+      <h2 style="font-size:16px;text-transform:uppercase">SKU / артикули</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Артикул</th><th>Назва</th><th>Розмір</th><th>Ціна</th><th></th></tr></thead>
+          <tbody>
+          {% for sku in skus %}
+            <tr>
+              <td>{{ sku.article }}</td>
+              <td><a href="{% url 'catalog:product' sku.group.slug %}?sku={{ sku.article }}">{{ sku.name }}</a></td>
+              <td>{{ sku.size_label }}</td>
+              <td>{{ sku.price }} ₴</td>
+              <td><a class="btn btn--sm" href="{% url 'catalog:product' sku.group.slug %}?sku={{ sku.article }}">Відкрити</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5">Нічого не знайдено.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty-state">Введіть запит від 2 символів.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

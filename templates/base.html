@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{{ site_settings.site_name }} — всі види кріплень{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+  <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+  <link rel="stylesheet" href="{% static 'css/motion.css' %}">
+  {% block extra_css %}{% endblock %}
+  <style>
+    :root {
+      {% for key, val in theme_vars.items %}{{ key }}: {{ val }};
+      {% endfor %}
+    }
+  </style>
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% include "includes/header.html" %}
+  {% if messages %}
+  <ul class="messages container">
+    {% for m in messages %}
+    <li class="{{ m.tags }}">{{ m }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <main class="page-main {% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  {% include "includes/footer.html" %}
+  <button type="button" class="scroll-top" data-scroll-top aria-label="Вгору">↑</button>
+  <script src="{% static 'js/main.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

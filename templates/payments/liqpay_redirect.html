@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Оплата — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card" style="max-width:480px;margin:0 auto;text-align:center">
+    <div class="section-body">
+      <h1 style="font-size:22px">Перехід до оплати</h1>
+      <p>Замовлення {{ order.number }} · {{ order.total }} грн</p>
+      <form id="liqpay" method="POST" action="{{ liqpay_checkout_url }}" accept-charset="utf-8">
+        <input type="hidden" name="data" value="{{ liqpay_data }}">
+        <input type="hidden" name="signature" value="{{ liqpay_signature }}">
+        <button class="btn" type="submit">Оплатити через LiqPay</button>
+      </form>
+      <script>document.getElementById("liqpay").submit();</script>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+# Django
+*.pyc
+__pycache__/
+*.py[cod]
+.Python
+db.sqlite3
+media/
+staticfiles/
+.env
+.venv/
+venv/
+*.egg-info/
+.DS_Store

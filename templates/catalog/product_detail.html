@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static l10n %}
+{% block title %}{{ group.name }} — {{ site_settings.site_name }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sku-filter.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/sku-filter.js' %}" defer></script>{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="pdp-hero">
+    <div class="pdp-gallery">
+      {% with imgs=group.images.all %}
+        {% if imgs %}
+          <img src="{{ imgs.0.image.url }}" alt="{{ imgs.0.alt|default:group.name }}" width="480" height="360">
+        {% else %}
+          <div class="product-card__placeholder" style="width:96px;height:96px;font-size:32px">Б</div>
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        {% if group.is_promo %}<span class="badge badge--promo">Акція</span>{% endif %}
+        {% if group.is_top %}<span class="badge">Топ</span>{% endif %}
+      </div>
+      <h1 style="margin-top:0">{{ group.name }}</h1>
+      {% if group.short_description %}<p>{{ group.short_description }}</p>{% endif %}
+      <ul class="pdp-attrs">
+        {% if group.standard %}<li><span>Стандарт</span><strong>{{ group.standard }}</strong></li>{% endif %}
+        {% if group.material %}<li><span>Матеріал</span><strong>{{ group.material }}</strong></li>{% endif %}
+        {% if group.coating %}<li><span>Покриття</span><strong>{{ group.coating }}</strong></li>{% endif %}
+        {% if group.industry %}<li><span>Галузь</span><strong>{{ group.industry }}</strong></li>{% endif %}
+        {% if group.diameter_min or group.diameter_max %}
+        <li><span>Діаметр</span><strong>{% if group.diameter_min %}{{ group.diameter_min }}{% endif %}{% if group.diameter_max %}–{{ group.diameter_max }}{% endif %} мм</strong></li>
+        {% endif %}
+        {% if group.length_min or group.length_max %}
+        <li><span>Довжина</span><strong>{% if group.length_min %}{{ group.length_min }}{% endif %}{% if group.length_max %}–{{ group.length_max }}{% endif %} мм</strong></li>
+        {% endif %}
+        {% if group.brand %}<li><span>Бренд</span><strong><a href="{% url 'catalog:brand_detail' group.brand.slug %}">{{ group.brand.name }}</a></strong></li>{% endif %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="pdp-tabs" role="tablist">
+      <button type="button" class="is-active" data-tab="assortment" role="tab">Асортимент</button>
+      <button type="button" data-tab="desc" role="tab">Опис</button>
+      <button type="button" data-tab="attrs" role="tab">Характеристики</button>
+      {% if group.documents.all %}<button type="button" data-tab="docs" role="tab">Документи</button>{% endif %}
+      <button type="button" data-tab="reviews" role="tab">Відгуки</button>
+    </div>
+
+    <div class="section-body">
+      <div class="pdp-panel is-active" data-panel="assortment">
+        {% if skus|length > 1 %}
+        <div class="sku-filter" data-sku-filter>
+          <div class="sku-filter__search">
+            <label class="sr-only" for="sku-filter-q">Пошук розміру або артикулу</label>
+            <input
+              id="sku-filter-q"
+              type="search"
+              name="sku_q"
+              placeholder="Розмір або артикул, напр. M4x20"
+              data-sku-q
+              inputmode="search"
+              enterkeyhint="search"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            >
+            <button type="button" class="sku-filter__clear-q" data-sku-clear-q hidden aria-label="Очистити пошук">×</button>
+          </div>
+
+          <div class="sku-filter__row" data-sku-diameter-row>
+            <div class="sku-filter__label" id="sku-filter-dia-label">Діаметр</div>
+            <div class="sku-filter__chips" data-sku-diameters role="group" aria-labelledby="sku-filter-dia-label"></div>
+          </div>
+
+          <div class="sku-filter__row" data-sku-length-row>
+            <div class="sku-filter__label" id="sku-filter-len-label">Довжина</div>
+            <div class="sku-filter__chips" data-sku-lengths role="group" aria-labelledby="sku-filter-len-label"></div>
+          </div>
+
+          <div class="sku-filter__bar">
+            <label class="sku-filter__stock">
+              <input type="checkbox" data-sku-stock>
+              Лише в наявності
+            </label>
+            <button type="button" class="sku-filter__reset" data-sku-reset hidden>Скинути</button>
+            <span class="sku-filter__count" data-sku-count aria-live="polite"></span>
+          </div>
+        </div>
+        <p class="sku-filter__empty" data-sku-empty hidden>Нічого не знайдено. Спробуйте інший розмір або скиньте фільтр.</p>
+        {% endif %}
+
+        <div class="table-wrap table-wrap--sku" role="region" aria-label="Асортимент SKU" tabindex="0">
+          <table class="data-table data-table--sku" data-sku-table>
+            <thead>
+              <tr>
+                <th>Артикул</th>
+                <th>Назва</th>
+                <th>Розмір</th>
+                <th>Партія</th>
+                <th>Наявність</th>
+                <th>Ціна</th>
+                <th><span class="sr-only">Дії</span></th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for sku in skus %}
+              <tr
+                class="{% if highlight_sku == sku.article %}is-highlight{% endif %}"
+                data-sku-row
+                data-article="{{ sku.article }}"
+                data-name="{{ sku.name }}"
+                data-size="{{ sku.size_label }}"
+                data-diameter="{% if sku.diameter is not None %}{{ sku.diameter|unlocalize }}{% endif %}"
+                data-length="{% if sku.length is not None %}{{ sku.length|unlocalize }}{% endif %}"
+                data-stock="{{ sku.stock_status }}"
+              >
+                <td data-label="Артикул"><span class="sku-article">{{ sku.article }}</span></td>
+                <td data-label="Назва">{{ sku.name }}</td>
+                <td data-label="Розмір" class="sku-cell--size"><strong>{{ sku.size_label }}</strong></td>
+                <td data-label="Партія">{{ sku.min_party }} шт</td>
+                <td data-label="Наявність">
+                  {% if sku.stock_status == "in_stock" %}
+                    <span class="badge--ok">є в наявності</span>
+                  {% else %}
+                    <span class="badge">під замовлення</span>
+                  {% endif %}
+                </td>
+                <td data-label="Ціна" class="sku-cell--price">
+                  <strong>{{ sku.price }} ₴</strong>
+                  {% if sku.party_price %}<div class="sku-party-price">партія: {{ sku.party_price }} ₴</div>{% endif %}
+                </td>
+                <td data-label="" class="sku-cell--actions">
+                  <form class="qty-form" method="post" action="{% url 'cart:add' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="sku_id" value="{{ sku.id }}">
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <input type="number" name="qty" value="{{ sku.min_party }}" min="{{ sku.min_party }}" step="{{ sku.min_party }}" inputmode="numeric" aria-label="Кількість">
+                    <button class="btn btn--sm" type="submit">У кошик</button>
+                  </form>
+                  {% if user.is_authenticated %}
+                  <form class="sku-wishlist-form" method="post" action="{% url 'cart:wishlist' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="sku_id" value="{{ sku.id }}">
+                    <button class="btn btn--sm btn--ghost" type="submit" title="Бажане">★</button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr class="sku-row--empty"><td colspan="7">Немає активних SKU.</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pdp-panel" data-panel="desc">
+        {% if group.description %}{{ group.description|linebreaks }}{% else %}<p class="empty-state">Опис зʼявиться пізніше.</p>{% endif %}
+      </div>
+
+      <div class="pdp-panel" data-panel="attrs">
+        <ul class="pdp-attrs">
+          {% if group.standard %}<li><span>Стандарт</span><strong>{{ group.standard }}</strong></li>{% endif %}
+          {% if group.material %}<li><span>Матеріал</span><strong>{{ group.material }}</strong></li>{% endif %}
+          {% if group.coating %}<li><span>Покриття</span><strong>{{ group.coating }}</strong></li>{% endif %}
+          {% if group.industry %}<li><span>Галузь</span><strong>{{ group.industry }}</strong></li>{% endif %}
+        </ul>
+      </div>
+
+      {% if group.documents.all %}
+      <div class="pdp-panel" data-panel="docs">
+        <ul>
+          {% for d in group.documents.all %}
+          <li><a href="{{ d.file.url }}">{{ d.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="pdp-panel" data-panel="reviews">
+        {% for r in reviews %}
+          <p><strong>{{ r.rating }}★</strong> {{ r.body }}</p>
+        {% empty %}
+          <p class="empty-state">Поки немає відгуків.</p>
+        {% endfor %}
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'catalog:product_review' group.slug %}" style="margin-top:16px;max-width:480px">
+          {% csrf_token %}
+          <div class="field">{{ review_form.rating.label_tag }}{{ review_form.rating }}</div>
+          <div class="field">{{ review_form.body.label_tag }}{{ review_form.body }}</div>
+          <button class="btn" type="submit">Надіслати</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Увійдіть</a>, щоб залишити відгук.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

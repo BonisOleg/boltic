@@ -1,0 +1,15 @@
+{% if groups or skus %}
+<script>
+  (function(){var el=document.getElementById('search-suggest'); if(el) el.classList.add('is-open');})();
+</script>
+{% for g in groups|slice:":8" %}
+<a href="{% url 'catalog:product' g.slug %}">{{ g.name }}</a>
+{% endfor %}
+{% for sku in skus|slice:":6" %}
+<a href="{% url 'catalog:product' sku.group.slug %}?sku={{ sku.article }}">{{ sku.article }} — {{ sku.name }}</a>
+{% endfor %}
+{% else %}
+{% if request.GET.q %}
+<a href="{% url 'catalog:search' %}?q={{ request.GET.q }}">Шукати «{{ request.GET.q }}»</a>
+{% endif %}
+{% endif %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Бренди — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Бренди</h1></div>
+    <div class="section-body">
+      <div class="l1-grid">
+        {% for b in brands %}
+        <a class="l1-card" href="{% url 'catalog:brand_detail' b.slug %}">{{ b.name }}</a>
+        {% empty %}<p class="empty-state">Бренди зʼявляться пізніше.</p>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

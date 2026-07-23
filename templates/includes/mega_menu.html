@@ -1,0 +1,29 @@
+<nav class="mega-menu" data-mega-menu aria-label="Каталог">
+  <div class="mega-menu__inner container" style="max-width:var(--container)">
+    <ul class="mega-l1">
+      {% for cat in nav_categories %}
+      <li class="mega-l1__item {% if forloop.first %}is-active{% endif %}">
+        <button type="button" data-mega-l1="{{ cat.id }}">{{ cat.name }}</button>
+      </li>
+      {% empty %}
+      <li class="mega-l1__item"><a class="mega-l1__link" href="{% url 'catalog:root' %}">Каталог</a></li>
+      {% endfor %}
+    </ul>
+    <div class="mega-panels">
+      {% for cat in nav_categories %}
+      <div class="mega-panel {% if forloop.first %}is-active{% endif %}" data-mega-panel="{{ cat.id }}">
+        <h3 class="mega-panel__title">
+          <a href="{% url 'catalog:category' path=cat.url_path %}">{{ cat.name }}</a>
+        </h3>
+        <ul class="mega-panel__grid">
+          {% for ch in cat.children.all %}
+          <li><a href="{% url 'catalog:category' path=ch.url_path %}">{{ ch.name }}</a></li>
+          {% empty %}
+          <li><a href="{% url 'catalog:category' path=cat.url_path %}">Перейти до розділу</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</nav>

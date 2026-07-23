@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Оформлення — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card" style="max-width:640px">
+    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Оформлення</h1></div>
+    <div class="section-body">
+      <p>Сума до сплати: <strong>{{ subtotal }} грн</strong></p>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="field">
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.errors %}<div style="color:var(--color-danger);font-size:13px">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        {% if form.non_field_errors %}<div style="color:var(--color-danger)">{{ form.non_field_errors }}</div>{% endif %}
+        <button class="btn" type="submit">Сплатити онлайн</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Новини — {{ site_settings.site_name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="section-card">
+    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Новини</h1></div>
+    <div class="section-body content-split" style="display:grid">
+      {% for n in posts %}
+      <a class="news-card" href="{% url 'content:news_detail' n.slug %}">
+        <h3>{{ n.title }}</h3>
+        {% if n.published_at %}<time datetime="{{ n.published_at|date:'c' }}">{{ n.published_at|date:"d.m.Y" }}</time>{% endif %}
+      </a>
+      {% empty %}
+      <p class="empty-state">Новин поки немає.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+Django>=5.2,<5.3
+Pillow>=11.0
+django-htmx>=1.21
+python-decouple>=3.8
+python-docx>=1.1
+openpyxl>=3.1

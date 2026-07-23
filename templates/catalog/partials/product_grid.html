@@ -1,0 +1,18 @@
+<div class="product-grid">
+{% for g in page_obj %}
+  {% include "includes/product_card.html" %}
+{% empty %}
+  <p class="empty-state">Немає товарів за фільтрами.</p>
+{% endfor %}
+</div>
+{% if page_obj.has_other_pages %}
+<nav class="pagination" aria-label="Сторінки">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% for code, values in selected_facets.items %}{% for v in values %}&{{ code }}={{ v }}{% endfor %}{% endfor %}&sort={{ sort }}">←</a>
+  {% endif %}
+  <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% for code, values in selected_facets.items %}{% for v in values %}&{{ code }}={{ v }}{% endfor %}{% endfor %}&sort={{ sort }}">→</a>
+  {% endif %}
+</nav>
+{% endif %}

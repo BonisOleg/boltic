@@ -1,0 +1,132 @@
+/* Scroll reveal + subtle motion (iOS Safari friendly) */
+
+.reveal {
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+}
+
+.hero-slider {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.hero-slide > * {
+  opacity: 0;
+  animation: hero-in 0.55s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) forwards;
+}
+
+.hero-slide > *:nth-child(1) {
+  animation-delay: 0.04s;
+}
+
+.hero-slide > *:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.hero-slide > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes hero-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.hero-slider__track {
+  transition: transform 0.45s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.advantage-item {
+  transition: transform 0.25s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.advantage-item:hover {
+  transform: translateY(-2px);
+}
+
+.advantage-item__icon {
+  transition: transform 0.3s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.advantage-item:hover .advantage-item__icon {
+  transform: scale(1.08);
+}
+
+.catalog-btn,
+.mobile-toggle,
+.hero-nav {
+  transition:
+    filter 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.catalog-btn:active,
+.mobile-toggle:active,
+.hero-nav:active {
+  transform: scale(0.97);
+}
+
+.action-link {
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.action-link:hover {
+  transform: translateY(-1px);
+}
+
+.mega-overlay {
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+@media (hover: none) {
+  .product-card:hover,
+  .l1-card:hover,
+  .service-card:hover,
+  .news-card:hover,
+  .promo-teaser:hover,
+  .advantage-item:hover,
+  .btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .product-card:hover {
+    box-shadow: none;
+  }
+
+  .section-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .advantage-item,
+  .advantage-item__icon,
+  .action-link {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+  }
+
+  .hero-slide > * {
+    opacity: 1;
+    animation: none;
+  }
+}
