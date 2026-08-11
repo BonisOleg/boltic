@@ -1,24 +1,42 @@
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-from apps.catalog.classification import BOLT_SCREW_L2
 from apps.catalog.models import Category
-from apps.content.models import HomeBlock, StaticPage
+from apps.content.models import StaticPage
 from apps.core.models import SiteSettings
 
 TREE = [
     (
-        "Болти, гвинти, стрижні",
-        # детальні підкатегорії (замість плоских Болти/Гвинти)
-        [name for name, _slug in BOLT_SCREW_L2],
+        "Болти",
+        ["Болти", "Болти нержавіючі"],
+    ),
+    (
+        "Гвинти",
+        ["Гвинти", "Гвинти нержавіючі"],
+    ),
+    (
+        "Стрижні",
+        ["Стрижні", "Стрижні нержавіючі"],
+    ),
+    (
+        "Меблеве кріплення",
+        ["Меблеве кріплення"],
     ),
     (
         "Гайки, шайби, гровери",
-        ["Гайки", "Шайби", "Гровери"],
+        [
+            "Гайки",
+            "Гайки нержавіючі",
+            "Шайби",
+            "Шайби нержавіючі",
+            "Гровери",
+            "Гровери нержавіючі",
+        ],
     ),
     (
-        "Самонарізи, шурупи",
-        ["Самонарізи", "Шурупи"],
+        "Саморізи, шурупи",
+        ["Саморізи", "Саморізи нержавіючі", "Шурупи"],
     ),
     (
         "Заклепки, шплінти, штифти",
@@ -38,7 +56,7 @@ TREE = [
     ),
     (
         "Автокріплення",
-        ["Болти", "Самонарізи", "Закладні елементи", "Фіксатори"],
+        ["Болти", "Саморізи", "Закладні елементи", "Фіксатори"],
     ),
     (
         "Витратні матеріали",
@@ -71,18 +89,12 @@ STATIC_PAGES = [
 
 
 class Command(BaseCommand):
-    help = "Seed категорій з каталог.docx + базові static pages"
+    help = "Seed категорій каталогу + базові static pages"
 
     def handle(self, *args, **options):
         SiteSettings.load()
-        HomeBlock.objects.get_or_create(
-            key="hero",
-            defaults={
-                "title": "БОЛТіК°",
-                "body": "Всі види кріплень",
-                "sort_order": 0,
-            },
-        )
+        call_command("seed_site_blocks")
+        call_command("seed_hero_slides")
         for i, (l1_name, children) in enumerate(TREE):
             l1_slug = slugify(l1_name, allow_unicode=True)
             l1, _ = Category.objects.update_or_create(

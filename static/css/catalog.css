@@ -22,12 +22,13 @@
 
 .product-card__media {
   position: relative;
-  aspect-ratio: 1 / 0.78;
+  aspect-ratio: 4 / 3;
   background: #fff;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 14px;
+  padding: 10px;
+  overflow: hidden;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -37,18 +38,24 @@
   justify-content: center;
   width: 100%;
   height: 100%;
+  min-height: 0;
   text-decoration: none;
 }
 
 .product-card__media img {
-  max-height: 170px;
+  display: block;
   width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  object-position: center;
 }
 
 .product-card__placeholder {
   width: 72px;
   height: 72px;
+  margin: auto;
   border-radius: 50%;
   background: color-mix(in srgb, var(--color-primary) 12%, #f3f4f6);
   color: var(--color-primary-dark);
@@ -296,18 +303,26 @@
 }
 
 .pdp-gallery {
-  background: #fafafa;
-  min-height: 240px;
+  background: #fff;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  overflow: hidden;
   border-radius: var(--radius);
+  border: 1px solid var(--color-border);
 }
 
 .pdp-gallery img {
-  max-height: 320px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  object-position: center;
 }
 
 .pdp-attrs {
@@ -363,6 +378,13 @@
   display: block;
 }
 
+.sku-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
 .qty-form {
   display: inline-flex;
   align-items: center;
@@ -381,13 +403,55 @@
   appearance: none;
 }
 
-.sku-party-price {
-  font-size: 12px;
+.sku-price-empty {
   color: var(--color-text-muted);
+  font-weight: 500;
 }
 
-.sku-wishlist-form {
-  margin-top: 6px;
+.sku-cell--party-price strong {
+  color: var(--color-primary-dark);
+}
+
+.wishlist-form {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.wishlist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  color: var(--color-primary);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.wishlist-btn svg {
+  display: block;
+  transition: fill 0.15s ease;
+}
+
+.wishlist-btn.is-active {
+  color: var(--color-danger);
+  border-color: currentColor;
+}
+
+.wishlist-btn.is-active svg {
+  fill: currentColor;
+}
+
+.wishlist-btn--lg {
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.wishlist-btn--lg svg {
+  width: 22px;
+  height: 22px;
 }
 
 .sku-article {
@@ -395,10 +459,38 @@
   word-break: break-word;
 }
 
-/* Desktop: таблиця не стискає колонки — скрол усередині wrap */
+/* Desktop: таблиця на всю ширину; зайвий простір — у «Назва», не справа від кнопок */
 @media (min-width: 768px) {
   .data-table--sku {
-    min-width: 920px;
+    width: 100%;
+    min-width: 1040px;
+    table-layout: auto;
+  }
+
+  .data-table--sku th:nth-child(2),
+  .data-table--sku td:nth-child(2) {
+    width: 99%;
+  }
+
+  .data-table--sku th:last-child,
+  .data-table--sku td.sku-cell--actions {
+    width: 1%;
+    white-space: nowrap;
+    padding-left: 10px;
+  }
+
+  .data-table--sku .sku-actions {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    width: auto;
+    max-width: none;
+    vertical-align: middle;
+  }
+
+  .data-table--sku .sku-cell--actions .qty-form {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    width: auto;
   }
 }
 
@@ -493,14 +585,15 @@
     padding-top: 12px;
   }
 
-  /* Порядок у картці: розмір → ціна → наявність → артикул → назва → партія → дії */
-  .data-table--sku td:nth-child(1) { order: 4; }
-  .data-table--sku td:nth-child(2) { order: 5; }
+  /* Порядок: розмір → ціна баз → ціна пар → наявність → артикул → назва → партія → дії */
+  .data-table--sku td:nth-child(1) { order: 5; }
+  .data-table--sku td:nth-child(2) { order: 6; }
   .data-table--sku td:nth-child(3) { order: 1; }
-  .data-table--sku td:nth-child(4) { order: 6; }
-  .data-table--sku td:nth-child(5) { order: 3; }
+  .data-table--sku td:nth-child(4) { order: 7; }
+  .data-table--sku td:nth-child(5) { order: 4; }
   .data-table--sku td:nth-child(6) { order: 2; }
-  .data-table--sku td:nth-child(7) { order: 7; }
+  .data-table--sku td:nth-child(7) { order: 3; }
+  .data-table--sku td:nth-child(8) { order: 8; }
 
   .data-table--sku .sku-cell--size {
     font-size: 17px;
@@ -519,31 +612,37 @@
     color: var(--color-primary-dark);
   }
 
-  .data-table--sku .sku-cell--actions .qty-form {
-    display: flex;
-    width: 100%;
+  .data-table--sku .sku-actions {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
     align-items: stretch;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .data-table--sku .sku-cell--actions .qty-form,
+  .data-table--sku .wishlist-form {
+    display: contents;
+    margin: 0;
   }
 
   .data-table--sku .sku-cell--actions .qty-form input[type="number"] {
-    flex: 0 0 88px;
-    width: 88px;
-    max-width: 40%;
+    width: 72px;
+    max-width: none;
+    min-width: 0;
   }
 
   .data-table--sku .sku-cell--actions .qty-form .btn {
-    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
     min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .data-table--sku .sku-wishlist-form {
-    margin-top: 8px;
-  }
-
-  .data-table--sku .sku-wishlist-form .btn {
+  .data-table--sku .wishlist-btn {
     min-height: 44px;
     min-width: 44px;
+    width: 44px;
   }
 
   .data-table--sku .sku-row--empty {
@@ -608,4 +707,34 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+@media (max-width: 767px) {
+  .product-card__media {
+    aspect-ratio: 4 / 3;
+    padding: 8px;
+  }
+
+  .pdp-gallery {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .product-card__media {
+    padding: 10px;
+  }
+
+  .pdp-gallery {
+    padding: 14px;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .product-card__media img,
+  .pdp-gallery img {
+    -webkit-transform: translateZ(0);
+  }
 }

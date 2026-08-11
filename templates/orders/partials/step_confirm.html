@@ -1,0 +1,43 @@
+<section class="checkout-card">
+  <h2 class="checkout-card__title">Підтвердження замовлення</h2>
+
+  <dl class="checkout-confirm">
+    <div>
+      <dt>Клієнт</dt>
+      <dd>{{ summary_name }}</dd>
+    </div>
+    <div>
+      <dt>Телефон</dt>
+      <dd>{{ summary_phone }}</dd>
+    </div>
+    {% if summary_email %}
+    <div>
+      <dt>Email</dt>
+      <dd>{{ summary_email }}</dd>
+    </div>
+    {% endif %}
+    <div>
+      <dt>Доставка</dt>
+      <dd>{{ summary_delivery }}</dd>
+    </div>
+    {% if summary_comment %}
+    <div>
+      <dt>Коментар</dt>
+      <dd>{{ summary_comment }}</dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  <div class="checkout-pay-note" role="note">
+    Оплата: рахунок-фактура на email або готівка при отриманні.
+    Менеджер звʼяжеться для уточнення.
+  </div>
+
+  <form method="post" class="checkout-form">
+    {% csrf_token %}
+    <div class="checkout-nav">
+      <a class="checkout-nav__back" href="{% url 'orders:checkout_delivery' %}">← Назад</a>
+      <button class="btn" type="submit">Підтвердити замовлення</button>
+    </div>
+  </form>
+</section>

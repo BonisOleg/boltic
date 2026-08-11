@@ -4,14 +4,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}{{ site_settings.site_name }} — всі види кріплень{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>{% block title %}{{ site_settings.site_name }}{% endblock %}</title>
+  {% if site_settings.favicon %}
+  <link rel="icon" href="{{ site_settings.favicon.url }}" sizes="any">
+  {% else %}
+  <link rel="icon" href="{% static 'img/favicon.ico' %}?v=20260723h" sizes="any">
+  <link rel="icon" type="image/png" href="{% static 'img/favicon-32.png' %}?v=20260723h" sizes="32x32">
+  <link rel="icon" type="image/png" href="{% static 'img/favicon-48.png' %}?v=20260723h" sizes="48x48">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}?v=20260723h" sizes="180x180">
+  {% endif %}
+  {% if site_settings.meta_description %}
+  <meta name="description" content="{{ site_settings.meta_description }}">
+  {% endif %}  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/layout.css' %}?v=20260723b">
-  <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260723c">
-  <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+  <link rel="stylesheet" href="{% static 'css/layout.css' %}?v=20260805b">
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260730a">
+  <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v=20260731c">
+  <link rel="stylesheet" href="{% static 'css/action-note.css' %}?v=20260731d">
   <link rel="stylesheet" href="{% static 'css/motion.css' %}">
   {% block extra_css %}{% endblock %}
   <style>
@@ -37,7 +48,8 @@
   </main>
   {% include "includes/footer.html" %}
   <button type="button" class="scroll-top" data-scroll-top aria-label="Вгору">↑</button>
-  <script src="{% static 'js/main.js' %}" defer></script>
+  <script src="{% static 'js/main.js' %}?v=20260805b" defer></script>
+  <script src="{% static 'js/action-note.js' %}?v=20260731a" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

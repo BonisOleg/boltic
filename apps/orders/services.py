@@ -4,14 +4,27 @@ from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
 
-from apps.cart.services import resolve_cart, sync_cart
-from apps.catalog.pricing import line_total
+from apps.cart.services import cart_totals, resolve_cart, sync_cart
+from apps.catalog.pricing import line_total, unit_price_for_qty
 from apps.core.exceptions import OrderError
+from apps.core.models import SiteSettings
+from apps.orders.constants import (
+    MIN_ORDER_AMOUNT,
+    NP_TYPE_LABELS,
+    SHIPPING_METHOD_LABELS,
+    SHIPPING_NOVA_POSHTA,
+    SHIPPING_PICKUP,
+)
+from apps.orders.emails import send_order_emails
 from apps.orders.models import Order, OrderItem
 
 
 ALLOWED_TRANSITIONS: dict[str, set[str]] = {
-    Order.Status.NEW: {Order.Status.PAID, Order.Status.CANCELED},
+    Order.Status.NEW: {
+        Order.Status.PAID,
+        Order.Status.PROCESSING,
+        Order.Status.CANCELED,
+    },
     Order.Status.PAID: {Order.Status.PROCESSING, Order.Status.CANCELED},
     Order.Status.PROCESSING: {Order.Status.SHIPPED, Order.Status.CANCELED},
     Order.Status.SHIPPED: {Order.Status.DONE},
@@ -38,10 +51,53 @@ def generate_order_number() -> str:
     return f"{prefix}{seq:04d}"
 
 
-@transaction.atomic
+def assert_min_order_amount(subtotal: Decimal) -> None:
+    if subtotal < MIN_ORDER_AMOUNT:
+        raise OrderError(
+            f"Мінімальна сума замовлення — {MIN_ORDER_AMOUNT:.0f} грн"
+        )
+
+
+def build_shipping_address(cleaned_data: dict) -> str:
+    method = cleaned_data.get("shipping_method") or ""
+    if method == SHIPPING_PICKUP:
+        site = SiteSettings.load()
+        parts = ["Самовивіз"]
+        desc = (site.pickup_description or site.address or "").strip()
+        if desc:
+            parts.append(desc)
+        return " — ".join(parts)
+
+    if method == SHIPPING_NOVA_POSHTA:
+        np_type = cleaned_data.get("np_delivery_type") or ""
+        type_label = NP_TYPE_LABELS.get(np_type, "НП")
+        city = (cleaned_data.get("np_city") or "").strip()
+        wh = (cleaned_data.get("np_warehouse") or "").strip()
+        bits = ["Нова Пошта", type_label]
+        if city:
+            bits.append(city)
+        if wh:
+            bits.append(wh)
+        return " — ".join(bits)
+
+    return SHIPPING_METHOD_LABELS.get(method, method)
+
+
 def place_order(request, cleaned_data: dict) -> Order:
+    order = _create_order(request, cleaned_data)
+    send_order_emails(order)
+    return order
+
+
+@transaction.atomic
+def _create_order(request, cleaned_data: dict) -> Order:
     cart = resolve_cart(request)
     sync_cart(cart)
+    totals = cart_totals(cart)
+    if not totals["lines"]:
+        raise OrderError("Кошик порожній")
+    assert_min_order_amount(totals["subtotal"])
+
     items = list(
         cart.items.select_related("sku", "sku__group").select_for_update()
     )
@@ -55,7 +111,12 @@ def place_order(request, cleaned_data: dict) -> Order:
         if sku.price <= 0:
             raise OrderError(f"Некоректна ціна для {sku.article}")
 
+    method = cleaned_data.get("shipping_method") or ""
+    if method == SHIPPING_PICKUP and not SiteSettings.load().pickup_enabled:
+        raise OrderError("Самовивіз тимчасово недоступний")
+
     user = request.user if request.user.is_authenticated else None
+    shipping_address = build_shipping_address(cleaned_data)
     order = Order.objects.create(
         number=generate_order_number(),
         user=user,
@@ -63,18 +124,22 @@ def place_order(request, cleaned_data: dict) -> Order:
         payment_status=Order.PaymentStatus.PENDING,
         customer_name=cleaned_data["customer_name"],
         phone=cleaned_data["phone"],
-        email=cleaned_data.get("email", ""),
-        shipping_method=cleaned_data.get("shipping_method", ""),
-        shipping_address=cleaned_data.get("shipping_address", ""),
-        comment=cleaned_data.get("comment", ""),
+        email=cleaned_data.get("email", "") or "",
+        shipping_method=method,
+        np_delivery_type=cleaned_data.get("np_delivery_type", "") or "",
+        np_city=cleaned_data.get("np_city", "") or "",
+        np_city_ref=cleaned_data.get("np_city_ref", "") or "",
+        np_warehouse=cleaned_data.get("np_warehouse", "") or "",
+        np_warehouse_ref=cleaned_data.get("np_warehouse_ref", "") or "",
+        shipping_address=shipping_address,
+        comment=cleaned_data.get("comment", "") or "",
         total=0,
     )
 
     total = Decimal("0.00")
     for item in items:
         sku = item.sku
-        # SEC-02: ціна лише з БД
-        unit = sku.price
+        unit = unit_price_for_qty(sku, item.quantity)
         lt = line_total(unit, item.quantity)
         total += lt
         OrderItem.objects.create(
@@ -88,6 +153,11 @@ def place_order(request, cleaned_data: dict) -> Order:
             price_includes_vat=sku.price_includes_vat,
             quantity=item.quantity,
             line_total=lt,
+        )
+
+    if total < MIN_ORDER_AMOUNT:
+        raise OrderError(
+            f"Мінімальна сума замовлення — {MIN_ORDER_AMOUNT:.0f} грн"
         )
 
     order.total = total

@@ -11,4 +11,5 @@ urlpatterns = [
     path("koshyk/remove/<int:item_id>/", views.cart_remove, name="remove"),
     path("koshyk/count/", views.cart_count, name="count"),
     path("bazhane/", views.wishlist, name="wishlist"),
+    path("bazhane/zminyty/", views.wishlist_toggle_view, name="wishlist_toggle"),
 ]

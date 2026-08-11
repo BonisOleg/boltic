@@ -1,10 +1,8 @@
 <a class="action-link" href="{% url 'cart:wishlist' %}" title="Бажане" aria-label="Бажане">
   <span class="action-link__icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 20.5s-7.2-4.35-9.3-8.4C1.2 9.1 2.35 5.5 5.6 4.55c1.85-.55 3.85.15 5.1 1.55 1.25-1.4 3.25-2.1 5.1-1.55 3.25.95 4.4 4.55 2.9 7.55-2.1 4.05-9.3 8.4-9.3 8.4z"/>
-    </svg>
+    {% include "includes/icon_heart.html" %}
   </span>
-  {% if wishlist_count %}<span class="action-badge">{{ wishlist_count }}</span>{% endif %}
+  <span class="action-badge" data-wishlist-count{% if not wishlist_count %} hidden{% endif %}>{{ wishlist_count|default:0 }}</span>
   <span class="action-link__label">Бажане</span>
 </a>
 <a class="action-link" href="{% url 'cart:detail' %}" title="Кошик" aria-label="Кошик">
@@ -15,7 +13,7 @@
       <circle cx="16.3" cy="19.2" r="1.35"/>
     </svg>
   </span>
-  {% if cart_count %}<span class="action-badge" data-cart-count>{{ cart_count }}</span>{% else %}<span class="action-badge" data-cart-count hidden>0</span>{% endif %}
+  <span class="action-badge" data-cart-count{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
   <span class="action-link__label">Кошик</span>
 </a>
 {% if user.is_authenticated %}

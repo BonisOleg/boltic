@@ -1,0 +1,89 @@
+<section class="checkout-card" data-checkout-delivery>
+  <h2 class="checkout-card__title">Спосіб доставки</h2>
+
+  <form method="post" class="checkout-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="checkout-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="ship-options" role="radiogroup" aria-label="Спосіб доставки">
+      {% if pickup_enabled %}
+      <label class="ship-option">
+        <input type="radio" name="shipping_method" value="pickup"
+          {% if form.shipping_method.value == "pickup" %}checked{% endif %} required>
+        <span class="ship-option__body">
+          <span class="ship-option__title">Самовивіз</span>
+          <span class="ship-option__desc">{{ pickup_description }}</span>
+        </span>
+      </label>
+      {% endif %}
+
+      <label class="ship-option">
+        <input type="radio" name="shipping_method" value="nova_poshta"
+          {% if form.shipping_method.value == "nova_poshta" or not pickup_enabled and not form.shipping_method.value %}checked{% endif %} required>
+        <span class="ship-option__body">
+          <span class="ship-option__title">Нова Пошта</span>
+          <span class="ship-option__desc">На відділення або поштомат</span>
+        </span>
+      </label>
+    </div>
+    {% if form.shipping_method.errors %}
+    <div class="field-error">{{ form.shipping_method.errors|striptags }}</div>
+    {% endif %}
+
+    <div class="np-block" data-np-block hidden>
+      {% if not np_configured %}
+      <div class="checkout-hint checkout-hint--warn">
+        API Нової Пошти не налаштовано. Додайте <code>NOVA_POSHTA_API_KEY</code> у .env
+      </div>
+      {% endif %}
+
+      <div class="np-types" role="radiogroup" aria-label="Тип доставки НП">
+        <label class="np-type">
+          <input type="radio" name="np_delivery_type" value="warehouse"
+            {% if form.np_delivery_type.value != "postomat" %}checked{% endif %}>
+          <span>Відділення</span>
+        </label>
+        <label class="np-type">
+          <input type="radio" name="np_delivery_type" value="postomat"
+            {% if form.np_delivery_type.value == "postomat" %}checked{% endif %}>
+          <span>Поштомат</span>
+        </label>
+      </div>
+      {% if form.np_delivery_type.errors %}
+      <div class="field-error">{{ form.np_delivery_type.errors }}</div>
+      {% endif %}
+
+      <div class="field np-suggest" data-np-city>
+        <label for="id_np_city">Місто *</label>
+        <input type="text" name="np_city" id="id_np_city" value="{{ form.np_city.value|default:'' }}"
+          autocomplete="off" placeholder="Почніть вводити місто" inputmode="search">
+        {{ form.np_city_ref }}
+        <ul class="np-suggest__list" data-np-list hidden></ul>
+        {% if form.np_city.errors %}<div class="field-error">{{ form.np_city.errors }}</div>{% endif %}
+      </div>
+
+      <div class="field np-suggest" data-np-warehouse>
+        <label for="id_np_warehouse">Відділення / поштомат *</label>
+        <input type="text" name="np_warehouse" id="id_np_warehouse"
+          value="{{ form.np_warehouse.value|default:'' }}"
+          autocomplete="off" placeholder="Оберіть зі списку" inputmode="search" disabled>
+        {{ form.np_warehouse_ref }}
+        <ul class="np-suggest__list" data-np-list hidden></ul>
+        {% if form.np_warehouse.errors %}<div class="field-error">{{ form.np_warehouse.errors }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="{{ form.comment.id_for_label }}">Коментар</label>
+      {{ form.comment }}
+      {% if form.comment.errors %}<div class="field-error">{{ form.comment.errors }}</div>{% endif %}
+    </div>
+
+    <div class="checkout-nav">
+      <a class="checkout-nav__back" href="{% url 'orders:checkout' %}">← Назад</a>
+      <button class="btn" type="submit">Далі →</button>
+    </div>
+  </form>
+</section>

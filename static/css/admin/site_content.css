@@ -1,0 +1,237 @@
+/* CMS section editor — layout only */
+.site-content-editor {
+  max-width: 52rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.site-content-editor__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-content-editor__head h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.site-content-editor__preview {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.site-content-editor__fieldset {
+  margin: 0;
+  padding: 1rem 1.15rem 1.15rem;
+  min-inline-size: 0;
+}
+
+.site-content-editor__fieldset legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.site-content-editor__fields {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.site-content-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.site-content-editor__field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.site-content-editor__field p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.site-content-editor__errors {
+  color: #f87171;
+  font-size: 0.85rem;
+}
+
+.site-content-editor__actions {
+  margin-top: 0.5rem;
+}
+
+.hero-slides-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.hero-slide-row {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 0.375rem;
+}
+
+.hero-slide-row--invalid {
+  border-color: #dc2626;
+}
+
+.hero-slide-row__handle {
+  cursor: grab;
+  user-select: none;
+  opacity: 0.55;
+  padding-top: 0.35rem;
+}
+
+.hero-slide-row__fields {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.hero-slide-row__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.hero-slide-row__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.hero-slide-row__preview {
+  max-height: 96px;
+  width: auto;
+  border-radius: 0.25rem;
+  margin-top: 0.35rem;
+}
+
+.hero-slide-row__checks {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hero-slides-add {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.375rem;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.site-content-editor__fieldset-note {
+  margin: 0 0 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.site-content-editor__fieldset-note a {
+  text-decoration: underline;
+}
+
+.contact-branches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.contact-branch-row {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 0.375rem;
+}
+
+.contact-branch-row--invalid {
+  border-color: #dc2626;
+}
+
+.contact-branch-row__handle {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 0.55;
+  padding-top: 0.35rem;
+}
+
+.contact-branch-row__fields {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.contact-branch-row__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.contact-branch-row__checks {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.contact-branches-add {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.375rem;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .contact-branch-row__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-content-editor__fieldset {
+    padding: 0.85rem;
+  }
+
+  .hero-slide-row__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-slide-row {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-slide-row__handle {
+    display: none;
+  }
+
+  .contact-branch-row {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-branch-row__handle {
+    display: none;
+  }
+}

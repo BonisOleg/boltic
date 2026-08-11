@@ -7,7 +7,14 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Iterable
 
+from apps.catalog.classification import infer_group_name, resolve_goods_category
 from apps.catalog.import_parser import parse_group_meta
+from apps.catalog.metric_size import (
+    canonical_size_key,
+    format_size_label,
+    normalize_size_label,
+    uses_metric_m_slugs,
+)
 
 
 _SIZE_RE = re.compile(
@@ -21,55 +28,15 @@ _SIZE_RE = re.compile(
 )
 _DIN_RE = re.compile(r"DIN\s*(\d+)", re.I)
 _CLS_RE = re.compile(
-    r"(?:кл\.?\s*пр\.?|клас(?:\s*м\.?)?|к\.?\s*м\.?)\s*([0-9]+[.,][0-9]+)",
+    r"(?:кл\.?\s*(?:пр|міц)\.?|клас(?:\s*м(?:іц(?:н(?:ості)?)?)?\.?)?|"
+    r"к\.?\s*м\.?)\s*([0-9]+[.,][0-9]+)",
     re.I,
 )
 _BARE_CLS_RE = re.compile(r"\b(5[.,]8|8[.,]8|10[.,]9|12[.,]9)\b")
 
 
-def _fmt_num(value: Decimal) -> str:
-    text = format(value.normalize(), "f")
-    if "." in text:
-        text = text.rstrip("0").rstrip(".")
-    return text
-
-
 def _dec(raw: str) -> Decimal:
     return Decimal(raw.replace(",", ".").strip())
-
-
-def normalize_size_label(label: str) -> str:
-    if not label:
-        return ""
-    s = (
-        label.strip()
-        .replace("Х", "×")
-        .replace("х", "×")
-        .replace("x", "×")
-        .replace("*", "×")
-        .replace(" ", "")
-    )
-    if re.match(r"^\d", s):
-        s = "M" + s
-    s = s.replace("м", "M").replace("М", "M")
-    if s.startswith("m"):
-        s = "M" + s[1:]
-    parts = s.split("×")
-    out: list[str] = []
-    for i, part in enumerate(parts):
-        token = part
-        if i == 0 and token.upper().startswith("M"):
-            num = token[1:]
-            try:
-                out.append("M" + _fmt_num(_dec(num)))
-            except InvalidOperation:
-                out.append(token)
-        else:
-            try:
-                out.append(_fmt_num(_dec(token)))
-            except InvalidOperation:
-                out.append(token)
-    return "×".join(out)
 
 
 @dataclass(frozen=True)
@@ -89,7 +56,9 @@ class ParsedGoodsRow:
     barcode: str
 
 
-def parse_size_from_name(name: str) -> tuple[str, Decimal | None, Decimal | None, Decimal | None]:
+def parse_size_from_name(
+    name: str, *, metric: bool = True
+) -> tuple[str, Decimal | None, Decimal | None, Decimal | None]:
     m = _SIZE_RE.search(name or "")
     if not m:
         return "", None, None, None
@@ -99,13 +68,13 @@ def parse_size_from_name(name: str) -> tuple[str, Decimal | None, Decimal | None
     pitch = _dec(pitch_raw) if pitch_raw else None
     # евристика: M10×1×20 (pitch), а не M10×1 як розмір
     if pitch is not None and pitch < 3 and length >= 5:
-        label = f"M{_fmt_num(d)}×{_fmt_num(pitch)}×{_fmt_num(length)}"
+        label = format_size_label(d, length, pitch, metric=metric)
         return label, d, length, pitch
     if pitch is not None:
         # рідкісний випадок двох чисел без явного pitch — трактуємо як d×l
-        label = f"M{_fmt_num(d)}×{_fmt_num(pitch)}"
+        label = format_size_label(d, pitch, None, metric=metric)
         return label, d, pitch, None
-    label = f"M{_fmt_num(d)}×{_fmt_num(length)}"
+    label = format_size_label(d, length, None, metric=metric)
     return label, d, length, None
 
 
@@ -147,8 +116,6 @@ def parse_stock(raw) -> int:
 
 
 def iter_goods_rows(rows: Iterable[tuple]) -> list[ParsedGoodsRow]:
-    from apps.catalog.classification import infer_group_name
-
     result: list[ParsedGoodsRow] = []
     for i, row in enumerate(rows, start=2):
         cells = list(row) + [None] * 11
@@ -163,8 +130,14 @@ def iter_goods_rows(rows: Iterable[tuple]) -> list[ParsedGoodsRow]:
         group_name = str(group_raw).strip() if group_raw else ""
         if not group_name:
             group_name = infer_group_name(name)
-        size_label, diameter, length, pitch = parse_size_from_name(name)
-        size_label = normalize_size_label(size_label) if size_label else ""
+        l1, l2 = resolve_goods_category(group_name, name)
+        metric = uses_metric_m_slugs(l1, l2)
+        size_label, diameter, length, pitch = parse_size_from_name(
+            name, metric=metric
+        )
+        size_label = (
+            normalize_size_label(size_label, metric=metric) if size_label else ""
+        )
         din = extract_din(name, group_name)
         strength = extract_strength(name, group_name)
         if not strength:
@@ -200,7 +173,7 @@ def iter_goods_rows(rows: Iterable[tuple]) -> list[ParsedGoodsRow]:
 
 def match_key(size: str, din: str, strength: str) -> tuple[str, str, str]:
     return (
-        normalize_size_label(size),
+        canonical_size_key(size),
         str(din or ""),
         (strength or "").replace(",", "."),
     )

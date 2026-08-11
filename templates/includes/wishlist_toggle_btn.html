@@ -1,0 +1,15 @@
+{% comment %}
+Сама кнопка-сердечко. Контекст: sku (з in_wishlist), btn_size ("lg"), oob.
+oob=True — для htmx out-of-band заміни після перемикання.
+{% endcomment %}
+<button
+  id="wl-btn-{{ sku.id }}"
+  class="btn btn--sm btn--ghost wishlist-btn{% if btn_size == 'lg' %} wishlist-btn--lg{% endif %}{% if sku.in_wishlist %} is-active{% endif %}"
+  type="submit"
+  {% if oob %}hx-swap-oob="true"{% endif %}
+  aria-pressed="{% if sku.in_wishlist %}true{% else %}false{% endif %}"
+  title="{% if sku.in_wishlist %}Прибрати з обраного{% else %}Додати в обране{% endif %}"
+  aria-label="{% if sku.in_wishlist %}Прибрати з обраного{% else %}Додати в обране{% endif %}"
+>
+  {% include "includes/icon_heart.html" with size=20 %}
+</button>

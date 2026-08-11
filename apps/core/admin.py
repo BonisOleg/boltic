@@ -1,7 +1,15 @@
 from django import forms
 from django.contrib import admin
+from django.utils.html import format_html
+from unfold.admin import ModelAdmin
 
-from .models import SiteSettings
+from apps.core.admin_guidelines import get_image_hint
+from apps.core.admin_site_content_proxies import register_site_content_section_admins
+from apps.core.admin_utils import (
+    ReadableUnfoldFieldsMixin,
+    SingletonModelAdminMixin,
+)
+from apps.core.models import SiteSettings
 
 COLOR_FIELDS = [
     "color_primary",
@@ -37,12 +45,19 @@ class SiteSettingsForm(forms.ModelForm):
                 self.fields[name].widget = forms.TextInput(
                     attrs={"type": "color", "style": "width:4rem;height:2.2rem;padding:0"}
                 )
+        if "logo" in self.fields:
+            self.fields["logo"].help_text = get_image_hint("brand")
+        if "favicon" in self.fields:
+            self.fields["favicon"].help_text = "ICO або PNG 32×32 / 48×48"
 
 
 @admin.register(SiteSettings)
-class SiteSettingsAdmin(admin.ModelAdmin):
+class SiteSettingsAdmin(
+    ReadableUnfoldFieldsMixin, SingletonModelAdminMixin, ModelAdmin
+):
     form = SiteSettingsForm
     list_display = ("site_name", "phone", "email", "color_primary")
+    readonly_fields = ("logo_preview", "favicon_preview")
     fieldsets = (
         (
             "Загальне",
@@ -51,10 +66,32 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                     "site_name",
                     "phone",
                     "email",
+                    "orders_email",
                     "address",
                     "order_hours",
                     "processing_hours",
                     "social_json",
+                    "meta_description",
+                )
+            },
+        ),
+        (
+            "Доставка",
+            {
+                "fields": (
+                    "pickup_enabled",
+                    "pickup_description",
+                )
+            },
+        ),
+        (
+            "Бренд",
+            {
+                "fields": (
+                    "logo",
+                    "logo_preview",
+                    "favicon",
+                    "favicon_preview",
                 )
             },
         ),
@@ -67,8 +104,21 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ),
     )
 
-    def has_add_permission(self, request) -> bool:
-        return not SiteSettings.objects.exists()
+    @admin.display(description="Превʼю логотипу")
+    def logo_preview(self, obj):
+        if obj and obj.logo:
+            return format_html(
+                '<img src="{}" alt="" style="max-height:64px">', obj.logo.url
+            )
+        return "—"
 
-    def has_delete_permission(self, request, obj=None) -> bool:
-        return False
+    @admin.display(description="Превʼю favicon")
+    def favicon_preview(self, obj):
+        if obj and obj.favicon:
+            return format_html(
+                '<img src="{}" alt="" style="max-height:32px">', obj.favicon.url
+            )
+        return "—"
+
+
+register_site_content_section_admins()

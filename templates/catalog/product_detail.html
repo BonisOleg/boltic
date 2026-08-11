@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% load static l10n %}
 {% block title %}{{ group.name }} — {{ site_settings.site_name }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sku-filter.css' %}">{% endblock %}
-{% block extra_js %}<script src="{% static 'js/sku-filter.js' %}" defer></script>{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sku-filter.css' %}">
+<link rel="stylesheet" href="{% static 'css/sku-preview.css' %}">
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/sku-filter.js' %}" defer></script>
+<script src="{% static 'js/sku-preview.js' %}" defer></script>
+{% endblock %}
 {% block content %}
 <div class="container">
   <div class="pdp-hero">
@@ -50,14 +56,14 @@
     <div class="section-body">
       <div class="pdp-panel is-active" data-panel="assortment">
         {% if skus|length > 1 %}
-        <div class="sku-filter" data-sku-filter>
+        <div class="sku-filter" data-sku-filter data-metric-m="{% if uses_metric_m %}1{% else %}0{% endif %}">
           <div class="sku-filter__search">
             <label class="sr-only" for="sku-filter-q">Пошук розміру або артикулу</label>
             <input
               id="sku-filter-q"
               type="search"
               name="sku_q"
-              placeholder="Розмір або артикул, напр. M4x20"
+              placeholder="Розмір або артикул, напр. {% if uses_metric_m %}M4x20{% else %}4.2x75{% endif %}"
               data-sku-q
               inputmode="search"
               enterkeyhint="search"
@@ -100,7 +106,8 @@
                 <th>Розмір</th>
                 <th>Партія</th>
                 <th>Наявність</th>
-                <th>Ціна</th>
+                <th>Ціна (баз)</th>
+                <th>Ціна (пар)</th>
                 <th><span class="sr-only">Дії</span></th>
               </tr>
             </thead>
@@ -117,7 +124,13 @@
                 data-stock="{{ sku.stock_status }}"
               >
                 <td data-label="Артикул"><span class="sku-article">{{ sku.article }}</span></td>
-                <td data-label="Назва">{{ sku.name }}</td>
+                <td data-label="Назва">
+                  <a
+                    class="sku-name-link{% if sku.image or group_image_url %} sku-name-link--has-preview{% endif %}"
+                    href="{% url 'catalog:sku_detail' group.slug sku.article %}"
+                    {% if sku.image %}data-sku-preview="{{ sku.image.url }}"{% elif group_image_url %}data-sku-preview="{{ group_image_url }}"{% endif %}
+                  >{{ sku.name }}</a>
+                </td>
                 <td data-label="Розмір" class="sku-cell--size"><strong>{{ sku.size_label }}</strong></td>
                 <td data-label="Партія">{{ sku.min_party }} шт</td>
                 <td data-label="Наявність">
@@ -127,29 +140,39 @@
                     <span class="badge">під замовлення</span>
                   {% endif %}
                 </td>
-                <td data-label="Ціна" class="sku-cell--price">
+                <td data-label="Ціна (баз)" class="sku-cell--price">
                   <strong>{{ sku.price }} ₴</strong>
-                  {% if sku.party_price %}<div class="sku-party-price">партія: {{ sku.party_price }} ₴</div>{% endif %}
+                </td>
+                <td data-label="Ціна (пар)" class="sku-cell--price sku-cell--party-price">
+                  {% if sku.party_price is not None %}
+                    <strong>{{ sku.party_price }} ₴</strong>
+                  {% else %}
+                    <span class="sku-price-empty">—</span>
+                  {% endif %}
                 </td>
                 <td data-label="" class="sku-cell--actions">
-                  <form class="qty-form" method="post" action="{% url 'cart:add' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="sku_id" value="{{ sku.id }}">
-                    <input type="hidden" name="next" value="{{ request.path }}">
-                    <input type="number" name="qty" value="{{ sku.min_party }}" min="{{ sku.min_party }}" step="{{ sku.min_party }}" inputmode="numeric" aria-label="Кількість">
-                    <button class="btn btn--sm" type="submit">У кошик</button>
-                  </form>
-                  {% if user.is_authenticated %}
-                  <form class="sku-wishlist-form" method="post" action="{% url 'cart:wishlist' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="sku_id" value="{{ sku.id }}">
-                    <button class="btn btn--sm btn--ghost" type="submit" title="Бажане">★</button>
-                  </form>
-                  {% endif %}
+                  <div class="sku-actions">
+                    <form
+                      class="qty-form"
+                      method="post"
+                      action="{% url 'cart:add' %}"
+                      hx-post="{% url 'cart:add' %}"
+                      hx-target="next [data-action-note]"
+                      hx-swap="innerHTML"
+                    >
+                      {% csrf_token %}
+                      <input type="hidden" name="sku_id" value="{{ sku.id }}">
+                      <input type="hidden" name="next" value="{{ request.path }}">
+                      <input type="number" name="qty" value="{{ sku.min_party }}" min="{{ sku.min_party }}" step="{{ sku.min_party }}" inputmode="numeric" aria-label="Кількість">
+                      <button class="btn btn--sm" type="submit">У кошик</button>
+                    </form>
+                    {% include "includes/wishlist_button.html" with sku=sku %}
+                    {% include "includes/action_note_slot.html" %}
+                  </div>
                 </td>
               </tr>
             {% empty %}
-              <tr class="sku-row--empty"><td colspan="7">Немає активних SKU.</td></tr>
+              <tr class="sku-row--empty"><td colspan="8">Немає активних SKU.</td></tr>
             {% endfor %}
             </tbody>
           </table>

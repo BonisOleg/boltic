@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils.text import slugify
 from docx import Document
 
-from apps.catalog.classification import resolve_bolt_screw_l2_slug
+from apps.catalog.classification import resolve_fastener_category
 from apps.catalog.import_parser import (
     is_group_header,
     parse_group_meta,
@@ -49,11 +49,10 @@ class Command(BaseCommand):
         price: Decimal = options["price"]
         min_party: int = options["min_party"]
 
-        l1 = Category.objects.filter(
-            path="болти-гвинти-стрижні/", level=Category.Level.L1
-        ).first()
-        if l1 is None:
-            raise CommandError("Немає L1 болти-гвинти-стрижні/. Спочатку seed_catalog.")
+        if not Category.objects.filter(
+            parent=None, slug="болти", level=Category.Level.L1, is_active=True
+        ).exists():
+            raise CommandError("Немає L1 «Болти». Спочатку seed_catalog.")
 
         total_groups = 0
         total_skus = 0
@@ -64,7 +63,7 @@ class Command(BaseCommand):
                 if not path.exists():
                     raise CommandError(f"Немає файлу: {path}")
                 g_count, s_count = self._import_file(
-                    path, l1, prefix, price, min_party
+                    path, prefix, price, min_party
                 )
                 total_groups += g_count
                 total_skus += s_count
@@ -81,22 +80,32 @@ class Command(BaseCommand):
             )
         )
 
-    def _resolve_category(self, l1: Category, meta: dict) -> Category:
-        slug = resolve_bolt_screw_l2_slug(meta["name"], meta["standard"])
-        cat = Category.objects.filter(
-            parent=l1, slug=slug, level=Category.Level.L2
-        ).first()
+    def _resolve_category(self, meta: dict) -> Category:
+        l1_slug, l2_slug = resolve_fastener_category(
+            meta["name"],
+            meta.get("standard") or "",
+            meta.get("material") or "",
+        )
+        cat = (
+            Category.objects.filter(
+                parent__slug=l1_slug,
+                parent__parent=None,
+                slug=l2_slug,
+                level=Category.Level.L2,
+            )
+            .select_related("parent")
+            .first()
+        )
         if cat is None:
             raise CommandError(
-                f"Немає підкатегорії «{slug}». "
-                "Спочатку: seed_catalog + reclassify_bolty_gvynty"
+                f"Немає категорії {l1_slug}/{l2_slug}. "
+                "Спочатку: seed_catalog + restructure_catalog_tree"
             )
         return cat
 
     def _import_file(
         self,
         path: Path,
-        l1: Category,
         prefix: str,
         price: Decimal,
         min_party: int,
@@ -139,11 +148,11 @@ class Command(BaseCommand):
                 current_meta = parse_group_meta(line)
                 # виправлення «лемішний10,9»
                 if "лемішний10" in current_meta["name"].replace(" ", ""):
-                    current_meta["name"] = "Болт лемішний 10,9 к.м."
+                    current_meta["name"] = "Болт лемішний 10,9 сталь"
                     current_meta["strength_class"] = "10.9"
-                    current_meta["material"] = "к.м."
+                    current_meta["material"] = "сталь"
 
-                category = self._resolve_category(l1, current_meta)
+                category = self._resolve_category(current_meta)
                 slug = slugify(current_meta["name"], allow_unicode=True)[:200]
                 current_group, created = ProductGroup.objects.update_or_create(
                     slug=slug,

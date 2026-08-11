@@ -74,6 +74,8 @@
       inStockOnly: false,
     };
 
+    var useMetricM = root.getAttribute("data-metric-m") === "1";
+
     var diameters = uniqueSorted(
       rows.map(function (r) {
         return r.getAttribute("data-diameter");
@@ -118,7 +120,8 @@
       }
       if (diaRow) diaRow.hidden = false;
       diameters.forEach(function (d) {
-        diaWrap.appendChild(makeChip(d, "M" + fmtNum(d), "diameter"));
+        var label = useMetricM ? "M" + fmtNum(d) : fmtNum(d);
+        diaWrap.appendChild(makeChip(d, label, "diameter"));
       });
     }
 

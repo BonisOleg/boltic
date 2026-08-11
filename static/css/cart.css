@@ -75,10 +75,40 @@
   appearance: textfield;
 }
 
-.qty-stock-hint {
+.qty-stock-hint,
+.cart-price-hint {
   margin-top: 4px;
   font-size: 12px;
   color: var(--color-text-muted);
+}
+
+.cart-total {
+  margin-top: 16px;
+  font-size: 18px;
+  font-family: var(--font-display);
+}
+
+.cart-min-order {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: var(--radius, 8px);
+  background: color-mix(in srgb, var(--color-accent) 20%, #fff);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.btn--disabled,
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@supports not (background: color-mix(in srgb, #000 10%, #fff)) {
+  .cart-min-order {
+    background: #f7f1d8;
+  }
 }
 
 @media (max-width: 767px) {

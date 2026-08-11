@@ -1,72 +1,51 @@
-{% load static %}
+{% load static site_content %}
 <footer class="site-footer">
-  <div class="container">
-    <div class="footer-brand">
-      <a class="footer-logo" href="{% url 'content:home' %}" aria-label="{{ site_settings.site_name }}">
-        <img src="{% static 'img/logo.png' %}" alt="{{ site_settings.site_name }}" width="160" height="34" decoding="async">
-      </a>
-      <a class="footer-cabinet" href="{% url 'accounts:cabinet' %}">Кабінет</a>
-    </div>
+  <div class="footer-inner">
+    <div class="footer-main">
+      <div class="footer-col footer-col--brand">
+        <a class="footer-logo" href="{% url 'content:home' %}" aria-label="{{ site_settings.site_name }}">
+          {% if site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" width="260" height="56" decoding="async">
+          {% else %}
+          <img src="{% static 'img/logo.png' %}?v=20260730g" alt="{{ site_settings.site_name }}" width="260" height="56" decoding="async">
+          {% endif %}
+        </a>
+        <a class="footer-cabinet" href="{% url 'accounts:cabinet' %}">{% block_plain 'site' 'footer_cabinet_label' %}</a>
+      </div>
 
-    <div class="footer-grid">
-      <div class="footer-col footer-col--catalog">
-        <h3>Каталог</h3>
-        <ul>
+      <nav class="footer-col footer-col--catalog" aria-label="{% block_plain 'site' 'footer_catalog_title' %}">
+        <h3 class="footer-col__title">{% block_plain 'site' 'footer_catalog_title' %}</h3>
+        <ul class="footer-col__list">
           {% for cat in nav_categories|slice:":6" %}
           <li><a href="{% url 'catalog:category' path=cat.url_path %}">{{ cat.name }}</a></li>
           {% endfor %}
           <li><a href="{% url 'catalog:root' %}">Увесь каталог</a></li>
         </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Покупцям</h3>
-        <ul>
+      </nav>
+
+      <nav class="footer-col footer-col--buyers" aria-label="{% block_plain 'site' 'footer_buyers_title' %}">
+        <h3 class="footer-col__title">{% block_plain 'site' 'footer_buyers_title' %}</h3>
+        <ul class="footer-col__list">
           <li><a href="{% url 'content:oplata_i_dostavka' %}">Оплата і доставка</a></li>
           <li><a href="{% url 'content:povernennya_ta_obmin' %}">Повернення та обмін</a></li>
           <li><a href="{% url 'content:promo_list' %}">Акції</a></li>
           <li><a href="{% url 'catalog:brand_list' %}">Бренди</a></li>
           <li><a href="{% url 'content:contacts' %}">Контакти</a></li>
         </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Інформація</h3>
-        <ul>
+      </nav>
+
+      <nav class="footer-col footer-col--info" aria-label="{% block_plain 'site' 'footer_info_title' %}">
+        <h3 class="footer-col__title">{% block_plain 'site' 'footer_info_title' %}</h3>
+        <ul class="footer-col__list">
           <li><a href="{% url 'content:publichnyy_dohovir' %}">Публічний договір</a></li>
           <li><a href="{% url 'content:polityka_konfidentsiynosti' %}">Політика конфіденційності</a></li>
           <li><a href="{% url 'content:news_list' %}">Новини</a></li>
         </ul>
-      </div>
-      {% if site_settings.phone or site_settings.email or site_settings.address or site_settings.social_json %}
-      <div class="footer-col footer-col--contacts">
-        <h3>Контакти</h3>
-        <ul class="footer-contacts">
-          {% if site_settings.phone %}
-          <li><a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a></li>
-          {% endif %}
-          {% if site_settings.email %}
-          <li><a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a></li>
-          {% endif %}
-          {% if site_settings.address %}
-          <li class="footer-contacts__address">{{ site_settings.address }}</li>
-          {% endif %}
-        </ul>
-        {% if site_settings.social_json %}
-        <ul class="footer-social">
-          {% for name, url in site_settings.social_json.items %}
-          {% if url %}
-          <li>
-            <a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ name }}">{{ name }}</a>
-          </li>
-          {% endif %}
-          {% endfor %}
-        </ul>
-        {% endif %}
-      </div>
-      {% endif %}
+      </nav>
     </div>
 
     <div class="footer-bottom">
-      <span class="footer-copy">© {% now "Y" %} {{ site_settings.site_name }}. Всі види кріплень.</span>
+      <p class="footer-copy">© {% now "Y" %} {{ site_settings.site_name }}. {% block_plain 'site' 'footer_copy_suffix' %}</p>
       <a class="footer-credit" href="https://www.prometeylabs.com/" target="_blank" rel="noopener noreferrer">Розроблено PrometeyLabs</a>
     </div>
   </div>

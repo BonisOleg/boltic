@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 
+from apps.catalog.image_process import PRODUCT_IMAGE_HELP, normalize_product_image
+
 from .brand import Brand
 from .category import Category
 
@@ -24,7 +26,7 @@ class ProductGroup(models.Model):
         verbose_name="Бренд",
     )
     name = models.CharField("Назва", max_length=255)
-    slug = models.SlugField("Slug", max_length=255, unique=True)
+    slug = models.SlugField("Slug", max_length=255, unique=True, allow_unicode=True)
     short_description = models.TextField("Короткий опис", blank=True)
     description = models.TextField("Опис", blank=True)
     standard = models.CharField("Стандарт", max_length=64, blank=True)
@@ -108,7 +110,18 @@ class ProductSKU(models.Model):
         "Ставка ПДВ %", max_digits=5, decimal_places=2, default=20
     )
     party_price = models.DecimalField(
-        "Ціна партії", max_digits=12, decimal_places=2, null=True, blank=True
+        "Ціна опт (партія)",
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Необовʼязково. Якщо задана — застосовується при qty ≥ мін. партії.",
+    )
+    image = models.ImageField(
+        "Фото SKU",
+        upload_to="sku/",
+        blank=True,
+        help_text=PRODUCT_IMAGE_HELP,
     )
     is_active = models.BooleanField("Активний", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -126,6 +139,13 @@ class ProductSKU(models.Model):
     def __str__(self) -> str:
         return f"{self.article} · {self.name}"
 
+    def save(self, *args, **kwargs):
+        if self.image:
+            processed = normalize_product_image(self.image)
+            if processed is not None:
+                self.image.save(processed.name, processed, save=False)
+        super().save(*args, **kwargs)
+
 
 class ProductImage(models.Model):
     group = models.ForeignKey(
@@ -134,7 +154,11 @@ class ProductImage(models.Model):
         related_name="images",
         verbose_name="Група",
     )
-    image = models.ImageField("Зображення", upload_to="products/")
+    image = models.ImageField(
+        "Зображення",
+        upload_to="products/",
+        help_text=PRODUCT_IMAGE_HELP,
+    )
     alt = models.CharField("Alt", max_length=255, blank=True)
     sort_order = models.PositiveIntegerField("Порядок", default=0)
     is_primary = models.BooleanField("Головне", default=False)
@@ -146,6 +170,13 @@ class ProductImage(models.Model):
 
     def __str__(self) -> str:
         return self.alt or f"Image #{self.pk}"
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            processed = normalize_product_image(self.image)
+            if processed is not None:
+                self.image.save(processed.name, processed, save=False)
+        super().save(*args, **kwargs)
 
 
 class ProductDocument(models.Model):

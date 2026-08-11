@@ -1,0 +1,91 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title }}{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin/catalog_io.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="catalog-io">
+  <header class="catalog-io__head">
+    <h1 class="text-font-important-light dark:text-font-important-dark">{{ title }}</h1>
+    <p class="text-font-subtle-light dark:text-font-subtle-dark">
+      Повний дамп SKU + груп + категорій, або імпорт у форматі goods.xlsx.
+      Формати: {{ supported }}.
+    </p>
+  </header>
+
+  <section class="catalog-io__card catalog-io__hint border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+    <h2 class="text-font-important-light dark:text-font-important-dark">Фото товарів</h2>
+    <p class="text-font-subtle-light dark:text-font-subtle-dark">
+      Рекомендований формат фото: <strong>4:3</strong>, розмір
+      <strong>1200×900&nbsp;px</strong> (JPEG/PNG/WebP).
+      Фото завантажуються в картці групи товарів.
+      Якщо співвідношення інше — файл автоматично обрізається по центру
+      під 4:3 і масштабується до 1200×900.
+    </p>
+  </section>
+
+  <section class="catalog-io__card border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+    <h2 class="text-font-important-light dark:text-font-important-dark">Імпорт</h2>
+    <p class="text-font-subtle-light dark:text-font-subtle-dark">
+      Існуючі SKU оновлюються за артикулом (<code>article</code> / <code>Код</code>),
+      нові створюються. Групи потрапляють у відповідні L1/L2 категорії.
+    </p>
+    <form method="post" enctype="multipart/form-data" class="catalog-io__form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="import">
+      <label class="catalog-io__label" for="{{ import_form.file.id_for_label }}">
+        {{ import_form.file.label }}
+      </label>
+      {{ import_form.file }}
+      {% if import_form.file.help_text %}
+      <p class="text-font-subtle-light dark:text-font-subtle-dark">{{ import_form.file.help_text }}</p>
+      {% endif %}
+      {% if import_form.file.errors %}
+      <div class="catalog-io__errors">{{ import_form.file.errors }}</div>
+      {% endif %}
+      <button type="submit" class="catalog-io__btn bg-primary-600 text-white rounded-default">
+        Імпортувати
+      </button>
+    </form>
+  </section>
+
+  <section class="catalog-io__card border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+    <h2 class="text-font-important-light dark:text-font-important-dark">Експорт (повний дамп)</h2>
+    <form method="post" class="catalog-io__form catalog-io__form--row">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="export">
+      <label class="catalog-io__label" for="{{ export_form.format.id_for_label }}">
+        {{ export_form.format.label }}
+      </label>
+      {{ export_form.format }}
+      <button type="submit" class="catalog-io__btn bg-primary-600 text-white rounded-default">
+        Завантажити
+      </button>
+    </form>
+  </section>
+
+  <section class="catalog-io__card border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+    <h2 class="text-font-important-light dark:text-font-important-dark">Шаблон повного дампу</h2>
+    <p class="text-font-subtle-light dark:text-font-subtle-dark">
+      Порожній файл з усіма колонками схеми <code>boltiko_catalog_full</code>.
+    </p>
+    <div class="catalog-io__template-row">
+      {% for fmt, label in export_form.FORMAT_CHOICES %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="template">
+        <input type="hidden" name="format" value="{{ fmt }}">
+        <button type="submit" class="catalog-io__btn catalog-io__btn--ghost border border-base-200 dark:border-base-700 rounded-default">
+          {{ label }}
+        </button>
+      </form>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

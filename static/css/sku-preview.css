@@ -1,0 +1,69 @@
+/* Hover-превʼю фото при наведенні на назву SKU */
+
+.sku-name-link {
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sku-name-link:hover {
+  text-decoration: underline;
+}
+
+.sku-name-link--has-preview {
+  cursor: pointer;
+}
+
+.sku-preview {
+  position: fixed;
+  z-index: 80;
+  width: 150px;
+  max-width: min(150px, 42vw);
+  padding: 6px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, 6px, 0);
+  transition:
+    opacity 0.16s var(--ease-out),
+    transform 0.16s var(--ease-out),
+    visibility 0.16s;
+  will-change: transform, opacity;
+}
+
+.sku-preview.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+}
+
+.sku-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Лише пристрії з реальним hover (не iOS sticky) */
+@media (hover: none), (pointer: coarse) {
+  .sku-preview {
+    display: none;
+  }
+
+  .sku-name-link:hover {
+    text-decoration: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sku-preview {
+    width: 132px;
+    max-width: min(132px, 38vw);
+  }
+}

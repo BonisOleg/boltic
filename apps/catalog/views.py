@@ -6,7 +6,9 @@ from django.views import View
 from django.views.decorators.http import require_GET, require_http_methods
 from django.views.generic import TemplateView
 
+from apps.cart.services import wishlist_sku_ids
 from apps.catalog import selectors
+from apps.catalog.metric_size import group_uses_metric_m
 from apps.core.exceptions import ReviewError
 from apps.orders.forms import ReviewForm
 from apps.reviews.services import create_pending_review
@@ -40,13 +42,22 @@ class CategoryView(View):
             "children": selectors.category_children(category),
             "page_obj": page,
             "selected_facets": selected,
-            "facet_attributes": selectors.facet_attributes(),
+            "facet_attributes": selectors.facet_attributes(category),
             "sort": sort,
             "canonical_path": category.path,
         }
         if getattr(request, "htmx", False):
             return render(request, self.partial_name, ctx)
         return render(request, self.template_name, ctx)
+
+
+def _mark_wishlist(request, skus):
+    """Позначити SKU, які вже в обраному, для стану кнопки."""
+    ids = wishlist_sku_ids(getattr(request, "user", None))
+    items = list(skus)
+    for sku in items:
+        sku.in_wishlist = sku.id in ids
+    return items
 
 
 class ProductDetailView(View):
@@ -63,10 +74,31 @@ class ProductDetailView(View):
             self.template_name,
             {
                 "group": group,
-                "skus": group.skus.all(),
+                "skus": _mark_wishlist(request, group.skus.all()),
                 "reviews": reviews,
                 "review_form": ReviewForm(),
                 "highlight_sku": highlight,
+                "group_image_url": selectors.group_primary_image_url(group),
+                "uses_metric_m": group_uses_metric_m(group),
+            },
+        )
+
+
+class SKUDetailView(View):
+    template_name = "catalog/sku_detail.html"
+
+    def get(self, request, slug: str, article: str):
+        sku = selectors.get_sku(slug, article)
+        if sku is None:
+            raise Http404
+        _mark_wishlist(request, [sku])
+        return render(
+            request,
+            self.template_name,
+            {
+                "sku": sku,
+                "group": sku.group,
+                "sku_image_url": selectors.sku_display_image_url(sku),
             },
         )
 

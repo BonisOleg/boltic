@@ -1,0 +1,2 @@
+{% comment %}Підказка біля кнопки. Контекст: note, ok.{% endcomment %}
+{% if note %}<span class="action-note{% if not ok %} action-note--error{% endif %}" data-note-life>{{ note }}</span>{% endif %}

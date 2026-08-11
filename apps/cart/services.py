@@ -3,7 +3,13 @@ from django.utils import timezone
 
 from apps.cart.models import Cart, CartItem, WishlistItem
 from apps.catalog.models import ProductSKU
-from apps.catalog.pricing import clamp_qty, line_total, max_orderable_qty, normalize_qty
+from apps.catalog.pricing import (
+    clamp_qty,
+    line_total,
+    max_orderable_qty,
+    normalize_qty,
+    unit_price_for_qty,
+)
 from apps.core.exceptions import CartError
 
 
@@ -72,10 +78,25 @@ def cart_totals(cart: Cart) -> dict:
     subtotal = Decimal("0.00")
     lines = []
     for item in items:
-        lt = line_total(item.sku.price, item.quantity)
+        unit = unit_price_for_qty(item.sku, item.quantity)
+        lt = line_total(unit, item.quantity)
         subtotal += lt
         max_qty = max_orderable_qty(item.sku.min_party, item.sku.stock_qty)
-        lines.append({"item": item, "line_total": lt, "max_qty": max_qty})
+        stock_qty = item.sku.stock_qty
+        available_qty = (
+            max(0, int(stock_qty) - int(item.quantity))
+            if stock_qty is not None
+            else None
+        )
+        lines.append(
+            {
+                "item": item,
+                "unit_price": unit,
+                "line_total": lt,
+                "max_qty": max_qty,
+                "available_qty": available_qty,
+            }
+        )
     return {"lines": lines, "subtotal": subtotal}
 
 
@@ -158,20 +179,29 @@ def merge_on_login(request, user) -> None:
 
 
 @transaction.atomic
-def wishlist_toggle(user, *, sku_id: int) -> bool:
-    """Повертає True якщо додано, False якщо прибрано."""
+def wishlist_toggle(user, *, sku_id: int) -> tuple[bool, ProductSKU]:
+    """Повертає (додано?, sku). Кидає CartError, якщо SKU недоступний."""
     sku = ProductSKU.objects.filter(pk=sku_id, is_active=True).first()
     if sku is None:
         raise CartError("Товар не знайдено")
     existing = WishlistItem.objects.filter(user=user, sku=sku).first()
     if existing:
         existing.delete()
-        return False
+        return False, sku
     WishlistItem.objects.create(user=user, sku=sku)
-    return True
+    return True, sku
 
 
 def wishlist_qs(user):
     return WishlistItem.objects.filter(user=user).select_related(
         "sku", "sku__group"
+    )
+
+
+def wishlist_sku_ids(user) -> set[int]:
+    """ID обраних SKU — для підсвітки активної кнопки в шаблонах."""
+    if user is None or not user.is_authenticated:
+        return set()
+    return set(
+        WishlistItem.objects.filter(user=user).values_list("sku_id", flat=True)
     )

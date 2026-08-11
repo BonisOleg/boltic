@@ -1,40 +1,45 @@
 {% extends "base.html" %}
-{% load static %}
-{% block title %}{{ site_settings.site_name }} — всі види кріплень{% endblock %}
+{% load static site_content %}
+{% block title %}{{ site_settings.site_name }} — {% block_plain 'site' 'footer_copy_suffix' %}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
 {% block main_class %}page-main--flush{% endblock %}
 {% block content %}
 
+{% if show_hero %}
 <section class="hero-slider" aria-label="Головний банер">
   {% if slides|length > 1 %}
   <button type="button" class="hero-nav hero-nav--prev" data-hero-prev aria-label="Назад">‹</button>
   <button type="button" class="hero-nav hero-nav--next" data-hero-next aria-label="Далі">›</button>
   {% endif %}
   <div class="hero-slider__track" data-hero-track>
-    {% if slides %}
-      {% for s in slides %}
-      <div class="hero-slide">
-        <div class="hero-slide__content">
-          <h{% if forloop.first %}1{% else %}2{% endif %}>{{ s.title|default:site_settings.site_name }}</h{% if forloop.first %}1{% else %}2{% endif %}>
-          {% if s.body %}<p>{{ s.body|truncatewords:40 }}</p>{% endif %}
-          <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Всі види кріплень</a>
-        </div>
-        <div class="hero-slide__visual" aria-hidden="true"></div>
+    {% for s in slides %}
+    <div class="hero-slide">
+      {% if s.has_image %}
+      <img class="hero-slide__bg" src="{{ s.image_url }}" alt="{{ s.alt_text }}" width="1920" height="1080" decoding="async"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+      {% endif %}
+      <div class="hero-slide__content">
+        <h{% if forloop.first %}1{% else %}2{% endif %}>{{ s.title|default:site_settings.site_name }}</h{% if forloop.first %}1{% else %}2{% endif %}>
+        {% if s.body %}<p>{{ s.body|truncatewords:40 }}</p>{% endif %}
+        {% if s.cta_label %}
+        <a class="hero-slide__accent" href="{{ s.cta_url }}">{{ s.cta_label }}</a>
+        {% endif %}
       </div>
-      {% endfor %}
-    {% else %}
-      <div class="hero-slide">
-        <div class="hero-slide__content">
-          <h1>{{ site_settings.site_name }} — всі види кріплень</h1>
-          <p>Інтернет-магазин кріплення. Болти, гайки, самонарізи, анкери та системи кріплення.</p>
-          <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Перейти в каталог</a>
-        </div>
-        <div class="hero-slide__visual" aria-hidden="true"></div>
+      <div class="hero-slide__visual" aria-hidden="true"></div>
+    </div>
+    {% empty %}
+    <div class="hero-slide">
+      <div class="hero-slide__content">
+        <h1>{{ site_settings.site_name }}</h1>
+        <a class="hero-slide__accent" href="{% url 'catalog:root' %}">Перейти в каталог</a>
       </div>
-    {% endif %}
+      <div class="hero-slide__visual" aria-hidden="true"></div>
+    </div>
+    {% endfor %}
   </div>
 </section>
+{% endif %}
 
+{% if show_advantages %}
 <section class="advantages">
   <div class="container">
     <div class="advantages__grid">
@@ -60,13 +65,15 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 <div class="container home-rail">
 
+  {% if show_catalog %}
   <section class="section-card">
     <div class="section-head">
-      <h2>Каталог</h2>
-      <a href="{% url 'catalog:root' %}">усі категорії</a>
+      <h2>{{ catalog_title }}</h2>
+      <a href="{% url 'catalog:root' %}">{{ catalog_link_label }}</a>
     </div>
     <div class="section-body">
       <div class="l1-rail">
@@ -78,12 +85,13 @@
       </div>
     </div>
   </section>
+  {% endif %}
 
-  {% if promo_products %}
+  {% if show_promo and promo_products %}
   <section class="section-card">
     <div class="section-head">
-      <h2>Акційні пропозиції</h2>
-      <a href="{% url 'content:promo_list' %}">всі акції</a>
+      <h2>{{ promo_title }}</h2>
+      <a href="{% url 'content:promo_list' %}">{{ promo_link_label }}</a>
     </div>
     <div class="section-body">
       <div class="product-rail">
@@ -93,11 +101,11 @@
       </div>
     </div>
   </section>
-  {% elif promotions %}
+  {% elif show_promo and promotions %}
   <section class="section-card">
     <div class="section-head">
-      <h2>Акції</h2>
-      <a href="{% url 'content:promo_list' %}">всі акції</a>
+      <h2>{{ promo_title }}</h2>
+      <a href="{% url 'content:promo_list' %}">{{ promo_link_label }}</a>
     </div>
     <div class="section-body content-split">
       {% for p in promotions %}
@@ -110,11 +118,11 @@
   </section>
   {% endif %}
 
-  {% if top_products %}
+  {% if show_tops and top_products %}
   <section class="section-card">
     <div class="section-head">
-      <h2>Лідери продажів</h2>
-      <a href="{% url 'catalog:root' %}">до каталогу</a>
+      <h2>{{ tops_title }}</h2>
+      <a href="{% url 'catalog:root' %}">{{ tops_link_label }}</a>
     </div>
     <div class="section-body">
       <div class="product-rail">
@@ -126,11 +134,11 @@
   </section>
   {% endif %}
 
-  {% if news_posts or promotions %}
+  {% if show_news %}{% if news_posts or promotions %}
   <section class="section-card">
     <div class="section-head">
-      <h2>Новини та акції</h2>
-      <a href="{% url 'content:news_list' %}">всі новини</a>
+      <h2>{{ news_title }}</h2>
+      <a href="{% url 'content:news_list' %}">{{ news_link_label }}</a>
     </div>
     <div class="section-body content-split">
       {% for n in news_posts %}
@@ -147,24 +155,20 @@
       {% endfor %}
     </div>
   </section>
+  {% endif %}{% endif %}
+
+  {% if show_seo %}
+  <section class="seo-block">
+    <h1>{{ seo_title }}</h1>
+    <div class="prose">{{ seo_body|linebreaks }}</div>
+  </section>
   {% endif %}
 
-  <section class="seo-block">
-    {% if seo_block %}
-      <h1>{{ seo_block.title|default:site_settings.site_name }}</h1>
-      <div class="prose">{{ seo_block.body|linebreaks }}</div>
-    {% else %}
-      <h1>Інтернет-магазин кріплення {{ site_settings.site_name }}. Надійне кріплення для бездоганного результату</h1>
-      <div class="prose">
-        <p>Вітаємо на сайті {{ site_settings.site_name }}. У каталозі — болти, гайки, самонарізи, анкери, заклепки та інші види кріплень із зручним підбором за розміром і характеристиками.</p>
-      </div>
-    {% endif %}
-  </section>
-
+  {% if show_services %}
   <section class="services-row">
     {% for s in services %}
-      {% if s.url_name %}
-      <a class="service-card" href="{% url s.url_name %}">
+      {% if s.url %}
+      <a class="service-card" href="{{ s.url }}">
         <h3>{{ s.title }}</h3>
         <p>{{ s.text }}</p>
       </a>
@@ -176,6 +180,7 @@
       {% endif %}
     {% endfor %}
   </section>
+  {% endif %}
 
 </div>
 {% endblock %}

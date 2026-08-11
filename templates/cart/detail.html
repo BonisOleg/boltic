@@ -23,7 +23,12 @@
                 <div style="font-size:12px;color:var(--color-text-muted)">{{ sku.article }}</div>
               </td>
               <td>{{ sku.size_label }}</td>
-              <td>{{ sku.price }} ₴</td>
+              <td>
+                {{ row.unit_price }} ₴
+                {% if sku.party_price is not None and row.unit_price == sku.party_price %}
+                <div class="cart-price-hint">опт від {{ sku.min_party }} шт</div>
+                {% endif %}
+              </td>
               <td>
                 <form class="qty-form qty-form--stepper" method="post" action="{% url 'cart:update' row.item.id %}" data-cart-qty>
                   {% csrf_token %}
@@ -58,8 +63,12 @@
                   </div>
                   <button class="btn btn--sm btn--ghost" type="submit">OK</button>
                 </form>
-                {% if sku.stock_qty is not None %}
-                <div class="qty-stock-hint">Залишок: {{ sku.stock_qty }} шт</div>
+                {% if row.available_qty is not None %}
+                <div
+                  class="qty-stock-hint"
+                  data-qty-available-hint
+                  data-stock-qty="{{ sku.stock_qty }}"
+                >Доступно ще: <span data-qty-available-value>{{ row.available_qty }}</span> шт</div>
                 {% endif %}
               </td>
               <td><strong>{{ row.line_total }} ₴</strong></td>
@@ -78,8 +87,18 @@
         </table>
       </div>
       {% if lines %}
-      <p style="margin-top:16px;font-size:18px;font-family:var(--font-display)"><strong>Разом: {{ subtotal }} грн</strong></p>
+      <p class="cart-total">Разом: <strong>{{ subtotal }} грн</strong></p>
+      {% if can_checkout %}
       <a class="btn" href="{% url 'orders:checkout' %}">Оформити замовлення</a>
+      {% else %}
+      <p class="cart-min-order" role="status">
+        Мінімальна сума замовлення — {{ min_order|floatformat:0 }} грн.
+        Додайте ще на {{ min_order_shortfall|floatformat:0 }} грн.
+      </p>
+      <button class="btn btn--disabled" type="button" disabled aria-disabled="true">
+        Оформити замовлення
+      </button>
+      {% endif %}
       {% else %}
       <a class="btn" href="{% url 'catalog:root' %}">До каталогу</a>
       {% endif %}

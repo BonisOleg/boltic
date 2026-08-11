@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.catalog.goods_xlsx import normalize_size_label
+from apps.catalog.metric_size import canonical_size_key
 from apps.catalog.models import ProductGroup
 
 
@@ -34,8 +34,8 @@ DELETE_EMPTY_IDS: list[int] = [
 
 
 def _size_key(label: str) -> str:
-    """M8×1×40 і M8×40 → один ключ M8×40 (діаметр × довжина)."""
-    norm = normalize_size_label(label or "")
+    """M8×1×40 і M8×40 / 8×40 → один ключ 8×40 (діаметр × довжина)."""
+    norm = canonical_size_key(label or "")
     if not norm:
         return ""
     parts = norm.split("×")

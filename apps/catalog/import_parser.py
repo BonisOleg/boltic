@@ -134,15 +134,26 @@ def parse_group_meta(title: str) -> dict:
         standard = f"DIN {din.group(1)}"
 
     strength = ""
-    sm = re.search(r"(\d+[,.]\d+)\s*к\.?\s*м", title, re.I)
+    sm = re.search(
+        r"(?:кл\.?\s*(?:пр|міц)\.?|клас(?:\s*м(?:іц(?:н(?:ості)?)?)?\.?)?)\s*"
+        r"(\d+[,.]\d+)",
+        title,
+        re.I,
+    )
+    if not sm:
+        sm = re.search(r"(\d+[,.]\d+)\s*к\.?\s*м", title, re.I)
     if sm:
         strength = sm.group(1).replace(",", ".")
 
     material = ""
     if re.search(r"\bА2\b|нержав", title, re.I):
         material = "А2 нержавіюча сталь"
-    elif "к.м" in title.lower() or "к.м." in title.lower():
-        material = "к.м."
+    elif re.search(
+        r"(?<![А-Яа-яІіЇїЄєҐґA-Za-z])к\.м\.?(?![А-Яа-яІіЇїЄєҐґA-Za-z])",
+        title,
+        re.I,
+    ):
+        material = "сталь"
 
     return {
         "name": title,

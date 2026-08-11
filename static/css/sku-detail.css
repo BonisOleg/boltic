@@ -1,0 +1,218 @@
+/* Сторінка одного SKU */
+
+.sku-detail__nav {
+  margin: 0 0 16px;
+  font-size: 14px;
+}
+
+.sku-detail__nav a {
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sku-detail__nav a:hover {
+  text-decoration: underline;
+}
+
+.sku-detail {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 24px;
+  padding-bottom: calc(16px + var(--safe-bottom));
+}
+
+.sku-detail__media {
+  background: #fff;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.sku-detail__media img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.sku-detail__placeholder {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  opacity: 0.45;
+}
+
+.sku-detail__article {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sku-detail__title {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.sku-detail__attrs {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.sku-detail__attrs li {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.sku-detail__attrs span {
+  color: var(--color-text-muted);
+}
+
+.sku-detail__price {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-family: var(--font-display);
+}
+
+.sku-detail__price-label {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-body, inherit);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sku-detail__party {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-family: var(--font-display);
+  color: var(--color-primary-dark);
+}
+
+.sku-detail__party-hint {
+  margin-left: 6px;
+  font-family: var(--font-body, inherit);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.sku-detail .sku-price-empty {
+  font-size: 18px;
+  color: var(--color-text-muted);
+}
+
+.sku-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.sku-detail__cart {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex: 0 1 auto;
+}
+
+.sku-detail__cart input[type="number"] {
+  width: 88px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: textfield;
+}
+
+.sku-detail__cart .btn {
+  min-height: 44px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+@media (min-width: 768px) {
+  .sku-detail {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 28px;
+    padding: 24px;
+    align-items: start;
+  }
+
+  .sku-detail__title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sku-detail {
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    gap: 36px;
+    padding: 28px;
+  }
+}
+
+@media (max-width: 479px) {
+  .sku-detail__actions,
+  .sku-detail__cart {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .sku-detail__cart {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .sku-detail__cart input[type="number"] {
+    flex: 0 0 72px;
+    width: 72px;
+  }
+
+  .sku-detail__cart .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .sku-detail__actions .wishlist-btn {
+    flex: 0 0 48px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* iOS Safari: no sticky :hover */
+@media (hover: none) {
+  .sku-detail__nav a:hover {
+    text-decoration: none;
+  }
+}

@@ -20,6 +20,19 @@
     return value + (step - rem);
   }
 
+  function syncAvailableHint(form, qty) {
+    var cell = form.parentElement;
+    if (!cell) return;
+    var hint = cell.querySelector("[data-qty-available-hint]");
+    if (!hint) return;
+    var stock = parseIntSafe(hint.getAttribute("data-stock-qty"), null);
+    if (stock == null) return;
+    var available = stock - qty;
+    if (available < 0) available = 0;
+    var valueEl = hint.querySelector("[data-qty-available-value]");
+    if (valueEl) valueEl.textContent = String(available);
+  }
+
   function syncButtons(form) {
     var input = form.querySelector("[data-qty-input]");
     if (!input) return;
@@ -31,6 +44,7 @@
     var plus = form.querySelector('[data-qty-delta]:not([data-qty-delta^="-"])');
     if (minus) minus.disabled = val <= min;
     if (plus) plus.disabled = max != null && val >= max;
+    syncAvailableHint(form, val);
   }
 
   function applyValue(form, next, submitNow) {

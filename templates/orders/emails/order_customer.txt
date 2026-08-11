@@ -1,0 +1,16 @@
+Дякуємо за замовлення в {{ site.site_name }}!
+
+Номер замовлення: {{ order.number }}
+Сума: {{ order.total }} грн
+
+Доставка: {{ order.shipping_address|default:order.get_shipping_method_display }}
+
+Оплата: рахунок-фактура на email або готівка при отриманні.
+Менеджер звʼяжеться з вами для уточнення деталей.
+
+Позиції:
+{% for item in order.items.all %}- {{ item.name }} ({{ item.size_label }}) × {{ item.quantity }} = {{ item.line_total }} грн
+{% endfor %}
+
+{% if site.phone %}Телефон: {{ site.phone }}{% endif %}
+{% if site.email %}Email: {{ site.email }}{% endif %}

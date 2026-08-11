@@ -1,0 +1,75 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title }}{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media }}
+  <link rel="stylesheet" href="{% static 'css/admin/site_content.css' %}">
+  <style>
+    .site-content-editor input[type="file"] {
+      color: var(--color-font-default-light, #e5e7eb);
+    }
+  </style>
+  {% if hero_formset %}
+  <script src="{% static 'js/admin/hero_slides.js' %}" defer></script>
+  {% endif %}
+  {% if branches_formset %}
+  <script src="{% static 'js/admin/contact_branches.js' %}" defer></script>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="site-content-editor">
+  <div class="site-content-editor__head">
+    <div>
+      <h1 class="text-font-important-light dark:text-font-important-dark">{{ title }}</h1>
+      {% if section.description %}
+      <p class="text-font-subtle-light dark:text-font-subtle-dark">{{ section.description }}</p>
+      {% endif %}
+    </div>
+    {% if section.preview_url %}
+    <a class="site-content-editor__preview border border-base-200 dark:border-base-700"
+       href="{{ section.preview_url }}" target="_blank" rel="noopener">Переглянути на сайті</a>
+    {% endif %}
+  </div>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="site-content-editor__errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for group in field_groups %}
+    <fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+      <legend class="text-font-important-light dark:text-font-important-dark">{{ group.title }}</legend>
+      <div class="site-content-editor__fields">
+        {% for field in group.fields %}
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}<div class="site-content-editor__errors">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+    {% endfor %}
+
+    {% if hero_formset %}
+      {% include "admin/core/hero_slides_fieldset.html" %}
+    {% endif %}
+
+    {% if branches_formset %}
+      {% include "admin/core/contact_branches_fieldset.html" %}
+    {% endif %}
+
+    <div class="site-content-editor__actions">
+      <button type="submit" class="bg-primary-600 border border-transparent font-medium px-3 py-2 rounded-default text-white">
+        Зберегти
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

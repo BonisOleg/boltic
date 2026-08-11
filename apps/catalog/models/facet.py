@@ -28,7 +28,7 @@ class FacetValue(models.Model):
         verbose_name="Атрибут",
     )
     value = models.CharField("Значення", max_length=128)
-    slug = models.SlugField("Slug", max_length=128)
+    slug = models.SlugField("Slug", max_length=128, allow_unicode=True)
     sort_order = models.PositiveIntegerField("Порядок", default=0)
 
     class Meta:

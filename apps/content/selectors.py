@@ -3,54 +3,9 @@ from django.utils import timezone
 
 from apps.catalog.models import ProductGroup, ProductImage
 from apps.catalog.selectors import annotate_price_from, root_categories
-from apps.content.models import (
-    ContactBranch,
-    HomeBlock,
-    NewsPost,
-    Promotion,
-    StaticPage,
-)
-
-DEFAULT_ADVANTAGES = [
-    {
-        "title": "Великий асортимент",
-        "text": "Усі види кріплень для будівництва, ремонту та промисловості",
-    },
-    {
-        "title": "Доставка по Україні",
-        "text": "Швидка відправка замовлень у зручний для вас спосіб",
-    },
-    {
-        "title": "Онлайн-оплата",
-        "text": "Безпечна оплата карткою через LiqPay",
-    },
-    {
-        "title": "Якість і стандарти",
-        "text": "Кріплення за DIN / ГОСТ із зрозумілими характеристиками",
-    },
-]
-
-DEFAULT_SERVICES = [
-    {
-        "title": "Каталог кріплення",
-        "text": "Болти, гайки, самонарізи, анкери та інше — з фільтрами за розміром",
-        "url_name": "catalog:root",
-    },
-    {
-        "title": "Оплата і доставка",
-        "text": "Умови доставки та онлайн-оплати замовлення",
-        "url_name": "content:oplata_i_dostavka",
-    },
-    {
-        "title": "Повернення 14 днів",
-        "text": "Прозорі правила обміну та повернення товарів",
-        "url_name": "content:povernennya_ta_obmin",
-    },
-]
-
-
-def _blocks_map():
-    return {b.key: b for b in HomeBlock.objects.filter(is_active=True)}
+from apps.content.models import ContactBranch, NewsPost, Promotion, StaticPage
+from apps.core.block_render import get_block_text, get_block_url, is_section_visible
+from apps.core.hero_slides import get_hero_slides
 
 
 def _primary_prefetch():
@@ -74,7 +29,6 @@ def promo_products(*, limit: int | None = None):
 
 def home_context():
     now = timezone.now()
-    blocks = _blocks_map()
     promos = (
         Promotion.objects.filter(is_published=True)
         .filter(
@@ -95,35 +49,38 @@ def home_context():
 
     advantages = []
     for i in range(1, 5):
-        b = blocks.get(f"advantage_{i}")
-        if b:
-            advantages.append({"title": b.title or b.key, "text": b.body})
-    if not advantages:
-        advantages = DEFAULT_ADVANTAGES
+        title = get_block_text("home", f"advantage_{i}_title")
+        text = get_block_text("home", f"advantage_{i}_text")
+        if title or text:
+            advantages.append({"title": title, "text": text})
 
     services = []
     for i in range(1, 4):
-        b = blocks.get(f"service_{i}")
-        if b:
-            services.append(
-                {"title": b.title or b.key, "text": b.body, "url": None, "url_name": None}
-            )
-    if not services:
-        services = DEFAULT_SERVICES
-
-    slides = []
-    for key, b in sorted(blocks.items(), key=lambda x: x[1].sort_order):
-        if key == "hero" or key.startswith("slider"):
-            slides.append(b)
-    if not slides and "hero" not in blocks:
-        slides = []
+        title = get_block_text("home", f"service_{i}_title")
+        text = get_block_text("home", f"service_{i}_text")
+        url = get_block_url("home", f"service_{i}_url")
+        services.append({"title": title, "text": text, "url": url, "url_name": None})
 
     return {
-        "blocks": list(blocks.values()),
-        "blocks_map": blocks,
-        "slides": slides,
-        "hero": blocks.get("hero"),
-        "seo_block": blocks.get("seo_text"),
+        "slides": get_hero_slides(),
+        "show_hero": is_section_visible("home", "hero_section_visible"),
+        "show_advantages": is_section_visible("home", "advantages_section_visible"),
+        "show_catalog": is_section_visible("home", "catalog_section_visible"),
+        "show_promo": is_section_visible("home", "promo_section_visible"),
+        "show_tops": is_section_visible("home", "tops_section_visible"),
+        "show_news": is_section_visible("home", "news_section_visible"),
+        "show_seo": is_section_visible("home", "seo_section_visible"),
+        "show_services": is_section_visible("home", "services_section_visible"),
+        "catalog_title": get_block_text("home", "catalog_title"),
+        "catalog_link_label": get_block_text("home", "catalog_link_label"),
+        "promo_title": get_block_text("home", "promo_title"),
+        "promo_link_label": get_block_text("home", "promo_link_label"),
+        "tops_title": get_block_text("home", "tops_title"),
+        "tops_link_label": get_block_text("home", "tops_link_label"),
+        "news_title": get_block_text("home", "news_title"),
+        "news_link_label": get_block_text("home", "news_link_label"),
+        "seo_title": get_block_text("home", "seo_title"),
+        "seo_body": get_block_text("home", "seo_body"),
         "advantages": advantages,
         "services": services,
         "categories": root_categories(),

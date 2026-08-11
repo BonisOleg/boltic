@@ -1,0 +1,31 @@
+{% comment %}
+Кнопка «в обране». Видима завжди.
+Гість → сторінка реєстрації з ?next на поточну сторінку.
+Контекст: sku (з атрибутом in_wishlist), btn_size ("lg" — більша кнопка).
+Поруч у контейнері має бути слот includes/action_note_slot.html.
+{% endcomment %}
+{% if user.is_authenticated %}
+<form
+  class="wishlist-form"
+  method="post"
+  action="{% url 'cart:wishlist_toggle' %}"
+  hx-post="{% url 'cart:wishlist_toggle' %}"
+  hx-target="next [data-action-note]"
+  hx-swap="innerHTML"
+>
+  {% csrf_token %}
+  <input type="hidden" name="sku_id" value="{{ sku.id }}">
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% if btn_size == 'lg' %}<input type="hidden" name="btn_size" value="lg">{% endif %}
+  {% include "includes/wishlist_toggle_btn.html" with sku=sku btn_size=btn_size %}
+</form>
+{% else %}
+<a
+  class="btn btn--sm btn--ghost wishlist-btn{% if btn_size == 'lg' %} wishlist-btn--lg{% endif %} wishlist-btn--guest"
+  href="{% url 'accounts:register' %}?next={{ request.get_full_path|urlencode }}"
+  title="Зареєструйтеся, щоб зберігати обране"
+  aria-label="Зареєструйтеся, щоб додати в обране"
+>
+  {% include "includes/icon_heart.html" with size=20 %}
+</a>
+{% endif %}

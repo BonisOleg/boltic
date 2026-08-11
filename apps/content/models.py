@@ -22,7 +22,7 @@ class HomeBlock(models.Model):
 
 class Promotion(models.Model):
     title = models.CharField("Назва", max_length=255)
-    slug = models.SlugField("Slug", max_length=255, unique=True)
+    slug = models.SlugField("Slug", max_length=255, unique=True, allow_unicode=True)
     body = models.TextField("Текст", blank=True)
     starts_at = models.DateTimeField("Початок", null=True, blank=True)
     ends_at = models.DateTimeField("Кінець", null=True, blank=True)
@@ -50,7 +50,7 @@ class Promotion(models.Model):
 
 class NewsPost(models.Model):
     title = models.CharField("Назва", max_length=255)
-    slug = models.SlugField("Slug", max_length=255, unique=True)
+    slug = models.SlugField("Slug", max_length=255, unique=True, allow_unicode=True)
     body = models.TextField("Текст")
     published_at = models.DateTimeField("Дата публікації", null=True, blank=True)
     is_published = models.BooleanField("Опубліковано", default=False)
@@ -70,7 +70,7 @@ class NewsPost(models.Model):
 
 
 class StaticPage(models.Model):
-    slug = models.SlugField("Slug", max_length=128, unique=True)
+    slug = models.SlugField("Slug", max_length=128, unique=True, allow_unicode=True)
     title = models.CharField("Заголовок", max_length=255)
     body = models.TextField("Текст")
     seo_title = models.CharField("SEO title", max_length=255, blank=True)

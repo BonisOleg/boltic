@@ -8,7 +8,7 @@ class Collection(models.Model):
     """Підбірка `/pidbirka/{slug}/`."""
 
     title = models.CharField("Назва", max_length=255)
-    slug = models.SlugField("Slug", max_length=255, unique=True)
+    slug = models.SlugField("Slug", max_length=255, unique=True, allow_unicode=True)
     description = models.TextField("Опис", blank=True)
     is_published = models.BooleanField("Опубліковано", default=False)
     groups = models.ManyToManyField(

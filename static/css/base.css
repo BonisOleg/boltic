@@ -348,6 +348,28 @@ button {
   gap: 16px;
 }
 
+.contacts-page__title {
+  margin: 0;
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.contacts-page__branches {
+  margin-top: 16px;
+}
+
+.contacts-page__branch {
+  display: block;
+  text-align: left;
+  text-transform: none;
+  font-weight: 400;
+}
+
+.contacts-page__branch-name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+
 @media (min-width: 768px) {
   .content-split {
     grid-template-columns: 1fr 1fr;

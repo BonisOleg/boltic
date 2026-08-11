@@ -11,6 +11,11 @@ urlpatterns = [
     path("katalog/<path:path>/", views.CategoryView.as_view(), name="category"),
     path("tovar/<uslug:slug>/", views.ProductDetailView.as_view(), name="product"),
     path(
+        "tovar/<uslug:slug>/sku/<str:article>/",
+        views.SKUDetailView.as_view(),
+        name="sku_detail",
+    ),
+    path(
         "tovar/<uslug:slug>/vidguk/",
         views.product_review,
         name="product_review",

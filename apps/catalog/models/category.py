@@ -19,7 +19,7 @@ class Category(models.Model):
         verbose_name="Батьківська",
     )
     name = models.CharField("Назва", max_length=255)
-    slug = models.SlugField("Slug", max_length=255)
+    slug = models.SlugField("Slug", max_length=255, allow_unicode=True)
     path = models.CharField("Шлях", max_length=512, unique=True, db_index=True)
     level = models.PositiveSmallIntegerField("Рівень", choices=Level.choices)
     sort_order = models.PositiveIntegerField("Порядок", default=0)

@@ -1,0 +1,80 @@
+{% load i18n %}
+<fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900" data-hero-slides>
+  <legend class="text-font-important-light dark:text-font-important-dark">Слайди каруселі</legend>
+  {{ hero_formset.management_form }}
+  {% if hero_formset.non_form_errors %}
+  <div class="site-content-editor__errors">{{ hero_formset.non_form_errors }}</div>
+  {% endif %}
+  <div class="hero-slides-list" data-hero-list>
+    {% for f in hero_formset %}
+    <div class="hero-slide-row border border-base-200 dark:border-base-700{% if f.errors %} hero-slide-row--invalid{% endif %}" data-hero-row>
+      <div class="hero-slide-row__handle" data-hero-handle title="Перетягнути">⋮⋮</div>
+      <div class="hero-slide-row__fields">
+        {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+        {% if f.instance.pk %}{{ f.id }}{% endif %}
+        {% if f.non_field_errors %}
+        <div class="site-content-editor__errors">{{ f.non_field_errors }}</div>
+        {% endif %}
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark">{{ f.image.label }}</label>
+          {{ f.image }}
+          {% if f.image.help_text %}
+          <p class="text-font-subtle-light dark:text-font-subtle-dark hero-slide-row__hint">{{ f.image.help_text }}</p>
+          {% endif %}
+          {% if f.instance.image %}
+          <img class="hero-slide-row__preview" src="{{ f.instance.image.url }}" alt="">
+          {% endif %}
+          {% if f.image.errors %}<div class="site-content-editor__errors">{{ f.image.errors }}</div>{% endif %}
+        </div>
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark">{{ f.title.label }}</label>
+          {{ f.title }}
+          {% if f.title.errors %}<div class="site-content-editor__errors">{{ f.title.errors }}</div>{% endif %}
+        </div>
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark">{{ f.body.label }}</label>
+          {{ f.body }}
+          {% if f.body.errors %}<div class="site-content-editor__errors">{{ f.body.errors }}</div>{% endif %}
+        </div>
+        <div class="hero-slide-row__grid">
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark">{{ f.cta_label.label }}</label>
+            {{ f.cta_label }}
+            {% if f.cta_label.errors %}<div class="site-content-editor__errors">{{ f.cta_label.errors }}</div>{% endif %}
+          </div>
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark">{{ f.cta_url.label }}</label>
+            {{ f.cta_url }}
+            {% if f.cta_url.errors %}<div class="site-content-editor__errors">{{ f.cta_url.errors }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="hero-slide-row__grid">
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark">{{ f.alt_text.label }}</label>
+            {{ f.alt_text }}
+            {% if f.alt_text.errors %}<div class="site-content-editor__errors">{{ f.alt_text.errors }}</div>{% endif %}
+          </div>
+          <div class="site-content-editor__field hero-slide-row__checks">
+            <label>{{ f.is_active }} {{ f.is_active.label }}</label>
+            {% if f.DELETE %}
+            <label>{{ f.DELETE }} Видалити</label>
+            {% endif %}
+            {% if f.is_active.errors %}<div class="site-content-editor__errors">{{ f.is_active.errors }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="button" class="hero-slides-add border border-base-200 dark:border-base-700" data-hero-add>
+    + Додати слайд
+  </button>
+  <template data-hero-empty>
+    <div class="hero-slide-row border border-base-200 dark:border-base-700" data-hero-row>
+      <div class="hero-slide-row__handle" data-hero-handle title="Перетягнути">⋮⋮</div>
+      <div class="hero-slide-row__fields">
+        __EMPTY_FORM__
+      </div>
+    </div>
+  </template>
+</fieldset>

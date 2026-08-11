@@ -1,0 +1,3 @@
+{% include "cart/partials/action_note.html" %}
+{% if sku %}{% include "includes/wishlist_toggle_btn.html" with sku=sku btn_size=btn_size oob=True %}{% endif %}
+{% include "includes/action_badges_oob.html" %}

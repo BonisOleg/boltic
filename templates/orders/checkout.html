@@ -1,24 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Оформлення — {{ site_settings.site_name }}{% endblock %}
+{% load static %}
+{% block title %}Оформлення замовлення — {{ site_settings.site_name }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
 {% block content %}
-<div class="container">
-  <div class="section-card" style="max-width:640px">
-    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Оформлення</h1></div>
-    <div class="section-body">
-      <p>Сума до сплати: <strong>{{ subtotal }} грн</strong></p>
-      <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="field">
-          {{ field.label_tag }}
-          {{ field }}
-          {% if field.errors %}<div style="color:var(--color-danger);font-size:13px">{{ field.errors }}</div>{% endif %}
-        </div>
-        {% endfor %}
-        {% if form.non_field_errors %}<div style="color:var(--color-danger)">{{ form.non_field_errors }}</div>{% endif %}
-        <button class="btn" type="submit">Сплатити онлайн</button>
-      </form>
+<div class="container checkout">
+  <h1 class="checkout__title">Оформлення замовлення</h1>
+
+  <ol class="checkout-steps" aria-label="Кроки оформлення">
+    <li class="checkout-steps__item{% if step >= 1 %} is-active{% endif %}{% if step > 1 %} is-done{% endif %}">
+      <span class="checkout-steps__num">1</span>
+    </li>
+    <li class="checkout-steps__item{% if step >= 2 %} is-active{% endif %}{% if step > 2 %} is-done{% endif %}">
+      <span class="checkout-steps__num">2</span>
+    </li>
+    <li class="checkout-steps__item{% if step >= 3 %} is-active{% endif %}">
+      <span class="checkout-steps__num">3</span>
+    </li>
+  </ol>
+
+  <div class="checkout__layout">
+    <div class="checkout__main">
+      {% if step == 1 %}
+        {% include "orders/partials/step_contact.html" %}
+      {% elif step == 2 %}
+        {% include "orders/partials/step_delivery.html" %}
+      {% else %}
+        {% include "orders/partials/step_confirm.html" %}
+      {% endif %}
     </div>
+
+    <aside class="checkout__aside" aria-label="Ваше замовлення">
+      <div class="checkout-summary">
+        <h2 class="checkout-summary__title">Ваше замовлення</h2>
+        <ul class="checkout-summary__list">
+          {% for row in lines %}
+          {% with sku=row.item.sku %}
+          <li class="checkout-summary__row">
+            <div class="checkout-summary__meta">
+              <a href="{% url 'catalog:product' sku.group.slug %}?sku={{ sku.article }}">{{ sku.name }}</a>
+              <span>{{ row.item.quantity }} × {{ row.unit_price }} ₴</span>
+            </div>
+            <strong>{{ row.line_total }} ₴</strong>
+          </li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+        <p class="checkout-summary__total">Разом: <strong>{{ subtotal }} ₴</strong></p>
+      </div>
+    </aside>
   </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+{% if step == 1 %}
+<script src="{% static 'js/checkout-contact.js' %}" defer></script>
+{% elif step == 2 %}
+<script>
+  window.BOLTIKO_CHECKOUT = {
+    npCitiesUrl: "{% url 'orders:np_cities' %}",
+    npWarehousesUrl: "{% url 'orders:np_warehouses' %}",
+    npConfigured: {{ np_configured|yesno:"true,false" }}
+  };
+</script>
+<script src="{% static 'js/checkout-np.js' %}" defer></script>
+{% endif %}
 {% endblock %}

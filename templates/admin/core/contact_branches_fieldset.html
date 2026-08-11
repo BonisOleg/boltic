@@ -1,0 +1,63 @@
+{% load i18n %}
+<fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900" data-contact-branches>
+  <legend class="text-font-important-light dark:text-font-important-dark">Філії</legend>
+  <p class="site-content-editor__fieldset-note text-font-subtle-light dark:text-font-subtle-dark">
+    Картки філій на сторінці «Контакти».
+    <a href="{% url 'admin:content_contactbranch_changelist' %}">Відкрити повний список</a>
+  </p>
+  {{ branches_formset.management_form }}
+  {% if branches_formset.non_form_errors %}
+  <div class="site-content-editor__errors">{{ branches_formset.non_form_errors }}</div>
+  {% endif %}
+  <div class="contact-branches-list" data-branches-list>
+    {% for f in branches_formset %}
+    <div class="contact-branch-row border border-base-200 dark:border-base-700{% if f.errors %} contact-branch-row--invalid{% endif %}" data-branch-row>
+      <div class="contact-branch-row__handle" data-branch-handle title="Перетягнути">⋮⋮</div>
+      <div class="contact-branch-row__fields">
+        {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+        {% if f.instance.pk %}{{ f.id }}{% endif %}
+        {% if f.non_field_errors %}
+        <div class="site-content-editor__errors">{{ f.non_field_errors }}</div>
+        {% endif %}
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark" for="{{ f.name.id_for_label }}">{{ f.name.label }}</label>
+          {{ f.name }}
+          {% if f.name.errors %}<div class="site-content-editor__errors">{{ f.name.errors }}</div>{% endif %}
+        </div>
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark" for="{{ f.address.id_for_label }}">{{ f.address.label }}</label>
+          {{ f.address }}
+          {% if f.address.errors %}<div class="site-content-editor__errors">{{ f.address.errors }}</div>{% endif %}
+        </div>
+        <div class="contact-branch-row__grid">
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark" for="{{ f.phone.id_for_label }}">{{ f.phone.label }}</label>
+            {{ f.phone }}
+            {% if f.phone.errors %}<div class="site-content-editor__errors">{{ f.phone.errors }}</div>{% endif %}
+          </div>
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark" for="{{ f.email.id_for_label }}">{{ f.email.label }}</label>
+            {{ f.email }}
+            {% if f.email.errors %}<div class="site-content-editor__errors">{{ f.email.errors }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="site-content-editor__field">
+          <label class="text-font-important-light dark:text-font-important-dark" for="{{ f.map_url.id_for_label }}">{{ f.map_url.label }}</label>
+          {{ f.map_url }}
+          {% if f.map_url.errors %}<div class="site-content-editor__errors">{{ f.map_url.errors }}</div>{% endif %}
+        </div>
+        <div class="site-content-editor__field contact-branch-row__checks">
+          <label>{{ f.is_active }} {{ f.is_active.label }}</label>
+          {% if f.DELETE %}
+          <label>{{ f.DELETE }} Видалити</label>
+          {% endif %}
+          {% if f.is_active.errors %}<div class="site-content-editor__errors">{{ f.is_active.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="button" class="contact-branches-add border border-base-200 dark:border-base-700" data-branches-add>
+    + Додати філію
+  </button>
+</fieldset>

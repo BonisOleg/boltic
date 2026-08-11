@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.accounts.models import UserProfile
 from apps.cart.services import merge_on_login
+from apps.core.http import safe_next
 from apps.orders.forms import ProfileForm, RegisterForm
 from apps.orders.models import Order
 from apps.orders.services import orders_for_user
@@ -14,8 +15,9 @@ from apps.orders.services import orders_for_user
 
 @require_http_methods(["GET", "POST"])
 def login_view(request):
+    next_url = safe_next(request)
     if request.user.is_authenticated:
-        return redirect("accounts:cabinet")
+        return redirect(next_url or "accounts:cabinet")
     error = ""
     if request.method == "POST":
         username = request.POST.get("username", "")
@@ -24,13 +26,18 @@ def login_view(request):
         if user:
             login(request, user)
             merge_on_login(request, user)
-            return redirect(request.GET.get("next") or "accounts:cabinet")
+            return redirect(next_url or "accounts:cabinet")
         error = "Невірний логін або пароль"
-    return render(request, "accounts/login.html", {"error": error})
+    return render(
+        request, "accounts/login.html", {"error": error, "next_url": next_url}
+    )
 
 
 @require_http_methods(["GET", "POST"])
 def register_view(request):
+    next_url = safe_next(request)
+    if request.user.is_authenticated:
+        return redirect(next_url or "accounts:cabinet")
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         if User.objects.filter(username=form.cleaned_data["username"]).exists():
@@ -44,8 +51,10 @@ def register_view(request):
             UserProfile.objects.get_or_create(user=user)
             login(request, user)
             merge_on_login(request, user)
-            return redirect("accounts:cabinet")
-    return render(request, "accounts/register.html", {"form": form})
+            return redirect(next_url or "accounts:cabinet")
+    return render(
+        request, "accounts/register.html", {"form": form, "next_url": next_url}
+    )
 
 
 def logout_view(request):

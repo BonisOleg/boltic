@@ -1,0 +1,6 @@
+{% comment %}
+Оновлення лічильників у хедері через htmx out-of-band.
+Селектор застосовується до всіх копій хедера (десктоп + мобільна шухляда).
+{% endcomment %}
+<span class="action-badge" data-cart-count hx-swap-oob="outerHTML:[data-cart-count]"{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
+<span class="action-badge" data-wishlist-count hx-swap-oob="outerHTML:[data-wishlist-count]"{% if not wishlist_count %} hidden{% endif %}>{{ wishlist_count|default:0 }}</span>

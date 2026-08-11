@@ -4,7 +4,7 @@ from django.utils.text import slugify
 
 class Brand(models.Model):
     name = models.CharField("Назва", max_length=255)
-    slug = models.SlugField("Slug", max_length=255, unique=True)
+    slug = models.SlugField("Slug", max_length=255, unique=True, allow_unicode=True)
     logo = models.ImageField("Логотип", upload_to="brands/", blank=True)
     description = models.TextField("Опис", blank=True)
     is_active = models.BooleanField("Активний", default=True)

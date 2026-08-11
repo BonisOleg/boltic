@@ -1,35 +1,73 @@
-"""Правила розфасовки ProductGroup → L2 підкатегорія."""
+"""Правила розфасовки ProductGroup → (L1 slug, L2 slug)."""
 
 from __future__ import annotations
 
 
-def resolve_bolt_screw_l2_slug(name: str, standard: str = "") -> str:
+def _is_stainless(*parts: str) -> bool:
+    text = " ".join(p or "" for p in parts).lower()
+    return any(x in text for x in ("нерж", "а2", "a2", "stainless"))
+
+
+def _is_furniture(text: str) -> bool:
+    t = (text or "").lower()
+    return any(
+        x in t
+        for x in (
+            "меблев",
+            "мебельн",
+            "конфірмат",
+            "з*єднан",
+            "з'єднан",
+            "зʼєднан",
+            "зєднання",
+        )
+    )
+
+
+def resolve_fastener_category(
+    name: str,
+    standard: str = "",
+    material: str = "",
+) -> tuple[str, str]:
     """
-    Повертає slug L2 під L1 «Болти, гвинти, стрижні»
-    (українські SEO-slug, як у seed_catalog).
+    Болт / гвинт / стрижень / меблеве → (l1_slug, l2_slug).
     """
     n = (name or "").lower()
-    std = (standard or "").upper().replace(" ", " ")
+    std = (standard or "").upper()
+    stainless = _is_stainless(name, material)
 
-    if "леміш" in n:
-        return "болти-лемішні"
-    if "норійн" in n or "норий" in n or "нор." in n:
-        return "болти-норійні"
-    if "меблев" in n or "конфірмат" in n:
-        return "болти-меблеві"
-    if "прес" in n or "967" in n:
-        return "гвинти-з-прес-шайбою"
-    if "7991" in n or "потай" in n or "DIN 7991" in std:
-        return "гвинти-потайні"
-    if "гвинт" in n or "DIN 912" in std or "912" in std:
-        return "гвинти-з-внутрішнім-шестигранником"
+    if _is_furniture(n):
+        return "меблеве-кріплення", "меблеве-кріплення"
+
     if "шпильк" in n or "стриж" in n:
-        return "стрижні"
+        return "стрижні", "стрижні-нержавіючі" if stainless else "стрижні"
+
+    if (
+        "прес" in n
+        or "967" in n
+        or "7991" in n
+        or "потай" in n
+        or "сегмент" in n
+        or "гвинт" in n
+        or "DIN 912" in std
+        or "912" in std
+        or "DIN 7991" in std
+        or "DIN 967" in std
+    ):
+        return "гвинти", "гвинти-нержавіючі" if stainless else "гвинти"
+
     if "болт" in n or any(
         s in std for s in ("DIN 933", "DIN 931", "DIN 960", "DIN 961")
     ):
-        return "болти-з-шестигранною-головкою"
-    return "болти-з-шестигранною-головкою"
+        return "болти", "болти-нержавіючі" if stainless else "болти"
+
+    return "болти", "болти-нержавіючі" if stainless else "болти"
+
+
+def resolve_bolt_screw_l2_slug(name: str, standard: str = "") -> str:
+    """Сумісність: лише L2 slug з resolve_fastener_category."""
+    _l1, l2 = resolve_fastener_category(name, standard)
+    return l2
 
 
 def resolve_goods_category(
@@ -43,19 +81,19 @@ def resolve_goods_category(
     """
     g = (group_name or "").strip().lower()
     p = (product_name or "").strip().lower()
-    # для класифікації групи не підмішуємо «свердло» з назви саморіза тощо
     text = g if g else p
     both = f"{g} {p}".strip()
 
-    # службові / слабкі групи — дивимось на товар
-    if not g or g in {"різне", "спец.замовлення", "спец замовлення"} or g.startswith("спец"):
+    if not g or g in {"різне", "спец.замовлення", "спец замовлення"} or g.startswith(
+        "спец"
+    ):
         if g.startswith("спец") or g in {"спец.замовлення", "спец замовлення"}:
             return "витратні-матеріали", "стяжки"
         text = both or p
 
     # --- автокріплення ---
     if "саморіз автомоб" in text or ("автомоб" in text and "саморіз" in text):
-        return "автокріплення", "самонарізи"
+        return "автокріплення", "саморізи"
 
     # --- дюбелі / анкери ---
     if "анкер" in text:
@@ -83,11 +121,11 @@ def resolve_goods_category(
     if "трос" in text:
         return "такелаж-троси-ланцюги", "троси"
 
-    # --- нерж мікс ---
+    # --- мішаний нерж-комплект (група) → болти нерж; SKU розносить окрема команда ---
     if "нерж" in text and "болт" in text and ("гайка" in text or "шайба" in text):
-        return "болти-гвинти-стрижні", "болти-з-шестигранною-головкою"
+        return "болти", "болти-нержавіючі"
 
-    # --- самонарізи / шурупи / віконні (ДО свердел і прес-шайби) ---
+    # --- саморізи / шурупи / віконні (ДО свердел і прес-шайби) ---
     if any(
         x in text
         for x in (
@@ -102,8 +140,10 @@ def resolve_goods_category(
         )
     ):
         if any(x in text for x in ("шуруп", "турбогвинт", "гвинт-шуруп", "гвинт шуруп")):
-            return "самонарізи-шурупи", "шурупи"
-        return "самонарізи-шурупи", "самонарізи"
+            return "саморізи-шурупи", "шурупи"
+        if _is_stainless(text):
+            return "саморізи-шурупи", "саморізи-нержавіючі"
+        return "саморізи-шурупи", "саморізи"
 
     # --- гвинти з прес-шайбою (не саморізи) ---
     compact = text.replace(" ", "")
@@ -113,15 +153,25 @@ def resolve_goods_category(
         or "din967" in compact
         or "din 967" in text
     ) and "саморіз" not in text:
-        return "болти-гвинти-стрижні", "гвинти-з-прес-шайбою"
+        return resolve_fastener_category(group_name or product_name, "DIN 967")
+
+    # --- меблеве (у т.ч. гайка меблева) ДО загальних гайок ---
+    if _is_furniture(text):
+        return "меблеве-кріплення", "меблеве-кріплення"
 
     # --- гайки / шайби / гровери ---
     if "гайка" in text:
-        return "гайки-шайби-гровери", "гайки"
+        l2 = "гайки-нержавіючі" if _is_stainless(text) else "гайки"
+        return "гайки-шайби-гровери", l2
     if "гровер" in text:
-        return "гайки-шайби-гровери", "гровери" if "шайба" not in text else "шайби"
+        # мішана група «Шайба,гровер» лишається в шайбах
+        if "шайба" in text:
+            return "гайки-шайби-гровери", "шайби"
+        l2 = "гровери-нержавіючі" if _is_stainless(text) else "гровери"
+        return "гайки-шайби-гровери", l2
     if "шайба" in text or "шайб" in text:
-        return "гайки-шайби-гровери", "шайби"
+        l2 = "шайби-нержавіючі" if _is_stainless(text) else "шайби"
+        return "гайки-шайби-гровери", l2
     if "кільц" in both and ("резин" in both or "гумов" in both):
         return "підшипники-сальники", "сальники"
 
@@ -155,21 +205,14 @@ def resolve_goods_category(
     if "фіксатор" in text:
         return "композитна-арматура-сітка-фіксатори-клинки", "фіксатори"
 
-    # --- меблеве ---
-    if "меблев" in text or "конфірмат" in text or "з*єднан" in text:
-        return "болти-гвинти-стрижні", "болти-меблеві"
-
     # --- болти / гвинти / шпильки ---
-    if "шпильк" in text:
-        return "болти-гвинти-стрижні", "стрижні"
-    if any(x in text for x in ("гвинт", "din 912", "din912", "7991", "din 967")):
-        l2 = resolve_bolt_screw_l2_slug(group_name or product_name, "")
-        return "болти-гвинти-стрижні", l2
+    if "шпильк" in text or "стриж" in text:
+        return resolve_fastener_category(group_name or product_name, "", "")
+    if any(x in text for x in ("гвинт", "din 912", "din912", "7991", "din 967", "сегмент")):
+        return resolve_fastener_category(group_name or product_name, "")
     if "болт" in text or "din 93" in text or "din93" in text or "din 96" in text:
-        l2 = resolve_bolt_screw_l2_slug(group_name or product_name, "")
-        return "болти-гвинти-стрижні", l2
+        return resolve_fastener_category(group_name or product_name, "")
 
-    # fallback за назвою товару
     if p and p != text:
         return resolve_goods_category("", p)
 
@@ -197,23 +240,38 @@ def infer_group_name(product_name: str) -> str:
     if ("прес-шайб" in pl or "прес шайб" in pl) and "саморіз" in pl:
         return "Саморіз з прес-шайбою"
     if "саморіз" in pl:
-        return "Самонарізи (інше)"
+        return "Саморізи (інше)"
     if "болт" in pl:
         return "Болт (інше)"
     return "Різне"
 
 
-# L2 під L1 «Болти, гвинти, стрижні» (замість плоских Болти/Гвинти)
-BOLT_SCREW_L2: list[tuple[str, str]] = [
-    ("Болти з шестигранною головкою", "болти-з-шестигранною-головкою"),
-    ("Болти лемішні", "болти-лемішні"),
-    ("Болти норійні", "болти-норійні"),
-    ("Болти меблеві", "болти-меблеві"),
-    ("Гвинти з внутрішнім шестигранником", "гвинти-з-внутрішнім-шестигранником"),
-    ("Гвинти потайні", "гвинти-потайні"),
-    ("Гвинти з прес-шайбою", "гвинти-з-прес-шайбою"),
-    ("Стрижні", "стрижні"),
+# Цільове дерево кріплення (для seed / міграції)
+FASTENER_TREE: list[tuple[str, list[str]]] = [
+    ("Болти", ["Болти", "Болти нержавіючі"]),
+    ("Гвинти", ["Гвинти", "Гвинти нержавіючі"]),
+    ("Стрижні", ["Стрижні", "Стрижні нержавіючі"]),
+    ("Меблеве кріплення", ["Меблеве кріплення"]),
 ]
 
-# Старі плоскі L2 — деактивуємо після переносу
-LEGACY_FLAT_L2_SLUGS = ("болти", "гвинти")
+# Застарілий L1 і детальні L2 — деактивуємо після переносу
+LEGACY_L1_SLUG = "болти-гвинти-стрижні"
+LEGACY_DETAIL_L2_SLUGS = (
+    "болти-з-шестигранною-головкою",
+    "болти-лемішні",
+    "болти-норійні",
+    "болти-меблеві",
+    "гвинти-з-внутрішнім-шестигранником",
+    "гвинти-потайні",
+    "гвинти-з-прес-шайбою",
+    "стрижні",
+    "болти",
+    "гвинти",
+)
+
+# Сумісність зі старим імпортом
+BOLT_SCREW_L2: list[tuple[str, str]] = [
+    ("Болти", "болти"),
+    ("Болти нержавіючі", "болти-нержавіючі"),
+]
+LEGACY_FLAT_L2_SLUGS = LEGACY_DETAIL_L2_SLUGS

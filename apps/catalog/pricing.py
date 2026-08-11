@@ -1,7 +1,20 @@
 from decimal import Decimal, ROUND_HALF_UP
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from apps.catalog.models import ProductSKU
 
 
 TWOPLACES = Decimal("0.01")
+
+
+def unit_price_for_qty(sku: "ProductSKU", qty: int) -> Decimal:
+    """Базова ціна; якщо є партійна і qty >= мін. партії — партійна."""
+    party = sku.party_price
+    min_party = sku.min_party if sku.min_party and sku.min_party > 0 else 1
+    if party is not None and int(qty) >= min_party:
+        return party
+    return sku.price
 
 
 def line_total(unit_price: Decimal, qty: int) -> Decimal:

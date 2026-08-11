@@ -1,0 +1,57 @@
+/* БОЛТіК° — підказка біля кнопок дій (кошик / обране) */
+
+.sku-actions,
+.sku-detail__actions {
+  position: relative;
+}
+
+/* Слот винесений із потоку: не змінює ширину колонки й не «стрибає» */
+.action-note-slot {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 4;
+  pointer-events: none;
+  white-space: normal;
+  text-align: right;
+}
+
+.action-note {
+  display: inline-block;
+  max-width: min(260px, 78vw);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-text);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: var(--shadow-lift);
+}
+
+.action-note--error {
+  background: var(--color-danger);
+}
+
+/* Зникнення — лише transition: якщо анімації заморожені (фонова вкладка),
+   підказка залишається видимою, а прибирає її скрипт. */
+.action-note.is-leaving {
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-note.is-leaving {
+    transform: none;
+    transition: opacity 0.1s linear;
+  }
+}
+
+/* Планшет і телефон: більший шрифт для читабельності, тап не перехоплюється */
+@media (max-width: 900px) {
+  .action-note {
+    max-width: min(300px, 82vw);
+    font-size: 13px;
+  }
+}

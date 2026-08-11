@@ -1,4 +1,4 @@
-{% load static %}
+{% load static site_content %}
 <header class="site-header">
   <div class="header-top">
     <div class="header-top__hours">
@@ -7,28 +7,36 @@
       {% if site_settings.processing_hours %}<span>обробка: {{ site_settings.processing_hours }}</span>{% endif %}
     </div>
     <nav>
-      <a href="{% url 'content:promo_list' %}">Акції</a>
-      <a href="{% url 'content:news_list' %}">Новини</a>
-      <a href="{% url 'content:oplata_i_dostavka' %}">Оплата і доставка</a>
-      <a href="{% url 'content:contacts' %}">Контакти</a>
+      {% section_visible 'site' 'header_nav_promo_visible' as show_promo_nav %}
+      {% if show_promo_nav %}<a href="{% url 'content:promo_list' %}">{% block_plain 'site' 'header_nav_promo_label' %}</a>{% endif %}
+      {% section_visible 'site' 'header_nav_news_visible' as show_news_nav %}
+      {% if show_news_nav %}<a href="{% url 'content:news_list' %}">{% block_plain 'site' 'header_nav_news_label' %}</a>{% endif %}
+      {% section_visible 'site' 'header_nav_delivery_visible' as show_delivery_nav %}
+      {% if show_delivery_nav %}<a href="{% url 'content:oplata_i_dostavka' %}">{% block_plain 'site' 'header_nav_delivery_label' %}</a>{% endif %}
+      {% section_visible 'site' 'header_nav_contacts_visible' as show_contacts_nav %}
+      {% if show_contacts_nav %}<a href="{% url 'content:contacts' %}">{% block_plain 'site' 'header_nav_contacts_label' %}</a>{% endif %}
       {% if site_settings.phone %}<a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a>{% endif %}
     </nav>
   </div>
 
-  <div class="header-bottom container" style="max-width:none;position:relative">
+  <div class="header-bottom container header-bottom--relative">
     <a class="logo-block" href="{% url 'content:home' %}" aria-label="{{ site_settings.site_name }}">
-      <img src="{% static 'img/logo.png' %}" alt="{{ site_settings.site_name }}" width="160" height="34">
+      {% if site_settings.logo %}
+      <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" width="186" height="40">
+      {% else %}
+      <img src="{% static 'img/logo.png' %}?v=20260730g" alt="{{ site_settings.site_name }}" width="186" height="40">
+      {% endif %}
     </a>
 
     <div class="header-search-cluster">
       <button type="button" class="catalog-btn" data-catalog-toggle>
         <span class="catalog-btn__icon" aria-hidden="true">≡</span>
-        Каталог
+        {% block_plain 'site' 'header_catalog_btn_label' %}
       </button>
 
       <form class="search-form" action="{% url 'catalog:search' %}" method="get" role="search">
         <label class="sr-only" for="q">Пошук</label>
-        <input id="q" type="search" name="q" value="{{ request.GET.q }}" placeholder="Я шукаю" autocomplete="off"
+        <input id="q" type="search" name="q" value="{{ request.GET.q }}" placeholder="{% block_plain 'site' 'header_search_placeholder' %}" autocomplete="off"
                hx-get="{% url 'catalog:search' %}?suggest=1"
                hx-trigger="keyup changed delay:300ms"
                hx-target="#search-suggest"
@@ -65,10 +73,10 @@
     {% include "includes/header_actions.html" %}
   </div>
   <nav>
-    <a href="{% url 'catalog:root' %}">Каталог</a>
-    <a href="{% url 'content:promo_list' %}">Акції</a>
-    <a href="{% url 'content:news_list' %}">Новини</a>
-    <a href="{% url 'content:contacts' %}">Контакти</a>
+    <a href="{% url 'catalog:root' %}">{% block_plain 'site' 'header_catalog_btn_label' %}</a>
+    {% if show_promo_nav %}<a href="{% url 'content:promo_list' %}">{% block_plain 'site' 'header_nav_promo_label' %}</a>{% endif %}
+    {% if show_news_nav %}<a href="{% url 'content:news_list' %}">{% block_plain 'site' 'header_nav_news_label' %}</a>{% endif %}
+    {% if show_contacts_nav %}<a href="{% url 'content:contacts' %}">{% block_plain 'site' 'header_nav_contacts_label' %}</a>{% endif %}
     {% if user.is_authenticated %}
       <a href="{% url 'accounts:logout' %}">Вихід</a>
     {% else %}

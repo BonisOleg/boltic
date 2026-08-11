@@ -13,9 +13,34 @@
   var mega = qs("[data-mega-menu]");
   var overlay = qs("[data-mega-overlay]");
 
+  function setMegaMore(expanded) {
+    if (!mega) return;
+    var moreBtn = qs("[data-mega-more]", mega);
+    var label = moreBtn ? qs("[data-mega-more-label]", moreBtn) : null;
+    var list = qs("[data-mega-l1-list]", mega);
+    mega.classList.toggle("is-expanded", expanded);
+    if (moreBtn) {
+      moreBtn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    }
+    if (label) {
+      label.textContent = expanded ? "Згорнути" : "Більше категорій";
+    }
+    if (list) {
+      if (expanded) {
+        var firstExtra = qs(".mega-l1__item--extra", list);
+        if (firstExtra) {
+          firstExtra.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      } else {
+        list.scrollTop = 0;
+      }
+    }
+  }
+
   function closeMega() {
     if (!mega) return;
     mega.classList.remove("is-open");
+    setMegaMore(false);
     if (overlay) overlay.classList.remove("is-open");
     document.body.style.overflow = "";
   }
@@ -35,6 +60,17 @@
     });
   }
   if (overlay) overlay.addEventListener("click", closeMega);
+
+  if (mega) {
+    var moreToggle = qs("[data-mega-more]", mega);
+    if (moreToggle) {
+      moreToggle.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setMegaMore(!mega.classList.contains("is-expanded"));
+      });
+    }
+  }
 
   qsa("[data-mega-l1]").forEach(function (btn) {
     btn.addEventListener("mouseenter", function () {

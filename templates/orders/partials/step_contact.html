@@ -1,0 +1,40 @@
+<section class="checkout-card">
+  <h2 class="checkout-card__title">Контактні дані</h2>
+
+  {% if not user.is_authenticated %}
+  <div class="checkout-hint">
+    <a href="{% url 'accounts:login' %}?next={% url 'orders:checkout' %}">Увійдіть</a>
+    або
+    <a href="{% url 'accounts:register' %}?next={% url 'orders:checkout' %}">зареєструйтесь</a>
+    для автозаповнення даних та відстеження замовлень
+  </div>
+  {% endif %}
+
+  <form method="post" class="checkout-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="checkout-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="field">
+      <label for="{{ form.customer_name.id_for_label }}">ПІБ *</label>
+      {{ form.customer_name }}
+      {% if form.customer_name.errors %}<div class="field-error">{{ form.customer_name.errors }}</div>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ form.phone.id_for_label }}">Телефон *</label>
+      {{ form.phone }}
+      {% if form.phone.errors %}<div class="field-error">{{ form.phone.errors }}</div>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email }}
+      {% if form.email.errors %}<div class="field-error">{{ form.email.errors }}</div>{% endif %}
+    </div>
+
+    <div class="checkout-nav">
+      <a class="checkout-nav__back" href="{% url 'cart:detail' %}">← Назад</a>
+      <button class="btn" type="submit">Далі →</button>
+    </div>
+  </form>
+</section>

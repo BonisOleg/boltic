@@ -7,6 +7,11 @@ from decimal import Decimal, InvalidOperation
 from django.db import transaction
 from django.utils.text import slugify
 
+from apps.catalog.metric_size import (
+    diameter_facet_label,
+    diameter_facet_slug,
+    group_uses_metric_m,
+)
 from apps.catalog.models import (
     FacetAttribute,
     FacetValue,
@@ -24,8 +29,11 @@ FACET_DEFS: tuple[tuple[str, str, int], ...] = (
 )
 
 _MATERIAL_LABELS = {
-    "к.м.": "Конструкційна сталь (к.м.)",
-    "к.м": "Конструкційна сталь (к.м.)",
+    "к.м.": "сталь",
+    "к.м": "сталь",
+    "сталь": "сталь",
+    "конструкційна сталь (к.м.)": "сталь",
+    "конструкційна сталь (к.м)": "сталь",
     "а2 нержавіюча сталь": "Нержавіюча сталь А2",
     "а2": "Нержавіюча сталь А2",
 }
@@ -45,10 +53,6 @@ def _material_label(raw: str) -> str:
 
 def _strength_label(raw: str) -> str:
     return f"Клас {raw.strip()}"
-
-
-def _diameter_label(value: Decimal) -> str:
-    return f"M{_fmt_num(value)}"
 
 
 def _length_label(value: Decimal) -> str:
@@ -103,12 +107,12 @@ def _collect_specs(sku: ProductSKU) -> list[tuple[str, str, str, int]]:
         )
 
     if sku.diameter is not None:
-        num = _fmt_num(sku.diameter)
+        metric = group_uses_metric_m(group)
         specs.append(
             (
                 "diametr",
-                f"m-{num}"[:128],
-                _diameter_label(sku.diameter),
+                diameter_facet_slug(sku.diameter, metric=metric),
+                diameter_facet_label(sku.diameter, metric=metric),
                 int(sku.diameter * 100),
             )
         )
@@ -136,7 +140,7 @@ def sync_facets_from_skus(*, prune_unused: bool = True) -> dict[str, int]:
 
     skus = list(
         ProductSKU.objects.filter(is_active=True, group__is_active=True)
-        .select_related("group")
+        .select_related("group", "group__category", "group__category__parent")
         .order_by("pk")
     )
 

@@ -1,0 +1,14 @@
+Нове замовлення {{ order.number }}
+
+Клієнт: {{ order.customer_name }}
+Телефон: {{ order.phone }}
+Email: {{ order.email|default:"—" }}
+Доставка: {{ order.get_shipping_method_display|default:order.shipping_method }}
+Деталі: {{ order.shipping_address|default:"—" }}
+Коментар: {{ order.comment|default:"—" }}
+Сума: {{ order.total }} грн
+Оплата: офлайн (рахунок / готівка)
+
+Позиції:
+{% for item in order.items.all %}- {{ item.article }} {{ item.name }} ({{ item.size_label }}) × {{ item.quantity }} = {{ item.line_total }} грн
+{% endfor %}

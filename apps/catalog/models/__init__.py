@@ -1,3 +1,5 @@
+from apps.catalog.io_proxy import CatalogImportExport
+
 from .brand import Brand
 from .category import Category
 from .collection import Collection
@@ -6,6 +8,7 @@ from .product import ProductDocument, ProductGroup, ProductImage, ProductSKU
 
 __all__ = [
     "Brand",
+    "CatalogImportExport",
     "Category",
     "Collection",
     "FacetAttribute",

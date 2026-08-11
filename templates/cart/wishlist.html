@@ -7,25 +7,41 @@
     <div class="section-body">
       <div class="table-wrap">
         <table class="data-table">
-          <thead><tr><th>Товар</th><th>Розмір</th><th>Ціна</th><th></th></tr></thead>
+          <thead><tr><th>Товар</th><th>Розмір</th><th>Ціна (баз)</th><th>Ціна (пар)</th><th></th></tr></thead>
           <tbody>
           {% for item in items %}
             <tr>
               <td><a href="{% url 'catalog:product' item.sku.group.slug %}?sku={{ item.sku.article }}">{{ item.sku.name }}</a></td>
               <td>{{ item.sku.size_label }}</td>
               <td>{{ item.sku.price }} ₴</td>
+              <td>{% if item.sku.party_price is not None %}{{ item.sku.party_price }} ₴{% else %}—{% endif %}</td>
               <td>
-                <form method="post" action="{% url 'cart:add' %}" style="display:inline">
-                  {% csrf_token %}
-                  <input type="hidden" name="sku_id" value="{{ item.sku.id }}">
-                  <input type="hidden" name="qty" value="{{ item.sku.min_party }}">
-                  <input type="hidden" name="next" value="{% url 'cart:wishlist' %}">
-                  <button class="btn btn--sm" type="submit">У кошик</button>
-                </form>
+                <div class="sku-actions">
+                  <form
+                    method="post"
+                    action="{% url 'cart:add' %}"
+                    hx-post="{% url 'cart:add' %}"
+                    hx-target="next [data-action-note]"
+                    hx-swap="innerHTML"
+                  >
+                    {% csrf_token %}
+                    <input type="hidden" name="sku_id" value="{{ item.sku.id }}">
+                    <input type="hidden" name="qty" value="{{ item.sku.min_party }}">
+                    <input type="hidden" name="next" value="{% url 'cart:wishlist' %}">
+                    <button class="btn btn--sm" type="submit">У кошик</button>
+                  </form>
+                  <form class="wishlist-form" method="post" action="{% url 'cart:wishlist_toggle' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="sku_id" value="{{ item.sku.id }}">
+                    <input type="hidden" name="next" value="{% url 'cart:wishlist' %}">
+                    {% include "includes/wishlist_toggle_btn.html" with sku=item.sku %}
+                  </form>
+                  {% include "includes/action_note_slot.html" %}
+                </div>
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="4" class="empty-state">Список порожній.</td></tr>
+            <tr><td colspan="5" class="empty-state">Список порожній.</td></tr>
           {% endfor %}
           </tbody>
         </table>

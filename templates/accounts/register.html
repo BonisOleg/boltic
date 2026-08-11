@@ -7,6 +7,7 @@
     <div class="section-body">
       <form method="post">
         {% csrf_token %}
+        {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
         {% for field in form %}
         <div class="field">
           {{ field.label_tag }}{{ field }}
@@ -16,7 +17,7 @@
         {% if form.non_field_errors %}<div style="color:var(--color-danger)">{{ form.non_field_errors }}</div>{% endif %}
         <button class="btn btn--block" type="submit">Створити акаунт</button>
       </form>
-      <p style="margin-top:16px">Вже є акаунт? <a href="{% url 'accounts:login' %}">Увійти</a></p>
+      <p style="margin-top:16px">Вже є акаунт? <a href="{% url 'accounts:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Увійти</a></p>
     </div>
   </div>
 </div>

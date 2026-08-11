@@ -3,6 +3,7 @@ from django.db.models import Prefetch
 from apps.cart.models import WishlistItem
 from apps.cart.services import cart_item_count
 from apps.catalog.models import Category
+from apps.core.block_render import load_site_blocks
 from apps.core.models import SiteSettings
 
 
@@ -11,6 +12,7 @@ def site_settings(request):
     return {
         "site_settings": settings,
         "theme_vars": settings.theme_css_vars(),
+        "site_blocks": load_site_blocks(),
     }
 
 

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ sku.name }} — {{ site_settings.site_name }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sku-detail.css' %}?v=20260731b">{% endblock %}
+{% block content %}
+<div class="container">
+  <nav class="sku-detail__nav" aria-label="Навігація">
+    <a href="{% url 'catalog:product' group.slug %}?sku={{ sku.article }}">← До асортименту</a>
+  </nav>
+
+  <article class="sku-detail">
+    <div class="sku-detail__media">
+      {% if sku_image_url %}
+        <img
+          src="{{ sku_image_url }}"
+          alt="{{ sku.name }}"
+          width="1200"
+          height="900"
+          loading="eager"
+          decoding="async"
+        >
+      {% else %}
+        <div class="sku-detail__placeholder" aria-hidden="true">Б</div>
+      {% endif %}
+    </div>
+
+    <div class="sku-detail__info">
+      <p class="sku-detail__article">Артикул {{ sku.article }}</p>
+      <h1 class="sku-detail__title">{{ sku.name }}</h1>
+
+      <ul class="sku-detail__attrs">
+        {% if sku.size_label %}
+        <li><span>Розмір</span><strong>{{ sku.size_label }}</strong></li>
+        {% endif %}
+        {% if group.standard %}
+        <li><span>Стандарт</span><strong>{{ group.standard }}</strong></li>
+        {% endif %}
+        {% if group.material %}
+        <li><span>Матеріал</span><strong>{{ group.material }}</strong></li>
+        {% endif %}
+        {% if group.coating %}
+        <li><span>Покриття</span><strong>{{ group.coating }}</strong></li>
+        {% endif %}
+        {% if group.brand %}
+        <li><span>Бренд</span><strong>{{ group.brand.name }}</strong></li>
+        {% endif %}
+        <li>
+          <span>Наявність</span>
+          <strong>
+            {% if sku.stock_status == "in_stock" %}є в наявності{% else %}під замовлення{% endif %}
+          </strong>
+        </li>
+      </ul>
+
+      <p class="sku-detail__price">
+        <span class="sku-detail__price-label">Ціна (баз)</span>
+        <strong>{{ sku.price }} ₴</strong> / шт
+      </p>
+      <p class="sku-detail__party">
+        <span class="sku-detail__price-label">Ціна (пар)</span>
+        {% if sku.party_price is not None %}
+        <strong>{{ sku.party_price }} ₴</strong>
+        <span class="sku-detail__party-hint">від {{ sku.min_party }} шт</span>
+        {% else %}
+        <span class="sku-price-empty">—</span>
+        {% endif %}
+      </p>
+
+      <div class="sku-detail__actions">
+        <form
+          class="qty-form sku-detail__cart"
+          method="post"
+          action="{% url 'cart:add' %}"
+          hx-post="{% url 'cart:add' %}"
+          hx-target="next [data-action-note]"
+          hx-swap="innerHTML"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="sku_id" value="{{ sku.id }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <label class="sr-only" for="sku-detail-qty">Кількість</label>
+          <input
+            id="sku-detail-qty"
+            type="number"
+            name="qty"
+            value="{{ sku.min_party }}"
+            min="{{ sku.min_party }}"
+            step="{{ sku.min_party }}"
+            inputmode="numeric"
+          >
+          <button class="btn" type="submit">У кошик</button>
+        </form>
+        {% include "includes/wishlist_button.html" with sku=sku btn_size="lg" %}
+        {% include "includes/action_note_slot.html" %}
+      </div>
+    </div>
+  </article>
+</div>
+{% endblock %}

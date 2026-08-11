@@ -1,10 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Контакти — {{ site_settings.site_name }}{% endblock %}
+{% load site_content %}
+{% block title %}{% block_plain 'contacts' 'contacts_title' %} — {{ site_settings.site_name }}{% endblock %}
 {% block content %}
+{% section_visible 'contacts' 'contacts_section_visible' as show_contacts %}
+{% if show_contacts %}
 <div class="container">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Контакти</h1></div>
+    <div class="section-head"><h1 class="contacts-page__title">{% block_plain 'contacts' 'contacts_title' %}</h1></div>
     <div class="section-body">
+      {% block_plain 'contacts' 'contacts_intro' as contacts_intro %}
+      {% if contacts_intro %}<p>{{ contacts_intro }}</p>{% endif %}
       {% if site_settings.phone or site_settings.email or site_settings.address %}
       <p>
         {% if site_settings.phone %}<a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a>{% endif %}
@@ -13,10 +18,10 @@
       {% if site_settings.address %}<p>{{ site_settings.address }}</p>{% endif %}
       {% endif %}
 
-      <div class="l1-grid" style="margin-top:16px">
+      <div class="l1-grid contacts-page__branches">
         {% for b in branches %}
-        <div class="l1-card" style="display:block;text-align:left;text-transform:none;font-weight:400">
-          <strong style="font-family:var(--font-display);text-transform:uppercase">{{ b.name }}</strong><br>
+        <div class="l1-card contacts-page__branch">
+          <strong class="contacts-page__branch-name">{{ b.name }}</strong><br>
           {{ b.address }}<br>
           <a href="tel:{{ b.phone }}">{{ b.phone }}</a>
           {% if b.email %}<br><a href="mailto:{{ b.email }}">{{ b.email }}</a>{% endif %}
@@ -29,4 +34,5 @@
     </div>
   </div>
 </div>
+{% endif %}
 {% endblock %}

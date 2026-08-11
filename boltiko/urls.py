@@ -9,6 +9,7 @@ from apps.core.views import RobotsTxtView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("tinymce/", include("tinymce.urls")),
     path("robots.txt", RobotsTxtView.as_view(), name="robots"),
     path(
         "sitemap.xml",

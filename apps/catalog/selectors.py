@@ -5,6 +5,7 @@ from apps.catalog.models import (
     Category,
     Collection,
     FacetAttribute,
+    FacetValue,
     ProductGroup,
     ProductImage,
     ProductSKU,
@@ -114,6 +115,42 @@ def get_pdp(slug: str) -> ProductGroup | None:
     )
 
 
+def group_primary_image_url(group: ProductGroup) -> str:
+    images = list(group.images.all())
+    primary = next((img for img in images if img.is_primary), None)
+    if primary is None and images:
+        primary = images[0]
+    if primary is None or not primary.image:
+        return ""
+    try:
+        return primary.image.url
+    except ValueError:
+        return ""
+
+
+def sku_display_image_url(sku: ProductSKU) -> str:
+    if sku.image:
+        try:
+            return sku.image.url
+        except ValueError:
+            pass
+    return group_primary_image_url(sku.group)
+
+
+def get_sku(group_slug: str, article: str) -> ProductSKU | None:
+    return (
+        ProductSKU.objects.filter(
+            is_active=True,
+            article=article,
+            group__slug=group_slug,
+            group__is_active=True,
+        )
+        .select_related("group", "group__brand", "group__category")
+        .prefetch_related("group__images")
+        .first()
+    )
+
+
 def search_groups(q: str) -> QuerySet[ProductGroup]:
     q = (q or "").strip()
     if len(q) < 2:
@@ -180,7 +217,32 @@ def root_categories() -> QuerySet[Category]:
     ).order_by("sort_order", "name")
 
 
-def facet_attributes():
-    return FacetAttribute.objects.prefetch_related("values").order_by(
-        "sort_order", "name"
+def facet_attributes(category: Category | None = None):
+    """Атрибути фасетів; якщо category — лише значення з товарів цієї гілки."""
+    base = FacetAttribute.objects.order_by("sort_order", "name")
+    if category is None:
+        return base.prefetch_related("values")
+
+    if category.level == Category.Level.L1:
+        cat_q = Q(
+            sku_links__sku__is_active=True,
+            sku_links__sku__group__is_active=True,
+            sku_links__sku__group__category__parent=category,
+        )
+    else:
+        cat_q = Q(
+            sku_links__sku__is_active=True,
+            sku_links__sku__group__is_active=True,
+            sku_links__sku__group__category=category,
+        )
+
+    value_qs = (
+        FacetValue.objects.filter(cat_q)
+        .distinct()
+        .order_by("sort_order", "value")
+    )
+    return (
+        base.filter(values__in=value_qs)
+        .distinct()
+        .prefetch_related(Prefetch("values", queryset=value_qs))
     )
