@@ -27,6 +27,7 @@
   color: var(--color-header-top-text);
   opacity: 0.92;
   margin-left: 14px;
+  white-space: nowrap;
 }
 
 .header-top a:hover {
