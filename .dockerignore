@@ -15,10 +15,9 @@ __pycache__
 db.sqlite3
 media
 staticfiles
+deploy/data
 *.md
 *.docx
 *.pdf
-*.jpeg
-*.jpg
 node_modules
 .idea

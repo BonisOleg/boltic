@@ -20,6 +20,11 @@ echo "==> migrate + collectstatic"
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
+if [ "${BOOTSTRAP_SEED:-0}" = "1" ]; then
+  echo "==> bootstrap_if_empty"
+  python manage.py bootstrap_if_empty
+fi
+
 STATIC_ROOT="${STATIC_ROOT:-/app/staticfiles}"
 count=$(find "$STATIC_ROOT" -type f 2>/dev/null | wc -l | tr -d ' ')
 echo "==> static files: ${count}"
