@@ -1,15 +1,11 @@
 from pathlib import Path
 
-from decouple import Csv, config
+from decouple import config
 from django.templatetags.static import static
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-boltiko-dev-change-me")
-DEBUG = config("DEBUG", default=True, cast=bool)
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS", default="localhost,127.0.0.1,testserver", cast=Csv()
-)
 
 INSTALLED_APPS = [
     "unfold",
@@ -67,13 +63,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "boltiko.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -86,11 +75,11 @@ TIME_ZONE = "Europe/Kyiv"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -100,6 +89,10 @@ LOGIN_REDIRECT_URL = "/kabinet/"
 LOGOUT_REDIRECT_URL = "/"
 
 NOVA_POSHTA_API_KEY = config("NOVA_POSHTA_API_KEY", default="")
+
+LIQPAY_PUBLIC_KEY = config("LIQPAY_PUBLIC_KEY", default="")
+LIQPAY_PRIVATE_KEY = config("LIQPAY_PRIVATE_KEY", default="")
+LIQPAY_SANDBOX = config("LIQPAY_SANDBOX", default=True, cast=bool)
 
 EMAIL_BACKEND = config(
     "EMAIL_BACKEND",
@@ -111,6 +104,8 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@boltiko.local")
+
+SITE_URL = config("SITE_URL", default="http://127.0.0.1:8000")
 
 TINYMCE_DEFAULT_CONFIG = {
     "height": 400,

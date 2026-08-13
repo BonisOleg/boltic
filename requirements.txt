@@ -6,3 +6,5 @@ python-docx>=1.1
 openpyxl>=3.1
 django-unfold>=0.55,<0.102
 django-tinymce>=4.1,<5.1
+gunicorn>=23.0,<24.0
+psycopg2-binary>=2.9.10,<3.0

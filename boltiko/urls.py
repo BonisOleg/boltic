@@ -5,9 +5,10 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
 from apps.core.sitemaps import SITEMAPS
-from apps.core.views import RobotsTxtView
+from apps.core.views import RobotsTxtView, healthz
 
 urlpatterns = [
+    path("healthz/", healthz, name="healthz"),
     path("admin/", admin.site.urls),
     path("tinymce/", include("tinymce.urls")),
     path("robots.txt", RobotsTxtView.as_view(), name="robots"),

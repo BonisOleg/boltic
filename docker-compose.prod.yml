@@ -1,0 +1,16 @@
+services:
+  nginx:
+    restart: always
+
+  web:
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: boltiko.settings.docker
+      DEBUG: "False"
+
+  db:
+    restart: always
+    env_file:
+      - .env
