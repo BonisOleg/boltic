@@ -2,6 +2,7 @@ from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
 from apps.catalog.admin_io import register_catalog_io_urls
+from apps.catalog.admin_sync_facets import SyncFacetsAdminMixin
 from apps.catalog.models import (
     Brand,
     Category,
@@ -37,26 +38,24 @@ class ProductDocumentInline(TabularInline):
     extra = 0
 
 
-class ProductSKUInline(ImagePreviewMixin, TabularInline):
+class ProductSKUInline(TabularInline):
     model = ProductSKU
     extra = 0
+    # Стислий набір полів — менше POST-параметрів на групах з 200+ SKU
     fields = (
         "article",
         "name",
         "size_label",
+        "length",
+        "diameter",
+        "head_width_mm",
         "price",
         "party_price",
         "min_party",
         "stock_status",
-        "image",
-        "image_preview",
         "is_active",
     )
-    readonly_fields = ("image_preview",)
-
-    @admin.display(description="Превʼю")
-    def image_preview(self, obj):
-        return self.get_image_preview(obj, height=56)
+    show_change_link = True
 
 
 @admin.register(Category)
@@ -76,7 +75,7 @@ class BrandAdmin(ModelAdmin):
 
 
 @admin.register(ProductGroup)
-class ProductGroupAdmin(TinyMCEAdminMixin, ModelAdmin):
+class ProductGroupAdmin(SyncFacetsAdminMixin, TinyMCEAdminMixin, ModelAdmin):
     list_display = ("name", "category", "brand", "is_top", "is_promo", "is_active")
     list_filter = ("is_active", "is_top", "is_promo", "category")
     list_filter_submit = True
@@ -126,11 +125,25 @@ class ProductGroupAdmin(TinyMCEAdminMixin, ModelAdmin):
 
 
 @admin.register(ProductSKU)
-class ProductSKUAdmin(ImagePreviewMixin, ModelAdmin):
+class ProductSKUAdmin(SyncFacetsAdminMixin, ImagePreviewMixin, ModelAdmin):
     list_display = (
         "article",
         "name",
         "size_label",
+        "length",
+        "diameter",
+        "head_width_mm",
+        "cell_a_mm",
+        "cell_b_mm",
+        "width_mm",
+        "thickness_mm",
+        "volume_ml",
+        "manufacturer",
+        "application_zone",
+        "pack_qty",
+        "bore_d_mm",
+        "od_d_mm",
+        "width_b_mm",
         "price",
         "party_price",
         "min_party",
@@ -139,7 +152,25 @@ class ProductSKUAdmin(ImagePreviewMixin, ModelAdmin):
         "is_active",
     )
     list_display_links = ("article", "name")
-    list_editable = ("price", "party_price", "min_party")
+    list_editable = (
+        "price",
+        "party_price",
+        "min_party",
+        "length",
+        "diameter",
+        "head_width_mm",
+        "cell_a_mm",
+        "cell_b_mm",
+        "width_mm",
+        "thickness_mm",
+        "volume_ml",
+        "manufacturer",
+        "application_zone",
+        "pack_qty",
+        "bore_d_mm",
+        "od_d_mm",
+        "width_b_mm",
+    )
     list_filter = ("stock_status", "is_active")
     list_filter_submit = True
     search_fields = ("article", "name", "size_label")
@@ -154,11 +185,71 @@ class ProductSKUAdmin(ImagePreviewMixin, ModelAdmin):
                     "article",
                     "name",
                     "size_label",
-                    "diameter",
-                    "length",
                     "thread_pitch",
                     "strength_class",
                 )
+            },
+        ),
+        (
+            "Розміри кріплення / арматура",
+            {
+                "description": (
+                    "Діаметр і довжина для болтів/саморізів. "
+                    "Композитна арматура: лише Діаметр (D, мм); ціна на вітрині — грн / м.п."
+                ),
+                "fields": ("diameter", "length"),
+            },
+        ),
+        (
+            "Автосаморізи: довжина × діаметр × ширина головки",
+            {
+                "description": (
+                    "Формат як у прайсі: 24×4,2×7,6. "
+                    "Поля: Довжина, Діаметр (вище) і Ширина головки. "
+                    "Заповнення вручну; після змін — sync_facets."
+                ),
+                "fields": ("head_width_mm",),
+            },
+        ),
+        (
+            "Композитна сітка: ячейка A × B",
+            {
+                "description": "Напр. 10×10 або 200×200. Ціна на вітрині — грн / м².",
+                "fields": ("cell_a_mm", "cell_b_mm"),
+            },
+        ),
+        (
+            "Клинки: довжина × ширина × товщина",
+            {
+                "description": "Довжина — поле вище; ширина і товщина тут.",
+                "fields": ("width_mm", "thickness_mm"),
+            },
+        ),
+        (
+            "Піни / клеї / герметики",
+            {
+                "description": (
+                    "Роздріб: ціна за шт. Опт: ціна партії + мін. партія; "
+                    "«Шт в упаковці» — розмір упаковки. "
+                    "Після змін — sync_facets."
+                ),
+                "fields": (
+                    "volume_ml",
+                    "manufacturer",
+                    "application_zone",
+                    "pack_qty",
+                ),
+            },
+        ),
+        (
+            "Підшипники: розміри d / D / B",
+            {
+                "description": (
+                    "Внутрішній (d), зовнішній (D) діаметр і ширина (B) у мм. "
+                    "Стандартні значення — команда fill_bearing_dimensions; "
+                    "можна змінити вручну."
+                ),
+                "fields": ("bore_d_mm", "od_d_mm", "width_b_mm"),
             },
         ),
         (
@@ -205,7 +296,7 @@ class FacetValueInline(TabularInline):
 
 
 @admin.register(FacetAttribute)
-class FacetAttributeAdmin(ModelAdmin):
+class FacetAttributeAdmin(SyncFacetsAdminMixin, ModelAdmin):
     list_display = ("code", "name", "sort_order")
     prepopulated_fields = {"code": ("name",)}
     inlines = [FacetValueInline]

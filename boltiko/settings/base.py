@@ -84,6 +84,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Адмінка: ProductGroup з сотнями SKU-inline (автосаморізи ~219 × ~18 полів)
+DATA_UPLOAD_MAX_NUMBER_FIELDS = config(
+    "DATA_UPLOAD_MAX_NUMBER_FIELDS", default=20000, cast=int
+)
+
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/kabinet/"
 LOGOUT_REDIRECT_URL = "/"

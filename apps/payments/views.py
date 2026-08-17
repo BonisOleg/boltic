@@ -34,8 +34,13 @@ def liqpay_callback(request):
 
 @require_http_methods(["GET", "POST"])
 def liqpay_result(request):
-    number = request.GET.get("number") or request.POST.get("order_id", "")
-    token = request.GET.get("token", "")
+    """Повернення з LiqPay → success лише з перевіреним підписом або валідним token.
+
+    Ніколи не підставляємо order.access_token за голим number (IDOR).
+    """
+    number = (request.GET.get("number") or request.POST.get("order_id") or "").strip()
+    token = (request.GET.get("token") or "").strip()
+    verified = False
 
     data_b64 = request.POST.get("data", "")
     signature = request.POST.get("signature", "")
@@ -44,6 +49,7 @@ def liqpay_result(request):
             order = handle_webhook(data_b64=data_b64, signature=signature)
             number = order.number
             token = str(order.access_token)
+            verified = True
         except PaymentError:
             pass
 
@@ -56,5 +62,10 @@ def liqpay_result(request):
         messages.error(request, "Замовлення не знайдено")
         return redirect("content:home")
 
+    if not verified:
+        if not token or str(order.access_token) != str(token):
+            messages.error(request, "Немає доступу до замовлення")
+            return redirect("content:home")
+
     url = reverse("orders:success", kwargs={"number": order.number})
-    return redirect(f"{url}?token={token or order.access_token}")
+    return redirect(f"{url}?token={token}")

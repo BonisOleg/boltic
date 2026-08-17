@@ -11,6 +11,7 @@
           {% endif %}
         </a>
         <a class="footer-cabinet" href="{% url 'accounts:cabinet' %}">{% block_plain 'site' 'footer_cabinet_label' %}</a>
+        {% include "includes/messengers.html" with messengers_modifier="footer" %}
       </div>
 
       <nav class="footer-col footer-col--catalog" aria-label="{% block_plain 'site' 'footer_catalog_title' %}">

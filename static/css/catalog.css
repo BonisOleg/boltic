@@ -595,15 +595,87 @@
   .data-table--sku td:nth-child(7) { order: 3; }
   .data-table--sku td:nth-child(8) { order: 8; }
 
-  .data-table--sku .sku-cell--size {
+  /* Підшипники: d → D → B → ціни → наявність → артикул → назва → партія → дії */
+  .data-table--sku-bearing td:nth-child(1) { order: 7; }
+  .data-table--sku-bearing td:nth-child(2) { order: 8; }
+  .data-table--sku-bearing td:nth-child(3) { order: 1; }
+  .data-table--sku-bearing td:nth-child(4) { order: 2; }
+  .data-table--sku-bearing td:nth-child(5) { order: 3; }
+  .data-table--sku-bearing td:nth-child(6) { order: 9; }
+  .data-table--sku-bearing td:nth-child(7) { order: 6; }
+  .data-table--sku-bearing td:nth-child(8) { order: 4; }
+  .data-table--sku-bearing td:nth-child(9) { order: 5; }
+  .data-table--sku-bearing td:nth-child(10) { order: 10; }
+
+  .data-table--sku-auto td:nth-child(1) { order: 7; }
+  .data-table--sku-auto td:nth-child(2) { order: 8; }
+  .data-table--sku-auto td:nth-child(3) { order: 1; }
+  .data-table--sku-auto td:nth-child(4) { order: 2; }
+  .data-table--sku-auto td:nth-child(5) { order: 3; }
+  .data-table--sku-auto td:nth-child(6) { order: 9; }
+  .data-table--sku-auto td:nth-child(7) { order: 6; }
+  .data-table--sku-auto td:nth-child(8) { order: 4; }
+  .data-table--sku-auto td:nth-child(9) { order: 5; }
+  .data-table--sku-auto td:nth-child(10) { order: 10; }
+
+  .data-table--sku-mesh td:nth-child(1) { order: 6; }
+  .data-table--sku-mesh td:nth-child(2) { order: 7; }
+  .data-table--sku-mesh td:nth-child(3) { order: 1; }
+  .data-table--sku-mesh td:nth-child(4) { order: 2; }
+  .data-table--sku-mesh td:nth-child(5) { order: 8; }
+  .data-table--sku-mesh td:nth-child(6) { order: 5; }
+  .data-table--sku-mesh td:nth-child(7) { order: 3; }
+  .data-table--sku-mesh td:nth-child(8) { order: 4; }
+  .data-table--sku-mesh td:nth-child(9) { order: 9; }
+
+  .data-table--sku-rebar td:nth-child(1) { order: 5; }
+  .data-table--sku-rebar td:nth-child(2) { order: 6; }
+  .data-table--sku-rebar td:nth-child(3) { order: 1; }
+  .data-table--sku-rebar td:nth-child(4) { order: 7; }
+  .data-table--sku-rebar td:nth-child(5) { order: 4; }
+  .data-table--sku-rebar td:nth-child(6) { order: 2; }
+  .data-table--sku-rebar td:nth-child(7) { order: 3; }
+  .data-table--sku-rebar td:nth-child(8) { order: 8; }
+
+  .data-table--sku-chem td:nth-child(1) { order: 8; }
+  .data-table--sku-chem td:nth-child(2) { order: 9; }
+  .data-table--sku-chem td:nth-child(3) { order: 1; }
+  .data-table--sku-chem td:nth-child(4) { order: 2; }
+  .data-table--sku-chem td:nth-child(5) { order: 3; }
+  .data-table--sku-chem td:nth-child(6) { order: 4; }
+  .data-table--sku-chem td:nth-child(7) { order: 10; }
+  .data-table--sku-chem td:nth-child(8) { order: 7; }
+  .data-table--sku-chem td:nth-child(9) { order: 5; }
+  .data-table--sku-chem td:nth-child(10) { order: 6; }
+  .data-table--sku-chem td:nth-child(11) { order: 11; }
+
+  .data-table--sku .sku-cell--size,
+  .data-table--sku .sku-cell--bearing-dim,
+  .data-table--sku .sku-cell--auto-dim,
+  .data-table--sku .sku-cell--mesh-dim,
+  .data-table--sku .sku-cell--rebar-dim,
+  .data-table--sku .sku-cell--chem-dim {
     font-size: 17px;
     padding-top: 0;
   }
 
-  .data-table--sku .sku-cell--size strong {
+  .data-table--sku .sku-cell--size strong,
+  .data-table--sku .sku-cell--bearing-dim strong,
+  .data-table--sku .sku-cell--auto-dim strong,
+  .data-table--sku .sku-cell--mesh-dim strong,
+  .data-table--sku .sku-cell--rebar-dim strong,
+  .data-table--sku .sku-cell--chem-dim strong {
     font-family: var(--font-display);
     font-size: 1.15em;
     letter-spacing: 0.01em;
+  }
+
+  .sku-price-unit {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-top: 2px;
   }
 
   .data-table--sku .sku-cell--price strong {

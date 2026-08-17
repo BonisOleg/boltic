@@ -89,6 +89,11 @@ Brand ──────────→ ProductGroup ──1:N──→ ProductS
 - `name` — завжди з видимим розміром (`M6×50`)
 - `size_label` — колонка «Розмір»
 - `diameter`, `length`, `thread_pitch` nullable decimal
+- `bore_d_mm`, `od_d_mm`, `width_b_mm` nullable decimal — підшипники: внутрішній d / зовнішній D / ширина B (мм); стандарт + ручне редагування в адмінці
+- `head_width_mm` nullable decimal — автосаморізи: ширина головки; разом з `length` × `diameter` × `head_width_mm` (напр. 24×4,2×7,6); заповнення вручну
+- `cell_a_mm`, `cell_b_mm` nullable — композитна сітка: ячейка A×B (мм); ціна на вітрині грн / м²
+- `width_mm`, `thickness_mm` nullable — клинки: ширина і товщина (з `length`); арматура: `diameter` = D (мм), ціна грн / м.п.
+- `volume_ml`, `manufacturer`, `application_zone` (internal|external|both), `pack_qty` — піни/клеї/герметики; роздріб грн/шт, опт грн/упак. (`party_price` + `min_party`)
 - `strength_class` nullable
 - `min_party` PositiveInt default 1
 - `stock_status` enum: `in_stock` | `on_order`
@@ -98,7 +103,7 @@ Brand ──────────→ ProductGroup ──1:N──→ ProductS
 - `vat_rate` Decimal(5,2) default 20.00
 - `party_price` nullable Decimal
 - `is_active`, timestamps
-- indexes: `(group, is_active)`, `(diameter, length)`
+- indexes: `(group, is_active)`, `(diameter, length)`, `(bore_d_mm, od_d_mm, width_b_mm)`
 
 ### ProductImage
 - `group` FK, `image`, `alt`, `sort_order`, `is_primary`
@@ -112,10 +117,14 @@ Brand ──────────→ ProductGroup ──1:N──→ ProductS
 - M2M → `ProductGroup`
 
 ### FacetAttribute / FacetValue / SKUFacet
-- Attribute: `code` unique (`material`, `diametr`, …), `name`
+- Attribute: `code` unique (`material`, `diametr`, `d`, `D`, `B`, …), `name`
 - Value: FK attribute, `value`, `slug`; `unique(attribute, slug)`
 - SKUFacet: M2M SKU ↔ Value  
 - Фільтри: той самий URL категорії + `?code=slug`
+- Підшипники: фасети `d` / `D` / `B` з полів `bore_d_mm` / `od_d_mm` / `width_b_mm` (команда `fill_bearing_dimensions` + `sync_facets`)
+- Автосаморізи: фасети `dovzhyna` / `diametr` / `shiryna-golovky` з `length` / `diameter` / `head_width_mm` (ручне заповнення + `sync_facets`)
+- Композит: арматура — `diametr` з `diameter`; сітка — `yacheyka-a` / `yacheyka-b`; клинки — `dovzhyna` / `shyryna` / `tovshchyna`
+- Піни/клеї/герметики: `obiem` / `vyrobnyk` / `zona` з `volume_ml` / `manufacturer` / `application_zone`
 
 ---
 
@@ -213,6 +222,7 @@ URL: `/payments/liqpay/callback/`, `/payments/liqpay/result/`
 
 ### SiteSettings (singleton)
 - `site_name`, `phone`, `email`, `address`, `social_json?`
+- `messenger_viber_url`, `messenger_whatsapp_url`, `messenger_telegram_url` — повні URL; на вітрині лише заповнені (`/kontakty/`, футер)
 
 ---
 

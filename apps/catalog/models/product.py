@@ -95,6 +95,106 @@ class ProductSKU(models.Model):
     thread_pitch = models.DecimalField(
         "Крок різьби", max_digits=6, decimal_places=2, null=True, blank=True
     )
+    bore_d_mm = models.DecimalField(
+        "Внутрішній діаметр (мм) d",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Підшипники: внутрішній діаметр d. Можна змінити вручну.",
+    )
+    od_d_mm = models.DecimalField(
+        "Зовнішній діаметр (мм) D",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Підшипники: зовнішній діаметр D. Можна змінити вручну.",
+    )
+    width_b_mm = models.DecimalField(
+        "Ширина (мм) B",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Підшипники: ширина B. Можна змінити вручну.",
+    )
+    head_width_mm = models.DecimalField(
+        "Ширина головки (мм)",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=(
+            "Автосаморізи: третє число в розмірі «довжина × діаметр × ширина головки» "
+            "(напр. 24×4,2×7,6). Заповнення вручну."
+        ),
+    )
+    cell_a_mm = models.DecimalField(
+        "Ячейка A (мм)",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Композитна сітка: перше число ячейки (напр. 10 у 10×10).",
+    )
+    cell_b_mm = models.DecimalField(
+        "Ячейка B (мм)",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Композитна сітка: друге число ячейки (напр. 200 у 200×200).",
+    )
+    width_mm = models.DecimalField(
+        "Ширина (мм)",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Клинки: ширина. Разом з довжиною і товщиною.",
+    )
+    thickness_mm = models.DecimalField(
+        "Товщина (мм)",
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Клинки: товщина.",
+    )
+    volume_ml = models.DecimalField(
+        "Обʼєм (мл)",
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Піни / клеї / герметики: обʼєм у мілілітрах.",
+    )
+    manufacturer = models.CharField(
+        "Виробник",
+        max_length=128,
+        blank=True,
+        help_text="Піни / клеї / герметики: назва виробника на SKU.",
+    )
+
+    class ApplicationZone(models.TextChoices):
+        INTERNAL = "internal", "Внутрішні роботи"
+        EXTERNAL = "external", "Зовнішні роботи"
+        BOTH = "both", "Внутрішні та зовнішні"
+
+    application_zone = models.CharField(
+        "Зона застосування",
+        max_length=16,
+        choices=ApplicationZone.choices,
+        blank=True,
+        help_text="Піни / клеї / герметики: внутрішні / зовнішні роботи.",
+    )
+    pack_qty = models.PositiveIntegerField(
+        "Шт в упаковці",
+        null=True,
+        blank=True,
+        help_text="Піни / клеї / герметики: кількість штук в оптовій упаковці.",
+    )
     strength_class = models.CharField("Клас міцності", max_length=32, blank=True)
     min_party = models.PositiveIntegerField("Мін. партія", default=1)
     stock_status = models.CharField(
@@ -134,6 +234,7 @@ class ProductSKU(models.Model):
         indexes = [
             models.Index(fields=["group", "is_active"]),
             models.Index(fields=["diameter", "length"]),
+            models.Index(fields=["bore_d_mm", "od_d_mm", "width_b_mm"]),
         ]
 
     def __str__(self) -> str:

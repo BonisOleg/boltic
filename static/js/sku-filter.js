@@ -78,24 +78,36 @@
 
     var diameters = uniqueSorted(
       rows.map(function (r) {
-        return r.getAttribute("data-diameter");
+        return r.getAttribute("data-diameter") || r.getAttribute("data-bore");
       })
     );
     var allLengths = uniqueSorted(
       rows.map(function (r) {
-        return r.getAttribute("data-length");
+        return r.getAttribute("data-length") || r.getAttribute("data-od");
       })
     );
+
+    function rowDiameter(r) {
+      return rawNum(
+        r.getAttribute("data-diameter") || r.getAttribute("data-bore")
+      );
+    }
+
+    function rowLength(r) {
+      return rawNum(
+        r.getAttribute("data-length") || r.getAttribute("data-od")
+      );
+    }
 
     function lengthsForDiameter(diameter) {
       if (!diameter) return allLengths;
       return uniqueSorted(
         rows
           .filter(function (r) {
-            return rawNum(r.getAttribute("data-diameter")) === diameter;
+            return rowDiameter(r) === diameter;
           })
           .map(function (r) {
-            return r.getAttribute("data-length");
+            return r.getAttribute("data-length") || r.getAttribute("data-od");
           })
       );
     }
@@ -120,7 +132,7 @@
       }
       if (diaRow) diaRow.hidden = false;
       diameters.forEach(function (d) {
-        var label = useMetricM ? "M" + fmtNum(d) : fmtNum(d);
+        var label = useMetricM ? "M" + fmtNum(d) : fmtNum(d) + " мм";
         diaWrap.appendChild(makeChip(d, label, "diameter"));
       });
     }
@@ -179,10 +191,10 @@
         );
         var ok = true;
         if (q && hay.indexOf(q) === -1) ok = false;
-        if (ok && state.diameter && rawNum(row.getAttribute("data-diameter")) !== state.diameter) {
+        if (ok && state.diameter && rowDiameter(row) !== state.diameter) {
           ok = false;
         }
-        if (ok && state.length && rawNum(row.getAttribute("data-length")) !== state.length) {
+        if (ok && state.length && rowLength(row) !== state.length) {
           ok = false;
         }
         if (ok && state.inStockOnly && row.getAttribute("data-stock") !== "in_stock") {

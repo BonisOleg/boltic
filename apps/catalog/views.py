@@ -9,6 +9,17 @@ from django.views.generic import TemplateView
 from apps.cart.services import wishlist_sku_ids
 from apps.catalog import selectors
 from apps.catalog.metric_size import group_uses_metric_m
+from apps.catalog.auto_screw_dims import group_is_auto_screw
+from apps.catalog.composite_dims import (
+    group_is_mesh,
+    group_is_rebar,
+    group_is_wedge,
+    price_unit_for_group,
+)
+from apps.catalog.foam_glue_dims import (
+    group_is_foam_glue_sealant,
+    party_price_unit_for_group,
+)
 from apps.core.exceptions import ReviewError
 from apps.orders.forms import ReviewForm
 from apps.reviews.services import create_pending_review
@@ -69,17 +80,37 @@ class ProductDetailView(View):
             raise Http404
         highlight = request.GET.get("sku", "")
         reviews = [r for r in group.reviews.all() if r.is_published]
+        skus = _mark_wishlist(request, group.skus.all())
         return render(
             request,
             self.template_name,
             {
                 "group": group,
-                "skus": _mark_wishlist(request, group.skus.all()),
+                "skus": skus,
                 "reviews": reviews,
                 "review_form": ReviewForm(),
                 "highlight_sku": highlight,
                 "group_image_url": selectors.group_primary_image_url(group),
                 "uses_metric_m": group_uses_metric_m(group),
+                "show_bearing_dims": any(
+                    s.bore_d_mm is not None
+                    or s.od_d_mm is not None
+                    or s.width_b_mm is not None
+                    for s in skus
+                ),
+                "show_auto_screw_dims": group_is_auto_screw(group)
+                or any(
+                    s.head_width_mm is not None
+                    for s in skus
+                ),
+                "show_rebar_dims": group_is_rebar(group),
+                "show_mesh_dims": group_is_mesh(group),
+                "show_wedge_dims": group_is_wedge(group),
+                "show_foam_glue_dims": group_is_foam_glue_sealant(group),
+                "price_unit": price_unit_for_group(group),
+                "party_price_unit": party_price_unit_for_group(group)
+                if group_is_foam_glue_sealant(group)
+                else price_unit_for_group(group),
             },
         )
 
@@ -99,6 +130,14 @@ class SKUDetailView(View):
                 "sku": sku,
                 "group": sku.group,
                 "sku_image_url": selectors.sku_display_image_url(sku),
+                "price_unit": price_unit_for_group(sku.group),
+                "party_price_unit": party_price_unit_for_group(sku.group)
+                if group_is_foam_glue_sealant(sku.group)
+                else price_unit_for_group(sku.group),
+                "show_rebar_dims": group_is_rebar(sku.group),
+                "show_mesh_dims": group_is_mesh(sku.group),
+                "show_wedge_dims": group_is_wedge(sku.group),
+                "show_foam_glue_dims": group_is_foam_glue_sealant(sku.group),
             },
         )
 

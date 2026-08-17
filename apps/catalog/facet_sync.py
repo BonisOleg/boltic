@@ -26,6 +26,17 @@ FACET_DEFS: tuple[tuple[str, str, int], ...] = (
     ("klas-micnosti", "Клас міцності", 30),
     ("diametr", "Діаметр", 40),
     ("dovzhyna", "Довжина", 50),
+    ("d", "Внутрішній діаметр (мм) d", 60),
+    ("D", "Зовнішній діаметр (мм) D", 70),
+    ("B", "Ширина (мм) B", 80),
+    ("shiryna-golovky", "Ширина головки (мм)", 90),
+    ("yacheyka-a", "Ячейка A (мм)", 100),
+    ("yacheyka-b", "Ячейка B (мм)", 110),
+    ("shyryna", "Ширина (мм)", 120),
+    ("tovshchyna", "Товщина (мм)", 130),
+    ("obiem", "Обʼєм (мл)", 140),
+    ("vyrobnyk", "Виробник", 150),
+    ("zona", "Зона застосування", 160),
 )
 
 _MATERIAL_LABELS = {
@@ -106,7 +117,26 @@ def _collect_specs(sku: ProductSKU) -> list[tuple[str, str, str, int]]:
             )
         )
 
-    if sku.diameter is not None:
+    if sku.bore_d_mm is not None:
+        num = _fmt_num(sku.bore_d_mm)
+        specs.append(("d", f"d-{num}"[:128], num, int(sku.bore_d_mm * 100)))
+
+    if sku.od_d_mm is not None:
+        num = _fmt_num(sku.od_d_mm)
+        specs.append(("D", f"D-{num}"[:128], num, int(sku.od_d_mm * 100)))
+
+    if sku.width_b_mm is not None:
+        num = _fmt_num(sku.width_b_mm)
+        specs.append(("B", f"B-{num}"[:128], num, int(sku.width_b_mm * 100)))
+
+    # Кріпильні diametr/dovzhyna — лише якщо немає підшипникових d/D/B
+    has_bearing_dims = (
+        sku.bore_d_mm is not None
+        or sku.od_d_mm is not None
+        or sku.width_b_mm is not None
+    )
+
+    if not has_bearing_dims and sku.diameter is not None:
         metric = group_uses_metric_m(group)
         specs.append(
             (
@@ -117,7 +147,7 @@ def _collect_specs(sku: ProductSKU) -> list[tuple[str, str, str, int]]:
             )
         )
 
-    if sku.length is not None:
+    if not has_bearing_dims and sku.length is not None:
         num = _fmt_num(sku.length)
         specs.append(
             (
@@ -127,6 +157,87 @@ def _collect_specs(sku: ProductSKU) -> list[tuple[str, str, str, int]]:
                 int(sku.length * 100),
             )
         )
+
+    if sku.head_width_mm is not None:
+        num = _fmt_num(sku.head_width_mm)
+        specs.append(
+            (
+                "shiryna-golovky",
+                f"hg-{num}"[:128],
+                f"{num} мм",
+                int(sku.head_width_mm * 100),
+            )
+        )
+
+    if sku.cell_a_mm is not None:
+        num = _fmt_num(sku.cell_a_mm)
+        specs.append(
+            (
+                "yacheyka-a",
+                f"ya-{num}"[:128],
+                num,
+                int(sku.cell_a_mm * 100),
+            )
+        )
+
+    if sku.cell_b_mm is not None:
+        num = _fmt_num(sku.cell_b_mm)
+        specs.append(
+            (
+                "yacheyka-b",
+                f"yb-{num}"[:128],
+                num,
+                int(sku.cell_b_mm * 100),
+            )
+        )
+
+    if sku.width_mm is not None:
+        num = _fmt_num(sku.width_mm)
+        specs.append(
+            (
+                "shyryna",
+                f"w-{num}"[:128],
+                f"{num} мм",
+                int(sku.width_mm * 100),
+            )
+        )
+
+    if sku.thickness_mm is not None:
+        num = _fmt_num(sku.thickness_mm)
+        specs.append(
+            (
+                "tovshchyna",
+                f"t-{num}"[:128],
+                f"{num} мм",
+                int(sku.thickness_mm * 100),
+            )
+        )
+
+    if sku.volume_ml is not None:
+        num = _fmt_num(sku.volume_ml)
+        specs.append(
+            (
+                "obiem",
+                f"v-{num}"[:128],
+                f"{num} мл",
+                int(sku.volume_ml * 100),
+            )
+        )
+
+    manufacturer = (sku.manufacturer or "").strip()
+    if manufacturer:
+        slug = slugify(manufacturer, allow_unicode=True) or "vyrobnyk"
+        specs.append(("vyrobnyk", slug[:128], manufacturer, 0))
+
+    zone = (sku.application_zone or "").strip()
+    if zone:
+        zone_labels = {
+            "internal": "Внутрішні роботи",
+            "external": "Зовнішні роботи",
+            "both": "Внутрішні та зовнішні",
+        }
+        label = zone_labels.get(zone, zone)
+        specs.append(("zona", zone[:128], label, 0))
 
     return specs
 

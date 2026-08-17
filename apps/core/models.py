@@ -7,6 +7,17 @@ _HEX = RegexValidator(
     message="Вкажіть колір у форматі #RRGGBB",
 )
 
+_MESSENGER_URL_RE = RegexValidator(
+    regex=r"^(https?://|viber://|tg://)\S+$",
+    message="Вкажіть повний URL (https://…, viber://… або tg://…)",
+)
+
+
+def _validate_messenger_url(value: str) -> None:
+    if not value:
+        return
+    _MESSENGER_URL_RE(value)
+
 SITE_BLOCKS_CACHE_KEY = "site_blocks_v1"
 
 
@@ -18,6 +29,27 @@ class SiteSettings(models.Model):
     email = models.EmailField("Email", blank=True)
     address = models.TextField("Адреса", blank=True)
     social_json = models.JSONField("Соцмережі", default=dict, blank=True)
+    messenger_viber_url = models.CharField(
+        "Viber URL",
+        max_length=512,
+        blank=True,
+        validators=[_validate_messenger_url],
+        help_text="Повний URL, напр. https://invite.viber.com/… або viber://chat?number=…",
+    )
+    messenger_whatsapp_url = models.CharField(
+        "WhatsApp URL",
+        max_length=512,
+        blank=True,
+        validators=[_validate_messenger_url],
+        help_text="Повний URL, напр. https://wa.me/380…",
+    )
+    messenger_telegram_url = models.CharField(
+        "Telegram URL",
+        max_length=512,
+        blank=True,
+        validators=[_validate_messenger_url],
+        help_text="Повний URL, напр. https://t.me/…",
+    )
     order_hours = models.CharField(
         "Прийом замовлень",
         max_length=128,
@@ -111,6 +143,21 @@ class SiteSettings(models.Model):
 
     def __str__(self) -> str:
         return self.site_name
+
+    @property
+    def filled_messengers(self) -> list[dict[str, str]]:
+        """Лише заповнені месенджери для вітрини (футер / контакти)."""
+        items: list[dict[str, str]] = []
+        mapping = (
+            ("viber", "Viber", self.messenger_viber_url),
+            ("whatsapp", "WhatsApp", self.messenger_whatsapp_url),
+            ("telegram", "Telegram", self.messenger_telegram_url),
+        )
+        for code, label, url in mapping:
+            cleaned = (url or "").strip()
+            if cleaned:
+                items.append({"code": code, "label": label, "url": cleaned})
+        return items
 
     def save(self, *args, **kwargs) -> None:
         self.pk = 1

@@ -1,3 +1,4 @@
+{% load catalog_units %}
 <article class="product-card">
   <div class="product-card__media">
     <div class="product-card__marks">
@@ -36,7 +37,7 @@
       {% if g.coating %}<li><span>Покриття</span><strong>{{ g.coating }}</strong></li>{% endif %}
     </ul>
     <div class="product-card__price">
-      {% if g.price_from %}від {{ g.price_from|floatformat:2 }} <span>грн / шт</span>{% else %}—{% endif %}
+      {% if g.price_from %}від {{ g.price_from|floatformat:2 }} <span>{{ g|price_unit }}</span>{% else %}—{% endif %}
     </div>
     <a class="btn btn--sm btn--block product-card__buy" href="{% url 'catalog:product' g.slug %}">Купити в асортименті</a>
   </div>

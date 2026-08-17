@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static 'css/sku-preview.css' %}">
 {% endblock %}
 {% block extra_js %}
-<script src="{% static 'js/sku-filter.js' %}" defer></script>
+<script src="{% static 'js/sku-filter.js' %}?v=20260817a" defer></script>
 <script src="{% static 'js/sku-preview.js' %}" defer></script>
 {% endblock %}
 {% block content %}
@@ -76,12 +76,12 @@
           </div>
 
           <div class="sku-filter__row" data-sku-diameter-row>
-            <div class="sku-filter__label" id="sku-filter-dia-label">Діаметр</div>
+            <div class="sku-filter__label" id="sku-filter-dia-label">{% if show_bearing_dims %}Внутрішній діаметр d{% elif show_auto_screw_dims %}Діаметр{% else %}Діаметр{% endif %}</div>
             <div class="sku-filter__chips" data-sku-diameters role="group" aria-labelledby="sku-filter-dia-label"></div>
           </div>
 
           <div class="sku-filter__row" data-sku-length-row>
-            <div class="sku-filter__label" id="sku-filter-len-label">Довжина</div>
+            <div class="sku-filter__label" id="sku-filter-len-label">{% if show_bearing_dims %}Зовнішній діаметр D{% elif show_auto_screw_dims %}Довжина{% else %}Довжина{% endif %}</div>
             <div class="sku-filter__chips" data-sku-lengths role="group" aria-labelledby="sku-filter-len-label"></div>
           </div>
 
@@ -98,12 +98,36 @@
         {% endif %}
 
         <div class="table-wrap table-wrap--sku" role="region" aria-label="Асортимент SKU" tabindex="0">
-          <table class="data-table data-table--sku" data-sku-table>
+          <table class="data-table data-table--sku{% if show_bearing_dims %} data-table--sku-bearing{% elif show_auto_screw_dims or show_wedge_dims %} data-table--sku-auto{% elif show_mesh_dims %} data-table--sku-mesh{% elif show_rebar_dims %} data-table--sku-rebar{% elif show_foam_glue_dims %} data-table--sku-chem{% endif %}" data-sku-table>
             <thead>
               <tr>
                 <th>Артикул</th>
                 <th>Назва</th>
+                {% if show_bearing_dims %}
+                <th title="Внутрішній діаметр">d&nbsp;(мм)</th>
+                <th title="Зовнішній діаметр">D&nbsp;(мм)</th>
+                <th title="Ширина">B&nbsp;(мм)</th>
+                {% elif show_auto_screw_dims %}
+                <th title="Довжина">Довжина</th>
+                <th title="Діаметр">Діаметр</th>
+                <th title="Ширина головки">Шир.&nbsp;головки</th>
+                {% elif show_rebar_dims %}
+                <th title="Діаметр D">D&nbsp;(мм)</th>
+                {% elif show_mesh_dims %}
+                <th title="Ячейка A">Ячейка&nbsp;A</th>
+                <th title="Ячейка B">Ячейка&nbsp;B</th>
+                {% elif show_wedge_dims %}
+                <th title="Довжина">Довжина</th>
+                <th title="Ширина">Ширина</th>
+                <th title="Товщина">Товщина</th>
+                {% elif show_foam_glue_dims %}
+                <th title="Обʼєм">Обʼєм&nbsp;(мл)</th>
+                <th title="Виробник">Виробник</th>
+                <th title="Зона застосування">Зона</th>
+                <th title="Шт в упаковці">Упак.&nbsp;(шт)</th>
+                {% else %}
                 <th>Розмір</th>
+                {% endif %}
                 <th>Партія</th>
                 <th>Наявність</th>
                 <th>Ціна (баз)</th>
@@ -121,6 +145,14 @@
                 data-size="{{ sku.size_label }}"
                 data-diameter="{% if sku.diameter is not None %}{{ sku.diameter|unlocalize }}{% endif %}"
                 data-length="{% if sku.length is not None %}{{ sku.length|unlocalize }}{% endif %}"
+                data-bore="{% if sku.bore_d_mm is not None %}{{ sku.bore_d_mm|unlocalize }}{% endif %}"
+                data-od="{% if sku.od_d_mm is not None %}{{ sku.od_d_mm|unlocalize }}{% endif %}"
+                data-width-b="{% if sku.width_b_mm is not None %}{{ sku.width_b_mm|unlocalize }}{% endif %}"
+                data-head-width="{% if sku.head_width_mm is not None %}{{ sku.head_width_mm|unlocalize }}{% endif %}"
+                data-cell-a="{% if sku.cell_a_mm is not None %}{{ sku.cell_a_mm|unlocalize }}{% endif %}"
+                data-cell-b="{% if sku.cell_b_mm is not None %}{{ sku.cell_b_mm|unlocalize }}{% endif %}"
+                data-width="{% if sku.width_mm is not None %}{{ sku.width_mm|unlocalize }}{% endif %}"
+                data-thickness="{% if sku.thickness_mm is not None %}{{ sku.thickness_mm|unlocalize }}{% endif %}"
                 data-stock="{{ sku.stock_status }}"
               >
                 <td data-label="Артикул"><span class="sku-article">{{ sku.article }}</span></td>
@@ -131,7 +163,63 @@
                     {% if sku.image %}data-sku-preview="{{ sku.image.url }}"{% elif group_image_url %}data-sku-preview="{{ group_image_url }}"{% endif %}
                   >{{ sku.name }}</a>
                 </td>
+                {% if show_bearing_dims %}
+                <td data-label="Внутрішній діаметр (мм) d" class="sku-cell--bearing-dim">
+                  {% if sku.bore_d_mm is not None %}<strong>{{ sku.bore_d_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Зовнішній діаметр (мм) D" class="sku-cell--bearing-dim">
+                  {% if sku.od_d_mm is not None %}<strong>{{ sku.od_d_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Ширина (мм) B" class="sku-cell--bearing-dim">
+                  {% if sku.width_b_mm is not None %}<strong>{{ sku.width_b_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                {% elif show_auto_screw_dims %}
+                <td data-label="Довжина (мм)" class="sku-cell--auto-dim">
+                  {% if sku.length is not None %}<strong>{{ sku.length }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Діаметр (мм)" class="sku-cell--auto-dim">
+                  {% if sku.diameter is not None %}<strong>{{ sku.diameter }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Ширина головки (мм)" class="sku-cell--auto-dim">
+                  {% if sku.head_width_mm is not None %}<strong>{{ sku.head_width_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                {% elif show_rebar_dims %}
+                <td data-label="Діаметр D (мм)" class="sku-cell--rebar-dim">
+                  {% if sku.diameter is not None %}<strong>{{ sku.diameter }}</strong>{% else %}—{% endif %}
+                </td>
+                {% elif show_mesh_dims %}
+                <td data-label="Ячейка A (мм)" class="sku-cell--mesh-dim">
+                  {% if sku.cell_a_mm is not None %}<strong>{{ sku.cell_a_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Ячейка B (мм)" class="sku-cell--mesh-dim">
+                  {% if sku.cell_b_mm is not None %}<strong>{{ sku.cell_b_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                {% elif show_wedge_dims %}
+                <td data-label="Довжина (мм)" class="sku-cell--auto-dim">
+                  {% if sku.length is not None %}<strong>{{ sku.length }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Ширина (мм)" class="sku-cell--auto-dim">
+                  {% if sku.width_mm is not None %}<strong>{{ sku.width_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Товщина (мм)" class="sku-cell--auto-dim">
+                  {% if sku.thickness_mm is not None %}<strong>{{ sku.thickness_mm }}</strong>{% else %}—{% endif %}
+                </td>
+                {% elif show_foam_glue_dims %}
+                <td data-label="Обʼєм (мл)" class="sku-cell--chem-dim">
+                  {% if sku.volume_ml is not None %}<strong>{{ sku.volume_ml }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Виробник" class="sku-cell--chem-dim">
+                  {% if sku.manufacturer %}<strong>{{ sku.manufacturer }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Зона застосування" class="sku-cell--chem-dim">
+                  {% if sku.application_zone %}<strong>{{ sku.get_application_zone_display }}</strong>{% else %}—{% endif %}
+                </td>
+                <td data-label="Шт в упаковці" class="sku-cell--chem-dim">
+                  {% if sku.pack_qty %}<strong>{{ sku.pack_qty }}</strong>{% else %}—{% endif %}
+                </td>
+                {% else %}
                 <td data-label="Розмір" class="sku-cell--size"><strong>{{ sku.size_label }}</strong></td>
+                {% endif %}
                 <td data-label="Партія">{{ sku.min_party }} шт</td>
                 <td data-label="Наявність">
                   {% if sku.stock_status == "in_stock" %}
@@ -142,10 +230,12 @@
                 </td>
                 <td data-label="Ціна (баз)" class="sku-cell--price">
                   <strong>{{ sku.price }} ₴</strong>
+                  <span class="sku-price-unit">{{ price_unit }}</span>
                 </td>
                 <td data-label="Ціна (пар)" class="sku-cell--price sku-cell--party-price">
                   {% if sku.party_price is not None %}
                     <strong>{{ sku.party_price }} ₴</strong>
+                    <span class="sku-price-unit">{{ party_price_unit|default:price_unit }}</span>
                   {% else %}
                     <span class="sku-price-empty">—</span>
                   {% endif %}
@@ -172,7 +262,7 @@
                 </td>
               </tr>
             {% empty %}
-              <tr class="sku-row--empty"><td colspan="8">Немає активних SKU.</td></tr>
+              <tr class="sku-row--empty"><td colspan="{% if show_foam_glue_dims %}11{% elif show_bearing_dims or show_auto_screw_dims or show_wedge_dims %}10{% elif show_mesh_dims %}9{% else %}8{% endif %}">Немає активних SKU.</td></tr>
             {% endfor %}
             </tbody>
           </table>

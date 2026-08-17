@@ -1,0 +1,159 @@
+/* Месенджери — футер і /kontakty/ */
+
+.messengers {
+  margin: 0;
+}
+
+.messengers__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.messengers__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px 0 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  color: #fff;
+  background: var(--color-secondary);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.messengers__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  flex-shrink: 0;
+}
+
+.messengers__icon svg {
+  display: block;
+}
+
+.messengers__link--viber {
+  background: #7360f2;
+}
+
+.messengers__link--whatsapp {
+  background: #25d366;
+}
+
+.messengers__link--telegram {
+  background: #2aabee;
+}
+
+.messengers__link:hover {
+  filter: brightness(1.06);
+}
+
+.messengers__link:active {
+  transform: scale(0.98);
+}
+
+.messengers__link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Футер: на темному тлі */
+.messengers--footer {
+  margin-top: 14px;
+}
+
+.messengers--footer .messengers__link {
+  min-height: 40px;
+  padding: 0 12px 0 8px;
+  font-size: 13px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+/* Сторінка контактів */
+.messengers--contacts {
+  margin-top: 4px;
+}
+
+.contacts-page__messengers {
+  margin: 24px 0 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+}
+
+.contacts-page__messengers-title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+@supports not (background: color-mix(in srgb, white 10%, black)) {
+  .contacts-page__messengers {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+}
+
+@media (max-width: 767px) {
+  .messengers--contacts .messengers__list {
+    flex-direction: column;
+  }
+
+  .messengers--contacts .messengers__link {
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .messengers--footer .messengers__list {
+    gap: 8px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .messengers--footer .messengers__label {
+    display: none;
+  }
+
+  .messengers--footer .messengers__link {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .messengers--footer .messengers__icon {
+    background: transparent;
+  }
+}
+
+@media (hover: none) {
+  .messengers__link:hover {
+    filter: none;
+  }
+}

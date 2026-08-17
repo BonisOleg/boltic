@@ -70,9 +70,19 @@ class SiteSettingsAdmin(
                     "address",
                     "order_hours",
                     "processing_hours",
-                    "social_json",
                     "meta_description",
                 )
+            },
+        ),
+        (
+            "Месенджери",
+            {
+                "description": "Повні URL. Порожні не показуються на сайті.",
+                "fields": (
+                    "messenger_viber_url",
+                    "messenger_whatsapp_url",
+                    "messenger_telegram_url",
+                ),
             },
         ),
         (

@@ -29,7 +29,77 @@
       <h1 class="sku-detail__title">{{ sku.name }}</h1>
 
       <ul class="sku-detail__attrs">
-        {% if sku.size_label %}
+        {% if sku.bore_d_mm is not None or sku.od_d_mm is not None or sku.width_b_mm is not None %}
+        <li>
+          <span>Внутрішній діаметр (мм) d</span>
+          <strong>{% if sku.bore_d_mm is not None %}{{ sku.bore_d_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Зовнішній діаметр (мм) D</span>
+          <strong>{% if sku.od_d_mm is not None %}{{ sku.od_d_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Ширина (мм) B</span>
+          <strong>{% if sku.width_b_mm is not None %}{{ sku.width_b_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        {% elif show_rebar_dims %}
+        <li>
+          <span>Діаметр (мм) D</span>
+          <strong>{% if sku.diameter is not None %}{{ sku.diameter }}{% else %}—{% endif %}</strong>
+        </li>
+        {% elif show_mesh_dims %}
+        <li>
+          <span>Ячейка A (мм)</span>
+          <strong>{% if sku.cell_a_mm is not None %}{{ sku.cell_a_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Ячейка B (мм)</span>
+          <strong>{% if sku.cell_b_mm is not None %}{{ sku.cell_b_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        {% elif show_wedge_dims %}
+        <li>
+          <span>Довжина (мм)</span>
+          <strong>{% if sku.length is not None %}{{ sku.length }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Ширина (мм)</span>
+          <strong>{% if sku.width_mm is not None %}{{ sku.width_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Товщина (мм)</span>
+          <strong>{% if sku.thickness_mm is not None %}{{ sku.thickness_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        {% elif show_foam_glue_dims %}
+        <li>
+          <span>Обʼєм (мл)</span>
+          <strong>{% if sku.volume_ml is not None %}{{ sku.volume_ml }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Виробник</span>
+          <strong>{% if sku.manufacturer %}{{ sku.manufacturer }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Зона застосування</span>
+          <strong>{% if sku.application_zone %}{{ sku.get_application_zone_display }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Шт в упаковці</span>
+          <strong>{% if sku.pack_qty %}{{ sku.pack_qty }}{% else %}—{% endif %}</strong>
+        </li>
+        {% elif sku.head_width_mm is not None or group.category.path == "автокріплення/саморізи/" %}
+        <li>
+          <span>Довжина (мм)</span>
+          <strong>{% if sku.length is not None %}{{ sku.length }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Діаметр (мм)</span>
+          <strong>{% if sku.diameter is not None %}{{ sku.diameter }}{% else %}—{% endif %}</strong>
+        </li>
+        <li>
+          <span>Ширина головки (мм)</span>
+          <strong>{% if sku.head_width_mm is not None %}{{ sku.head_width_mm }}{% else %}—{% endif %}</strong>
+        </li>
+        {% elif sku.size_label %}
         <li><span>Розмір</span><strong>{{ sku.size_label }}</strong></li>
         {% endif %}
         {% if group.standard %}
@@ -54,13 +124,14 @@
 
       <p class="sku-detail__price">
         <span class="sku-detail__price-label">Ціна (баз)</span>
-        <strong>{{ sku.price }} ₴</strong> / шт
+        <strong>{{ sku.price }} ₴</strong> <span class="sku-price-unit">{{ price_unit }}</span>
       </p>
       <p class="sku-detail__party">
         <span class="sku-detail__price-label">Ціна (пар)</span>
         {% if sku.party_price is not None %}
         <strong>{{ sku.party_price }} ₴</strong>
-        <span class="sku-detail__party-hint">від {{ sku.min_party }} шт</span>
+        <span class="sku-price-unit">{{ party_price_unit|default:price_unit }}</span>
+        <span class="sku-detail__party-hint">від {{ sku.min_party }} шт{% if sku.pack_qty %} · упак. {{ sku.pack_qty }} шт{% endif %}</span>
         {% else %}
         <span class="sku-price-empty">—</span>
         {% endif %}

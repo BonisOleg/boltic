@@ -31,6 +31,13 @@
         <p class="empty-state">Філії зʼявляться після наповнення CMS.</p>
         {% endfor %}
       </div>
+
+      {% if site_settings.filled_messengers %}
+      <div class="contacts-page__messengers">
+        <h2 class="contacts-page__messengers-title">Напишіть нам</h2>
+        {% include "includes/messengers.html" with messengers_modifier="contacts" %}
+      </div>
+      {% endif %}
     </div>
   </div>
 </div>
