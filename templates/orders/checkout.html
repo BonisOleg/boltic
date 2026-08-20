@@ -57,13 +57,6 @@
 {% if step == 1 %}
 <script src="{% static 'js/checkout-contact.js' %}" defer></script>
 {% elif step == 2 %}
-<script>
-  window.BOLTIKO_CHECKOUT = {
-    npCitiesUrl: "{% url 'orders:np_cities' %}",
-    npWarehousesUrl: "{% url 'orders:np_warehouses' %}",
-    npConfigured: {{ np_configured|yesno:"true,false" }}
-  };
-</script>
-<script src="{% static 'js/checkout-np.js' %}" defer></script>
+<script src="{% static 'js/checkout-np.js' %}?v=20260820a" defer></script>
 {% endif %}
 {% endblock %}

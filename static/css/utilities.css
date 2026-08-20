@@ -1,0 +1,169 @@
+/* Reusable layout / typography (no inline style=) */
+.section-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+.section-title--upper,
+.page-title--upper {
+  text-transform: uppercase;
+}
+
+.heading-sm {
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.heading-sm--spaced {
+  margin: 0 0 16px;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.heading-sm--mt {
+  margin-top: 24px;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.section-card--xs {
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-card--sm {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-card--md {
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-card--lg {
+  max-width: 560px;
+}
+
+.section-card--xl {
+  max-width: 640px;
+}
+
+.section-card--center {
+  text-align: center;
+}
+
+.form-error {
+  color: var(--color-danger);
+}
+
+.field-error {
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.text-muted-sm {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.text-muted-xs {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.u-mt-0 {
+  margin-top: 0;
+}
+
+.u-mt-12 {
+  margin-top: 12px;
+}
+
+.u-mt-16 {
+  margin-top: 16px;
+}
+
+.u-mb-20 {
+  margin-bottom: 20px;
+}
+
+.u-mb-24 {
+  margin-bottom: 24px;
+}
+
+.u-flex-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.u-flex-row--mt {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.u-flex-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.u-flex-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.stack-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.stack-list > li {
+  margin-bottom: 10px;
+}
+
+.stack-list > li:last-child {
+  margin-bottom: 0;
+}
+
+.notice-soft {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-primary) 12%, #fff);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.content-split--mb {
+  margin-bottom: 24px;
+}
+
+.search-form--page {
+  max-width: 560px;
+  margin-bottom: 20px;
+}
+
+.form-control--narrow {
+  max-width: 180px;
+}
+
+.product-card__placeholder--lg {
+  width: 96px;
+  height: 96px;
+  font-size: 32px;
+}
+
+.review-form {
+  margin-top: 16px;
+  max-width: 480px;
+}

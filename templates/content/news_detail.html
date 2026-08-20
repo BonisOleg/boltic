@@ -4,7 +4,7 @@
 <div class="container">
   <article class="section-card">
     <div class="section-head">
-      <h1 style="margin:0;font-size:22px">{{ post.title }}</h1>
+      <h1>{{ post.title }}</h1>
       {% if post.published_at %}<time datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"d.m.Y" }}</time>{% endif %}
     </div>
     <div class="section-body prose">{{ post.body|linebreaks }}</div>

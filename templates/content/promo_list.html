@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Акції — {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}Актуальні акції та спецпропозиції на кріплення в {{ site_settings.site_name }}. Знижки на болти, гайки та інші метизи — перегляньте умови та замовляйте онлайн.{% endblock %}
+{% block og_title %}Акції — {{ site_settings.site_name }}{% endblock %}
+{% block og_description %}Актуальні акції та спецпропозиції на кріплення в {{ site_settings.site_name }}. Знижки на болти, гайки та інші метизи — перегляньте умови та замовляйте онлайн.{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
 {% block content %}
 <div class="container">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Акції</h1></div>
+    <div class="section-head"><h1 class="is-upper">Акції</h1></div>
     <div class="section-body">
       {% if promotions %}
-      <div class="content-split" style="display:grid;margin-bottom:24px">
+      <div class="content-split content-split--mb">
         {% for p in promotions %}
         <a class="promo-teaser" href="{% url 'content:promo_detail' p.slug %}">
           <h3>{{ p.title }}</h3>
@@ -19,8 +22,8 @@
       {% endif %}
 
       {% if promo_products %}
-      <h2 style="margin:0 0 16px;font-size:16px;text-transform:uppercase">Акційні пропозиції</h2>
-      <div class="product-grid">
+      <h2 class="heading-sm--spaced">Акційні пропозиції</h2>
+      <div class="product-grid" data-qa="product-grid">
         {% for g in promo_products %}
           {% include "includes/product_card.html" %}
         {% endfor %}

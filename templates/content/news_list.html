@@ -3,8 +3,8 @@
 {% block content %}
 <div class="container">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Новини</h1></div>
-    <div class="section-body content-split" style="display:grid">
+    <div class="section-head"><h1 class="is-upper">Новини</h1></div>
+    <div class="section-body content-split">
       {% for n in posts %}
       <a class="news-card" href="{% url 'content:news_detail' n.slug %}">
         <h3>{{ n.title }}</h3>

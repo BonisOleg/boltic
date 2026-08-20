@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load static site_content %}
 {% block title %}{{ site_settings.site_name }} — {% block_plain 'site' 'footer_copy_suffix' %}{% endblock %}
+{% block meta_description %}{{ seo_description_default }}{% endblock %}
+{% block og_title %}{{ site_settings.site_name }} — {% block_plain 'site' 'footer_copy_suffix' %}{% endblock %}
+{% block og_description %}{{ seo_description_default }}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/home.css' %}">{% endblock %}
 {% block main_class %}page-main--flush{% endblock %}
 {% block content %}

@@ -3,9 +3,9 @@
 {% block content %}
 <div class="container">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px">Пошук</h1></div>
+    <div class="section-head"><h1>Пошук</h1></div>
     <div class="section-body">
-      <form method="get" class="search-form" style="max-width:560px;margin-bottom:20px">
+      <form method="get" class="search-form search-form--page">
         <input type="search" name="q" value="{{ q }}" placeholder="Я шукаю" class="form-control">
         <button type="submit" aria-label="Шукати">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -16,14 +16,14 @@
       </form>
 
       {% if q %}
-      <h2 style="font-size:16px;text-transform:uppercase">Товарні групи</h2>
-      <div class="product-grid" style="margin-bottom:24px">
+      <h2 class="heading-sm">Товарні групи</h2>
+      <div class="product-grid u-mb-24" data-qa="product-grid">
         {% for g in groups %}
           {% include "includes/product_card.html" %}
         {% empty %}<p class="empty-state">Нічого не знайдено серед груп.</p>{% endfor %}
       </div>
 
-      <h2 style="font-size:16px;text-transform:uppercase">SKU / артикули</h2>
+      <h2 class="heading-sm">SKU / артикули</h2>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr><th>Артикул</th><th>Назва</th><th>Розмір</th><th>Ціна (баз)</th><th>Ціна (пар)</th><th></th></tr></thead>

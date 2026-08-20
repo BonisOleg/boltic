@@ -17,16 +17,16 @@
         {% if imgs %}
           <img src="{{ imgs.0.image.url }}" alt="{{ imgs.0.alt|default:group.name }}" width="480" height="360">
         {% else %}
-          <div class="product-card__placeholder" style="width:96px;height:96px;font-size:32px">Б</div>
+          <div class="product-card__placeholder product-card__placeholder--lg">Б</div>
         {% endif %}
       {% endwith %}
     </div>
     <div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <div class="u-flex-badges">
         {% if group.is_promo %}<span class="badge badge--promo">Акція</span>{% endif %}
         {% if group.is_top %}<span class="badge">Топ</span>{% endif %}
       </div>
-      <h1 style="margin-top:0">{{ group.name }}</h1>
+      <h1 class="u-mt-0">{{ group.name }}</h1>
       {% if group.short_description %}<p>{{ group.short_description }}</p>{% endif %}
       <ul class="pdp-attrs">
         {% if group.standard %}<li><span>Стандарт</span><strong>{{ group.standard }}</strong></li>{% endif %}
@@ -246,6 +246,7 @@
                       class="qty-form"
                       method="post"
                       action="{% url 'cart:add' %}"
+                      data-qa="cart-add"
                       hx-post="{% url 'cart:add' %}"
                       hx-target="next [data-action-note]"
                       hx-swap="innerHTML"
@@ -299,7 +300,7 @@
           <p class="empty-state">Поки немає відгуків.</p>
         {% endfor %}
         {% if user.is_authenticated %}
-        <form method="post" action="{% url 'catalog:product_review' group.slug %}" style="margin-top:16px;max-width:480px">
+        <form method="post" action="{% url 'catalog:product_review' group.slug %}" class="review-form">
           {% csrf_token %}
           <div class="field">{{ review_form.rating.label_tag }}{{ review_form.rating }}</div>
           <div class="field">{{ review_form.body.label_tag }}{{ review_form.body }}</div>

@@ -1,3 +1,4 @@
+from django.conf import settings as dj_settings
 from django.db.models import Prefetch
 
 from apps.cart.models import WishlistItem
@@ -6,13 +7,24 @@ from apps.catalog.models import Category
 from apps.core.block_render import load_site_blocks
 from apps.core.models import SiteSettings
 
+_DEFAULT_META = (
+    "Інтернет-магазин кріплення {name}. Болти, гайки, самонарізи, анкери — "
+    "опт і роздріб з доставкою по Україні."
+)
+
 
 def site_settings(request):
-    settings = SiteSettings.load()
+    site = SiteSettings.load()
+    base = dj_settings.SITE_URL.rstrip("/")
+    meta = (site.meta_description or "").strip()
+    if not meta:
+        meta = _DEFAULT_META.format(name=site.site_name)
     return {
-        "site_settings": settings,
-        "theme_vars": settings.theme_css_vars(),
+        "site_settings": site,
+        "theme_vars": site.theme_css_vars(),
         "site_blocks": load_site_blocks(),
+        "seo_canonical": f"{base}{request.path}",
+        "seo_description_default": meta,
     }
 
 

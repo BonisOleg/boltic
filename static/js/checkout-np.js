@@ -1,9 +1,14 @@
 (function () {
   "use strict";
 
-  var cfg = window.BOLTIKO_CHECKOUT || {};
   var root = document.querySelector("[data-checkout-delivery]");
   if (!root) return;
+
+  var cfg = {
+    npCitiesUrl: root.getAttribute("data-np-cities-url") || "",
+    npWarehousesUrl: root.getAttribute("data-np-warehouses-url") || "",
+    npConfigured: root.getAttribute("data-np-configured") === "true",
+  };
 
   var npBlock = root.querySelector("[data-np-block]");
   var methodInputs = root.querySelectorAll('input[name="shipping_method"]');

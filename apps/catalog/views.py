@@ -48,11 +48,13 @@ class CategoryView(View):
             category, selected=selected, sort=sort
         )
         page = Paginator(groups, 24).get_page(request.GET.get("page") or 1)
+        active_facet_count = sum(len(v) for v in selected.values())
         ctx = {
             "category": category,
             "children": selectors.category_children(category),
             "page_obj": page,
             "selected_facets": selected,
+            "active_facet_count": active_facet_count,
             "facet_attributes": selectors.facet_attributes(category),
             "sort": sort,
             "canonical_path": category.path,

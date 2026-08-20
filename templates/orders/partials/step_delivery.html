@@ -1,4 +1,10 @@
-<section class="checkout-card" data-checkout-delivery>
+<section
+  class="checkout-card"
+  data-checkout-delivery
+  data-np-cities-url="{% url 'orders:np_cities' %}"
+  data-np-warehouses-url="{% url 'orders:np_warehouses' %}"
+  data-np-configured="{% if np_configured %}true{% else %}false{% endif %}"
+>
   <h2 class="checkout-card__title">Спосіб доставки</h2>
 
   <form method="post" class="checkout-form" novalidate>

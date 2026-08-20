@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
     "tinymce",
     "django_htmx",
+    "csp",
     "apps.core",
     "apps.catalog",
     "apps.reviews",
@@ -38,6 +39,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "csp.middleware.CSPMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
@@ -88,6 +90,30 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = config(
     "DATA_UPLOAD_MAX_NUMBER_FIELDS", default=20000, cast=int
 )
+
+# ERR-132: never default /admin/ — empty or literal "admin" → manage/
+_admin_path = config("ADMIN_URL", default="manage").strip().strip("/")
+if not _admin_path or _admin_path.lower() == "admin":
+    _admin_path = "manage"
+ADMIN_URL = f"{_admin_path}/"
+
+# SEC-csp / project_structure §8.5 — Unfold needs CSP exempt (Alpine unsafe-eval)
+CONTENT_SECURITY_POLICY = {
+    "EXCLUDE_URL_PREFIXES": (f"/{_admin_path}/", "/tinymce/"),
+    "DIRECTIVES": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'"],
+        # style= legacy + theme :root block; cleanup ≠ SEC-csp scope. ERR-106: no HTMX inject.
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "font-src": ["'self'", "data:"],
+        "img-src": ["'self'", "data:", "blob:"],
+        "connect-src": ["'self'"],
+        "frame-ancestors": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'", "https://www.liqpay.ua", "https://www.liqpay.com"],
+        "object-src": ["'none'"],
+    },
+}
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/kabinet/"

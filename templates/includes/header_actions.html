@@ -1,4 +1,4 @@
-<a class="action-link" href="{% url 'cart:wishlist' %}" title="Бажане" aria-label="Бажане">
+<a class="action-link" href="{% url 'cart:wishlist' %}" title="Бажане" aria-label="Бажане" data-qa="favorites">
   <span class="action-link__icon" aria-hidden="true">
     {% include "includes/icon_heart.html" %}
   </span>
@@ -13,7 +13,7 @@
       <circle cx="16.3" cy="19.2" r="1.35"/>
     </svg>
   </span>
-  <span class="action-badge" data-cart-count{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
+  <span class="action-badge" data-cart-count data-qa="cart-count"{% if not cart_count %} hidden{% endif %}>{{ cart_count|default:0 }}</span>
   <span class="action-link__label">Кошик</span>
 </a>
 {% if user.is_authenticated %}

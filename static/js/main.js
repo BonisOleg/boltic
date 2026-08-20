@@ -8,6 +8,12 @@
     return Array.prototype.slice.call((root || document).querySelectorAll(sel));
   }
 
+  /* Deferred CSS: media=print → all (no inline onload; CSP script-src 'self') */
+  qsa("link[data-defer-css]").forEach(function (link) {
+    link.media = "all";
+    link.removeAttribute("data-defer-css");
+  });
+
   /* Mega menu */
   var catalogBtn = qs("[data-catalog-toggle]");
   var mega = qs("[data-mega-menu]");

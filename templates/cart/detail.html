@@ -5,9 +5,9 @@
 <link rel="stylesheet" href="{% static 'css/cart.css' %}">
 {% endblock %}
 {% block content %}
-<div class="container">
+<div class="container" data-qa="cart-page">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px;text-transform:uppercase">Кошик</h1></div>
+    <div class="section-head"><h1 class="is-upper">Кошик</h1></div>
     <div class="section-body">
       <div class="table-wrap">
         <table class="data-table">
@@ -20,7 +20,7 @@
             <tr>
               <td>
                 <a href="{% url 'catalog:product' sku.group.slug %}?sku={{ sku.article }}">{{ sku.name }}</a>
-                <div style="font-size:12px;color:var(--color-text-muted)">{{ sku.article }}</div>
+                <div class="text-muted-xs">{{ sku.article }}</div>
               </td>
               <td>{{ sku.size_label }}</td>
               <td>
@@ -89,13 +89,13 @@
       {% if lines %}
       <p class="cart-total">Разом: <strong>{{ subtotal }} грн</strong></p>
       {% if can_checkout %}
-      <a class="btn" href="{% url 'orders:checkout' %}">Оформити замовлення</a>
+      <a class="btn" href="{% url 'orders:checkout' %}" data-qa="checkout-cta">Оформити замовлення</a>
       {% else %}
       <p class="cart-min-order" role="status">
         Мінімальна сума замовлення — {{ min_order|floatformat:0 }} грн.
         Додайте ще на {{ min_order_shortfall|floatformat:0 }} грн.
       </p>
-      <button class="btn btn--disabled" type="button" disabled aria-disabled="true">
+      <button class="btn btn--disabled" type="button" disabled aria-disabled="true" data-qa="checkout-cta">
         Оформити замовлення
       </button>
       {% endif %}

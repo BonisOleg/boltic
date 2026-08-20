@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from django_htmx.http import HttpResponseClientRedirect
@@ -140,10 +139,12 @@ def wishlist_toggle_view(request):
     return redirect(back_url)
 
 
-@login_required
 @require_GET
 def wishlist(request):
-    items = list(wishlist_qs(request.user))
-    for item in items:
-        item.sku.in_wishlist = True
+    # Guest: 200 + unique title (no redirect to /login/) — PAGE-uniq / seo_skill.
+    items = []
+    if request.user.is_authenticated:
+        items = list(wishlist_qs(request.user))
+        for item in items:
+            item.sku.in_wishlist = True
     return render(request, "cart/wishlist.html", {"items": items})

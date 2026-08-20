@@ -3,12 +3,12 @@
 {% block content %}
 <div class="container">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px">{{ promo.title }}</h1></div>
+    <div class="section-head"><h1>{{ promo.title }}</h1></div>
     <div class="section-body">
       <div class="prose">{{ promo.body|linebreaks }}</div>
       {% if promo_products %}
-      <h2 style="margin-top:24px;font-size:16px;text-transform:uppercase">Товари акції</h2>
-      <div class="product-grid">
+      <h2 class="heading-sm--mt">Товари акції</h2>
+      <div class="product-grid" data-qa="product-grid">
         {% for g in promo_products %}
           {% include "includes/product_card.html" %}
         {% endfor %}

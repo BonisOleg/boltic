@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block title %}{{ page.seo_title|default:page.title }} — {{ site_settings.site_name }}{% endblock %}
-{% block extra_head %}
-{% if page.seo_description %}<meta name="description" content="{{ page.seo_description }}">{% endif %}
-{% endblock %}
+{% block meta_description %}{% if page.seo_description %}{{ page.seo_description }}{% else %}{{ page.title }} — {{ site_settings.site_name }}.{% endif %}{% endblock %}
+{% block og_title %}{{ page.seo_title|default:page.title }} — {{ site_settings.site_name }}{% endblock %}
+{% block og_description %}{% if page.seo_description %}{{ page.seo_description }}{% else %}{{ page.title }} — {{ site_settings.site_name }}.{% endif %}{% endblock %}
 {% block content %}
 <div class="container">
   <article class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px">{{ page.title }}</h1></div>
+    <div class="section-head"><h1>{{ page.title }}</h1></div>
     <div class="section-body prose">{{ page.body|linebreaks }}</div>
   </article>
 </div>

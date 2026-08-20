@@ -142,6 +142,7 @@
           class="qty-form sku-detail__cart"
           method="post"
           action="{% url 'cart:add' %}"
+          data-qa="cart-add"
           hx-post="{% url 'cart:add' %}"
           hx-target="next [data-action-note]"
           hx-swap="innerHTML"

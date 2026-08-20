@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container">
   <div class="section-card">
-    <div class="section-head"><h1 style="margin:0;font-size:22px">Замовлення {{ order.number }}</h1></div>
+    <div class="section-head"><h1>Замовлення {{ order.number }}</h1></div>
     <div class="section-body">
       <p>Статус: {{ order.get_status_display }} · Оплата: {{ order.get_payment_status_display }}</p>
       <p>{{ order.customer_name }} · {{ order.phone }}{% if order.email %} · {{ order.email }}{% endif %}</p>
@@ -25,7 +25,7 @@
           </tbody>
         </table>
       </div>
-      <p style="margin-top:12px"><strong>Разом: {{ order.total }} грн</strong></p>
+      <p class="u-mt-12"><strong>Разом: {{ order.total }} грн</strong></p>
       <a class="btn btn--ghost" href="{% url 'accounts:orders' %}">← До списку</a>
     </div>
   </div>

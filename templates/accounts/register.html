@@ -2,22 +2,22 @@
 {% block title %}Реєстрація — {{ site_settings.site_name }}{% endblock %}
 {% block content %}
 <div class="container">
-  <div class="section-card" style="max-width:420px;margin:0 auto">
-    <div class="section-head"><h1 style="margin:0;font-size:22px">Реєстрація</h1></div>
+  <div class="section-card section-card--xs">
+    <div class="section-head"><h1>Реєстрація</h1></div>
     <div class="section-body">
-      <form method="post">
+      <form method="post" data-qa="register-form">
         {% csrf_token %}
         {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
         {% for field in form %}
         <div class="field">
           {{ field.label_tag }}{{ field }}
-          {% if field.errors %}<div style="color:var(--color-danger);font-size:13px">{{ field.errors }}</div>{% endif %}
+          {% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}
         </div>
         {% endfor %}
-        {% if form.non_field_errors %}<div style="color:var(--color-danger)">{{ form.non_field_errors }}</div>{% endif %}
+        {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
         <button class="btn btn--block" type="submit">Створити акаунт</button>
       </form>
-      <p style="margin-top:16px">Вже є акаунт? <a href="{% url 'accounts:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Увійти</a></p>
+      <p class="u-mt-16">Вже є акаунт? <a href="{% url 'accounts:login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Увійти</a></p>
     </div>
   </div>
 </div>

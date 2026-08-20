@@ -2,11 +2,11 @@
 {% block title %}Вхід — {{ site_settings.site_name }}{% endblock %}
 {% block content %}
 <div class="container">
-  <div class="section-card" style="max-width:420px;margin:0 auto">
-    <div class="section-head"><h1 style="margin:0;font-size:22px">Вхід</h1></div>
+  <div class="section-card section-card--xs">
+    <div class="section-head"><h1>Вхід</h1></div>
     <div class="section-body">
-      {% if error %}<p style="color:var(--color-danger)">{{ error }}</p>{% endif %}
-      <form method="post">
+      {% if error %}<p class="form-error">{{ error }}</p>{% endif %}
+      <form method="post" data-qa="login-form">
         {% csrf_token %}
         {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
         <div class="field">
@@ -19,7 +19,7 @@
         </div>
         <button class="btn btn--block" type="submit">Увійти</button>
       </form>
-      <p style="margin-top:16px">Ще немає акаунту? <a href="{% url 'accounts:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Зареєструватися</a></p>
+      <p class="u-mt-16">Ще немає акаунту? <a href="{% url 'accounts:register' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">Зареєструватися</a></p>
     </div>
   </div>
 </div>

@@ -17,7 +17,6 @@ class StaticViewSitemap(Sitemap):
             "content:promo_list",
             "content:news_list",
             "content:contacts",
-            "cart:detail",
         ]
 
     def location(self, item):

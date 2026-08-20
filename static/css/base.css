@@ -277,6 +277,15 @@ button {
   border-bottom: 1px solid var(--color-border);
 }
 
+.section-head h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.section-head h1.is-upper {
+  text-transform: uppercase;
+}
+
 .section-head h2 {
   margin: 0;
   font-size: 20px;
@@ -375,3 +384,4 @@ button {
     grid-template-columns: 1fr 1fr;
   }
 }
+

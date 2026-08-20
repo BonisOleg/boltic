@@ -47,7 +47,19 @@
 
     <div class="footer-bottom">
       <p class="footer-copy">© {% now "Y" %} {{ site_settings.site_name }}. {% block_plain 'site' 'footer_copy_suffix' %}</p>
-      <a class="footer-credit" href="https://www.prometeylabs.com/" target="_blank" rel="noopener noreferrer">Розроблено PrometeyLabs</a>
+      <p class="footer-credit">
+        Сайт від
+        {% if request.resolver_match.url_name == "home" %}
+        <a
+          class="footer-credit__link"
+          href="https://www.prometeylabs.com/internet-shop-v2/"
+          target="_blank"
+          rel="nofollow noopener noreferrer"
+        >PrometeyLabs</a>
+        {% else %}
+        <span class="footer-credit__name">PrometeyLabs</span>
+        {% endif %}
+      </p>
     </div>
   </div>
 </footer>
