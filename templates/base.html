@@ -21,9 +21,10 @@
   <link rel="icon" type="image/png" href="{% static 'img/favicon-48.png' %}?v=20260723h" sizes="48x48">
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}?v=20260723h" sizes="180x180">
   {% endif %}
-  <link rel="preload" href="{% static 'fonts/rubik-cyrillic.woff2' %}?v=20260820a" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="{% static 'fonts/rubik-latin.woff2' %}?v=20260820a" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=20260820a">
+  {# preload URL must match @font-face src exactly (no ?v=) or Chrome warns unused preload #}
+  <link rel="preload" href="{% static 'fonts/rubik-cyrillic.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'fonts/rubik-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=20260820b">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/utilities.css' %}?v=20260820a">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}?v=20260805b">
