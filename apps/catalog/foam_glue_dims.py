@@ -7,7 +7,6 @@ from apps.catalog.models import ProductGroup
 PATH_PREFIX = "піни-клеї-герметики/"
 
 PRICE_UNIT_PCS = "грн / шт"
-PRICE_UNIT_PACK = "грн / упак."
 
 
 def group_is_foam_glue_sealant(group: ProductGroup) -> bool:
@@ -19,13 +18,10 @@ def group_is_foam_glue_sealant(group: ProductGroup) -> bool:
 
 
 def price_unit_for_group(group: ProductGroup | None) -> str:
-    """Базова ціна — завжди за штуку в цьому розділі."""
-    if group is not None and group_is_foam_glue_sealant(group):
-        return PRICE_UNIT_PCS
+    """Базова та оптова ціна в цьому розділі — завжди за штуку."""
     return PRICE_UNIT_PCS
 
 
 def party_price_unit_for_group(group: ProductGroup | None) -> str:
-    if group is not None and group_is_foam_glue_sealant(group):
-        return PRICE_UNIT_PACK
+    """Опт також грн/шт (поріг — wholesale_from_qty)."""
     return PRICE_UNIT_PCS

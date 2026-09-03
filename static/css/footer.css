@@ -135,27 +135,35 @@
 .footer-credit {
   flex: 0 0 auto;
   margin: 0 56px 0 0;
-  font-size: 12px;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.78);
   white-space: nowrap;
 }
 
 .footer-credit__link {
-  color: inherit;
+  color: #e65100;
+  font-weight: 600;
   text-decoration: none;
   transition: color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .footer-credit__link:hover {
-  color: #fff;
+  color: #ff9544;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+}
+
+.footer-credit__link:focus-visible {
+  color: #ff9544;
+  outline: 2px solid #ff9544;
+  outline-offset: 2px;
 }
 
 .footer-credit__name {
-  color: inherit;
+  color: #e65100;
+  font-weight: 600;
 }
 
 /* Tablet: 2×2, equal side padding */

@@ -55,9 +55,11 @@ def apply_facets(
 
 
 def annotate_price_from(groups: QuerySet[ProductGroup]) -> QuerySet[ProductGroup]:
+    from django.db.models.functions import Coalesce
+
     return groups.annotate(
         price_from=Min(
-            "skus__price",
+            Coalesce("skus__sale_price", "skus__price"),
             filter=Q(skus__is_active=True),
         )
     )

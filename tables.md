@@ -8,12 +8,12 @@
 |--------|---------|
 | L3 | Немає окремого `Category` L3 — лист = `ProductGroup` |
 | Category | Лише **L1–L2** (12 груп + підкатегорії з `каталог.docx`) |
-| Ціна | `price` = ціна/шт для клієнта; `price_includes_vat=True` (дефолт UA); `vat_rate=20`; опційно `party_price`. Знімок ПДВ у `OrderItem`. |
+| Ціна | `price` / опційно `sale_price` (роздріб); `party_price` грн/шт від `wholesale_from_qty`. Знімок у `OrderItem`. |
 | Checkout | Гість: `Order.user` nullable; обовʼязкові імʼя + телефон; `access_token` для success |
 | Документи PDP | `ProductDocument` у MVP |
-| Купівля | Лише з `ProductSKU`; `qty ≥ min_party` і `qty % min_party == 0` |
+| Купівля | Лише з `ProductSKU`; `qty ≥ min_party`, крок 1 |
 | Наявність PDP | `in_stock` / `on_order` — обидва купуються; зняти з продажу = `is_active=False` |
-| Оплата | Онлайн **LiqPay** → `payments.PaymentTransaction` |
+| Оплата | `payment_status=pending` при place; LiqPay — пізніше |
 | Логіка | Деталі в `business-logic.md` |
 
 ## Apps → моделі
@@ -93,15 +93,17 @@ Brand ──────────→ ProductGroup ──1:N──→ ProductS
 - `head_width_mm` nullable decimal — автосаморізи: ширина головки; разом з `length` × `diameter` × `head_width_mm` (напр. 24×4,2×7,6); заповнення вручну
 - `cell_a_mm`, `cell_b_mm` nullable — композитна сітка: ячейка A×B (мм); ціна на вітрині грн / м²
 - `width_mm`, `thickness_mm` nullable — клинки: ширина і товщина (з `length`); арматура: `diameter` = D (мм), ціна грн / м.п.
-- `volume_ml`, `manufacturer`, `application_zone` (internal|external|both), `pack_qty` — піни/клеї/герметики; роздріб грн/шт, опт грн/упак. (`party_price` + `min_party`)
+- `volume_ml`, `manufacturer`, `application_zone` (internal|external|both), `pack_qty` — піни/клеї/герметики; `pack_qty` лише display; ціни грн/шт
 - `strength_class` nullable
-- `min_party` PositiveInt default 1
+- `min_party` PositiveInt default 1 — мін. qty (крок 1)
+- `wholesale_from_qty` nullable — поріг опту (шт)
 - `stock_status` enum: `in_stock` | `on_order`
-- `stock_qty` nullable int
+- `stock_qty` nullable int — ліміт у кошику; списання при place_order
 - `price` Decimal(12,2) — база за шт
+- `sale_price` nullable — акція лише в роздробі
 - `price_includes_vat` bool default True
 - `vat_rate` Decimal(5,2) default 20.00
-- `party_price` nullable Decimal
+- `party_price` nullable Decimal — опт грн/шт
 - `is_active`, timestamps
 - indexes: `(group, is_active)`, `(diameter, length)`, `(bore_d_mm, od_d_mm, width_b_mm)`
 
@@ -144,7 +146,7 @@ Brand ──────────→ ProductGroup ──1:N──→ ProductS
 
 ### CartItem
 - `cart` FK, `sku` FK → ProductSKU
-- `quantity`: `≥ min_party` і кратна `min_party` (див. `business-logic.md`)
+- `quantity`: `≥ min_party` (крок 1; див. `business-logic.md`)
 - `unique(cart, sku)`
 
 ### WishlistItem

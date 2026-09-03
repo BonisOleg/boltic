@@ -51,7 +51,7 @@
     var input = form.querySelector("[data-qty-input]");
     if (!input) return;
     var min = parseIntSafe(input.getAttribute("min"), 1);
-    var step = parseIntSafe(input.getAttribute("step"), min);
+    var step = parseIntSafe(input.getAttribute("step"), 1);
     var maxAttr = input.getAttribute("max");
     var max = maxAttr === null || maxAttr === "" ? null : parseIntSafe(maxAttr, null);
     var val = snapToStep(clamp(next, min, max), min, step);
@@ -62,9 +62,28 @@
     input.value = String(val);
     syncButtons(form);
     if (submitNow) {
+      if (form.dataset.submitting === "1") return;
+      form.dataset.submitting = "1";
       if (typeof form.requestSubmit === "function") form.requestSubmit();
       else form.submit();
     }
+  }
+
+  function submitOnDelta(form) {
+    return form.getAttribute("data-cart-qty") !== "local";
+  }
+
+  function commitTypedQty(form, input) {
+    if (!input || form.dataset.submitting === "1") return;
+    var min = parseIntSafe(input.getAttribute("min"), 1);
+    var initial = parseIntSafe(input.dataset.qtyInitial, min);
+    applyValue(form, parseIntSafe(input.value, min), false);
+    var normalized = parseIntSafe(input.value, min);
+    if (!submitOnDelta(form) || normalized === initial) {
+      input.dataset.qtyInitial = String(normalized);
+      return;
+    }
+    applyValue(form, normalized, true);
   }
 
   function onDelta(form, delta) {
@@ -72,7 +91,7 @@
     if (!input || form.dataset.submitting === "1") return;
     var min = parseIntSafe(input.getAttribute("min"), 1);
     var current = parseIntSafe(input.value, min);
-    applyValue(form, current + delta, true);
+    applyValue(form, current + delta, submitOnDelta(form));
   }
 
   function bindForm(form) {
@@ -88,15 +107,20 @@
 
     var input = form.querySelector("[data-qty-input]");
     if (input) {
+      input.dataset.qtyInitial = String(parseIntSafe(input.value, 1));
+
       input.addEventListener("change", function () {
-        var min = parseIntSafe(input.getAttribute("min"), 1);
-        applyValue(form, parseIntSafe(input.value, min), false);
+        commitTypedQty(form, input);
       });
+
+      input.addEventListener("blur", function () {
+        commitTypedQty(form, input);
+      });
+
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           e.preventDefault();
-          var min = parseIntSafe(input.getAttribute("min"), 1);
-          applyValue(form, parseIntSafe(input.value, min), true);
+          input.blur();
         }
       });
     }

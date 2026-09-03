@@ -8,7 +8,7 @@ from apps.core.block_render import load_site_blocks
 from apps.core.models import SiteSettings
 
 _DEFAULT_META = (
-    "Інтернет-магазин кріплення {name}. Болти, гайки, самонарізи, анкери — "
+    "Інтернет-магазин кріплення {name}. Болти, гайки, саморізи, анкери — "
     "опт і роздріб з доставкою по Україні."
 )
 

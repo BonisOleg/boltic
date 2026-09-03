@@ -46,8 +46,9 @@ def resolve_cart(request) -> Cart:
 
 
 def cart_item_count(request) -> int:
+    """Кількість позицій (рядків) у кошику, не сума шт."""
     cart = resolve_cart(request)
-    return sum(cart.items.values_list("quantity", flat=True))
+    return cart.items.count()
 
 
 def sync_cart(cart: Cart) -> list[str]:

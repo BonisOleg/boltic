@@ -26,6 +26,10 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -35,8 +39,9 @@ body {
   line-height: 1.5;
   color: var(--color-text);
   background: var(--color-bg);
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
 }
@@ -121,9 +126,12 @@ button {
   border-color: var(--color-danger);
 }
 
+main {
+  flex: 1 0 auto;
+}
+
 .page-main {
   padding: 16px 0 40px;
-  min-height: 50vh;
 }
 
 .page-main--flush {

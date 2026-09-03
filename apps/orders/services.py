@@ -1,10 +1,11 @@
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import F, Max
 from django.utils import timezone
 
 from apps.cart.services import cart_totals, resolve_cart, sync_cart
+from apps.catalog.models import ProductSKU
 from apps.catalog.pricing import line_total, unit_price_for_qty
 from apps.core.exceptions import OrderError
 from apps.core.models import SiteSettings
@@ -104,12 +105,26 @@ def _create_order(request, cleaned_data: dict) -> Order:
     if not items:
         raise OrderError("Кошик порожній")
 
+    sku_ids = [item.sku_id for item in items]
+    locked_skus = {
+        s.pk: s
+        for s in ProductSKU.objects.select_for_update()
+        .select_related("group")
+        .filter(pk__in=sku_ids)
+    }
+
     for item in items:
-        sku = item.sku
-        if not sku.is_active or not sku.group.is_active:
-            raise OrderError(f"Товар {sku.article} недоступний")
-        if sku.price <= 0:
+        sku = locked_skus.get(item.sku_id)
+        if sku is None or not sku.is_active or not sku.group.is_active:
+            raise OrderError(f"Товар {item.sku.article} недоступний")
+        unit = unit_price_for_qty(sku, item.quantity)
+        if unit <= 0:
             raise OrderError(f"Некоректна ціна для {sku.article}")
+        if sku.stock_qty is not None and item.quantity > sku.stock_qty:
+            raise OrderError(
+                f"Недостатньо на складі для {sku.article} "
+                f"(доступно {sku.stock_qty} шт.)"
+            )
 
     method = cleaned_data.get("shipping_method") or ""
     if method == SHIPPING_PICKUP and not SiteSettings.load().pickup_enabled:
@@ -138,7 +153,7 @@ def _create_order(request, cleaned_data: dict) -> Order:
 
     total = Decimal("0.00")
     for item in items:
-        sku = item.sku
+        sku = locked_skus[item.sku_id]
         unit = unit_price_for_qty(sku, item.quantity)
         lt = line_total(unit, item.quantity)
         total += lt
@@ -154,6 +169,14 @@ def _create_order(request, cleaned_data: dict) -> Order:
             quantity=item.quantity,
             line_total=lt,
         )
+        if sku.stock_qty is not None:
+            updated = ProductSKU.objects.filter(
+                pk=sku.pk, stock_qty__gte=item.quantity
+            ).update(stock_qty=F("stock_qty") - item.quantity)
+            if not updated:
+                raise OrderError(
+                    f"Недостатньо на складі для {sku.article}"
+                )
 
     if total < MIN_ORDER_AMOUNT:
         raise OrderError(

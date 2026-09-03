@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{{ sku.name }} — {{ site_settings.site_name }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/sku-detail.css' %}?v=20260731b">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sku-detail.css' %}?v=20260903a">
+<link rel="stylesheet" href="{% static 'css/cart.css' %}?v=20260903a">
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/cart-qty.js' %}?v=20260903a" defer></script>
+{% endblock %}
 {% block content %}
 <div class="container">
   <nav class="sku-detail__nav" aria-label="Навігація">
@@ -102,6 +108,12 @@
         {% elif sku.size_label %}
         <li><span>Розмір</span><strong>{{ sku.size_label }}</strong></li>
         {% endif %}
+        {% if sku.pack_qty and not show_foam_glue_dims %}
+        <li>
+          <span>Шт в упаковці</span>
+          <strong>{{ sku.pack_qty }}&nbsp;шт</strong>
+        </li>
+        {% endif %}
         {% if group.standard %}
         <li><span>Стандарт</span><strong>{{ group.standard }}</strong></li>
         {% endif %}
@@ -124,14 +136,19 @@
 
       <p class="sku-detail__price">
         <span class="sku-detail__price-label">Ціна (баз)</span>
+        {% if sku.sale_price %}
+        <strong>{{ sku.sale_price }} ₴</strong> <span class="sku-price-unit">{{ price_unit }}</span>
+        <span class="sku-price-was">{{ sku.price }} ₴</span>
+        {% else %}
         <strong>{{ sku.price }} ₴</strong> <span class="sku-price-unit">{{ price_unit }}</span>
+        {% endif %}
       </p>
       <p class="sku-detail__party">
-        <span class="sku-detail__price-label">Ціна (пар)</span>
-        {% if sku.party_price is not None %}
+        <span class="sku-detail__price-label">Ціна (опт)</span>
+        {% if sku.party_price is not None and sku.wholesale_from_qty %}
         <strong>{{ sku.party_price }} ₴</strong>
         <span class="sku-price-unit">{{ party_price_unit|default:price_unit }}</span>
-        <span class="sku-detail__party-hint">від {{ sku.min_party }} шт{% if sku.pack_qty %} · упак. {{ sku.pack_qty }} шт{% endif %}</span>
+        <span class="sku-detail__party-hint">від {{ sku.wholesale_from_qty }} шт{% if sku.pack_qty %} · упак. {{ sku.pack_qty }} шт{% endif %}</span>
         {% else %}
         <span class="sku-price-empty">—</span>
         {% endif %}
@@ -139,10 +156,11 @@
 
       <div class="sku-detail__actions">
         <form
-          class="qty-form sku-detail__cart"
+          class="qty-form qty-form--stepper sku-detail__cart"
           method="post"
           action="{% url 'cart:add' %}"
           data-qa="cart-add"
+          data-cart-qty="local"
           hx-post="{% url 'cart:add' %}"
           hx-target="next [data-action-note]"
           hx-swap="innerHTML"
@@ -150,16 +168,34 @@
           {% csrf_token %}
           <input type="hidden" name="sku_id" value="{{ sku.id }}">
           <input type="hidden" name="next" value="{{ request.path }}">
-          <label class="sr-only" for="sku-detail-qty">Кількість</label>
-          <input
-            id="sku-detail-qty"
-            type="number"
-            name="qty"
-            value="{{ sku.min_party }}"
-            min="{{ sku.min_party }}"
-            step="{{ sku.min_party }}"
-            inputmode="numeric"
-          >
+          <div class="qty-stepper" role="group" aria-label="Кількість">
+            <button
+              class="qty-stepper__btn"
+              type="button"
+              data-qty-delta="-1"
+              aria-label="Зменшити"
+              disabled
+            >−</button>
+            <input
+              id="sku-detail-qty"
+              class="qty-stepper__input"
+              type="number"
+              name="qty"
+              value="{{ sku.min_party }}"
+              min="{{ sku.min_party }}"
+              step="1"
+              inputmode="numeric"
+              enterkeyhint="done"
+              aria-label="Кількість"
+              data-qty-input
+            >
+            <button
+              class="qty-stepper__btn"
+              type="button"
+              data-qty-delta="1"
+              aria-label="Збільшити"
+            >+</button>
+          </div>
           <button class="btn" type="submit">У кошик</button>
         </form>
         {% include "includes/wishlist_button.html" with sku=sku btn_size="lg" %}

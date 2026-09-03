@@ -25,8 +25,10 @@
               <td>{{ sku.size_label }}</td>
               <td>
                 {{ row.unit_price }} ₴
-                {% if sku.party_price is not None and row.unit_price == sku.party_price %}
-                <div class="cart-price-hint">опт від {{ sku.min_party }} шт</div>
+                {% if sku.party_price is not None and sku.wholesale_from_qty and row.unit_price == sku.party_price %}
+                <div class="cart-price-hint">опт від {{ sku.wholesale_from_qty }} шт</div>
+                {% elif sku.sale_price and row.unit_price == sku.sale_price %}
+                <div class="cart-price-hint">акція</div>
                 {% endif %}
               </td>
               <td>
@@ -36,7 +38,7 @@
                     <button
                       class="qty-stepper__btn"
                       type="button"
-                      data-qty-delta="-{{ sku.min_party }}"
+                      data-qty-delta="-1"
                       aria-label="Зменшити"
                       {% if row.item.quantity <= sku.min_party %}disabled{% endif %}
                     >−</button>
@@ -45,7 +47,7 @@
                       type="number"
                       name="qty"
                       value="{{ row.item.quantity }}"
-                      step="{{ sku.min_party }}"
+                      step="1"
                       min="{{ sku.min_party }}"
                       {% if row.max_qty is not None %}max="{{ row.max_qty }}"{% endif %}
                       inputmode="numeric"
@@ -56,12 +58,11 @@
                     <button
                       class="qty-stepper__btn"
                       type="button"
-                      data-qty-delta="{{ sku.min_party }}"
+                      data-qty-delta="1"
                       aria-label="Збільшити"
                       {% if row.max_qty is not None and row.item.quantity >= row.max_qty %}disabled{% endif %}
                     >+</button>
                   </div>
-                  <button class="btn btn--sm btn--ghost" type="submit">OK</button>
                 </form>
                 {% if row.available_qty is not None %}
                 <div
@@ -107,5 +108,5 @@
 </div>
 {% endblock %}
 {% block extra_js %}
-<script src="{% static 'js/cart-qty.js' %}" defer></script>
+<script src="{% static 'js/cart-qty.js' %}?v=20260903b" defer></script>
 {% endblock %}

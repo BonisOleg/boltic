@@ -193,10 +193,20 @@ class ProductSKU(models.Model):
         "Шт в упаковці",
         null=True,
         blank=True,
-        help_text="Піни / клеї / герметики: кількість штук в оптовій упаковці.",
+        help_text="Якщо задано — показується на сторінці товару (інформативно, на ціну не впливає).",
     )
     strength_class = models.CharField("Клас міцності", max_length=32, blank=True)
-    min_party = models.PositiveIntegerField("Мін. партія", default=1)
+    min_party = models.PositiveIntegerField(
+        "Мін. кількість",
+        default=1,
+        help_text="Мінімальна кількість шт у замовленні цього SKU. Крок кількості = 1.",
+    )
+    wholesale_from_qty = models.PositiveIntegerField(
+        "Опт від (шт)",
+        null=True,
+        blank=True,
+        help_text="Від цієї кількості (включно) застосовується оптова ціна за шт.",
+    )
     stock_status = models.CharField(
         "Наявність",
         max_length=16,
@@ -205,17 +215,25 @@ class ProductSKU(models.Model):
     )
     stock_qty = models.PositiveIntegerField("Кількість на складі", null=True, blank=True)
     price = models.DecimalField("Ціна за шт", max_digits=12, decimal_places=2)
+    sale_price = models.DecimalField(
+        "Акційна ціна (роздріб)",
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Лише для роздробу (qty нижче порога опту). Опт завжди без акції.",
+    )
     price_includes_vat = models.BooleanField("Ціна з ПДВ", default=True)
     vat_rate = models.DecimalField(
         "Ставка ПДВ %", max_digits=5, decimal_places=2, default=20
     )
     party_price = models.DecimalField(
-        "Ціна опт (партія)",
+        "Ціна опт (за шт)",
         max_digits=12,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Необовʼязково. Якщо задана — застосовується при qty ≥ мін. партії.",
+        help_text="Грн за 1 шт при qty ≥ «Опт від». Без sale_price.",
     )
     image = models.ImageField(
         "Фото SKU",

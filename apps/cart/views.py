@@ -5,6 +5,7 @@ from django_htmx.http import HttpResponseClientRedirect
 
 from apps.cart.services import (
     add_item,
+    cart_item_count,
     cart_totals,
     remove_item,
     resolve_cart,
@@ -45,12 +46,11 @@ def cart_detail(request):
 
 def _note_context(request, *, note: str, ok: bool) -> dict:
     """Контекст для htmx-підказки біля кнопки + лічильники в хедері."""
-    cart = resolve_cart(request)
     user = getattr(request, "user", None)
     return {
         "note": note,
         "ok": ok,
-        "cart_count": sum(cart.items.values_list("quantity", flat=True)),
+        "cart_count": cart_item_count(request),
         "wishlist_count": len(wishlist_sku_ids(user)),
     }
 
@@ -102,8 +102,7 @@ def cart_remove(request, item_id: int):
 
 @require_GET
 def cart_count(request):
-    cart = resolve_cart(request)
-    count = sum(cart.items.values_list("quantity", flat=True))
+    count = cart_item_count(request)
     return render(request, "cart/partials/count.html", {"cart_count": count})
 
 

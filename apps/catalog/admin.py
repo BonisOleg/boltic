@@ -50,8 +50,11 @@ class ProductSKUInline(TabularInline):
         "diameter",
         "head_width_mm",
         "price",
+        "sale_price",
         "party_price",
+        "wholesale_from_qty",
         "min_party",
+        "pack_qty",
         "stock_status",
         "is_active",
     )
@@ -145,7 +148,9 @@ class ProductSKUAdmin(SyncFacetsAdminMixin, ImagePreviewMixin, ModelAdmin):
         "od_d_mm",
         "width_b_mm",
         "price",
+        "sale_price",
         "party_price",
+        "wholesale_from_qty",
         "min_party",
         "stock_status",
         "has_image",
@@ -154,7 +159,9 @@ class ProductSKUAdmin(SyncFacetsAdminMixin, ImagePreviewMixin, ModelAdmin):
     list_display_links = ("article", "name")
     list_editable = (
         "price",
+        "sale_price",
         "party_price",
+        "wholesale_from_qty",
         "min_party",
         "length",
         "diameter",
@@ -229,15 +236,13 @@ class ProductSKUAdmin(SyncFacetsAdminMixin, ImagePreviewMixin, ModelAdmin):
             "Піни / клеї / герметики",
             {
                 "description": (
-                    "Роздріб: ціна за шт. Опт: ціна партії + мін. партія; "
-                    "«Шт в упаковці» — розмір упаковки. "
+                    "Характеристики розділу. «Шт в упаковці» — у блоці «Ціна та наявність». "
                     "Після змін — sync_facets."
                 ),
                 "fields": (
                     "volume_ml",
                     "manufacturer",
                     "application_zone",
-                    "pack_qty",
                 ),
             },
         ),
@@ -257,8 +262,11 @@ class ProductSKUAdmin(SyncFacetsAdminMixin, ImagePreviewMixin, ModelAdmin):
             {
                 "fields": (
                     "price",
+                    "sale_price",
                     "party_price",
+                    "wholesale_from_qty",
                     "min_party",
+                    "pack_qty",
                     "stock_status",
                     "stock_qty",
                     "price_includes_vat",

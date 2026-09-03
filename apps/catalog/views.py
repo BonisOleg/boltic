@@ -109,6 +109,7 @@ class ProductDetailView(View):
                 "show_mesh_dims": group_is_mesh(group),
                 "show_wedge_dims": group_is_wedge(group),
                 "show_foam_glue_dims": group_is_foam_glue_sealant(group),
+                "show_pack_qty": any(s.pack_qty for s in skus),
                 "price_unit": price_unit_for_group(group),
                 "party_price_unit": party_price_unit_for_group(group)
                 if group_is_foam_glue_sealant(group)

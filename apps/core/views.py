@@ -15,7 +15,6 @@ class RobotsTxtView(TemplateView):
     # seo_skill + shop: noindex службових / транзакційних URL
     _DISALLOW = (
         "/admin/",
-        "/manage/",
         "/koshyk/",
         "/bazhane/",
         "/oformlennya/",
@@ -34,6 +33,11 @@ class RobotsTxtView(TemplateView):
         ]
         for path in self._DISALLOW:
             lines.append(f"Disallow: {path}")
+        admin_path = f"/{settings.ADMIN_URL.lstrip('/')}"
+        if not admin_path.endswith("/"):
+            admin_path = f"{admin_path}/"
+        if admin_path not in self._DISALLOW and admin_path != "/admin/":
+            lines.append(f"Disallow: {admin_path}")
         lines.extend(
             [
                 f"Sitemap: {site}/sitemap.xml",

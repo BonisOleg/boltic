@@ -7,7 +7,7 @@ from typing import Any
 
 
 FORMAT_ID = "boltiko_catalog_full"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 
 # Порядок колонок для CSV / XLSX / XML / JSON items
 FULL_DUMP_FIELDS: tuple[str, ...] = (
@@ -19,9 +19,11 @@ FULL_DUMP_FIELDS: tuple[str, ...] = (
     "thread_pitch",
     "strength_class",
     "min_party",
+    "wholesale_from_qty",
     "stock_status",
     "stock_qty",
     "price",
+    "sale_price",
     "price_includes_vat",
     "vat_rate",
     "party_price",
@@ -155,9 +157,11 @@ def parse_full_row(raw: dict[str, Any]) -> dict[str, Any]:
         "thread_pitch": _as_decimal(get("thread_pitch")),
         "strength_class": _as_str(get("strength_class"))[:32],
         "min_party": max(1, _as_int(get("min_party"), 1) or 1),
+        "wholesale_from_qty": _as_int(get("wholesale_from_qty"), None),
         "stock_status": _as_str(get("stock_status")) or "in_stock",
         "stock_qty": _as_int(get("stock_qty"), None),
         "price": price.quantize(Decimal("0.01")),
+        "sale_price": _as_decimal(get("sale_price")),
         "price_includes_vat": _as_bool(get("price_includes_vat"), True),
         "vat_rate": (_as_decimal(get("vat_rate")) or Decimal("20")).quantize(
             Decimal("0.01")

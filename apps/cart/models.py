@@ -64,14 +64,10 @@ class CartItem(models.Model):
     def clean(self) -> None:
         if not self.sku_id:
             return
-        min_party = self.sku.min_party
+        min_party = self.sku.min_party or 1
         if self.quantity < min_party:
             raise ValidationError(
-                {"quantity": f"Мін. партія: {min_party}."}
-            )
-        if self.quantity % min_party != 0:
-            raise ValidationError(
-                {"quantity": f"Кількість має бути кратна {min_party}."}
+                {"quantity": f"Мін. кількість: {min_party}."}
             )
         stock_qty = self.sku.stock_qty
         if stock_qty is not None and self.quantity > stock_qty:

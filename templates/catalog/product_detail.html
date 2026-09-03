@@ -4,10 +4,12 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sku-filter.css' %}">
 <link rel="stylesheet" href="{% static 'css/sku-preview.css' %}">
+<link rel="stylesheet" href="{% static 'css/cart.css' %}?v=20260903a">
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/sku-filter.js' %}?v=20260817a" defer></script>
 <script src="{% static 'js/sku-preview.js' %}" defer></script>
+<script src="{% static 'js/cart-qty.js' %}?v=20260903a" defer></script>
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -128,10 +130,13 @@
                 {% else %}
                 <th>Розмір</th>
                 {% endif %}
-                <th>Партія</th>
+                {% if show_pack_qty and not show_foam_glue_dims %}
+                <th title="Шт в упаковці">Упак.</th>
+                {% endif %}
+                <th>Мін.</th>
                 <th>Наявність</th>
                 <th>Ціна (баз)</th>
-                <th>Ціна (пар)</th>
+                <th>Ціна (опт)</th>
                 <th><span class="sr-only">Дії</span></th>
               </tr>
             </thead>
@@ -215,12 +220,17 @@
                   {% if sku.application_zone %}<strong>{{ sku.get_application_zone_display }}</strong>{% else %}—{% endif %}
                 </td>
                 <td data-label="Шт в упаковці" class="sku-cell--chem-dim">
-                  {% if sku.pack_qty %}<strong>{{ sku.pack_qty }}</strong>{% else %}—{% endif %}
+                  {% if sku.pack_qty %}<strong>{{ sku.pack_qty }}&nbsp;шт</strong>{% else %}—{% endif %}
                 </td>
                 {% else %}
                 <td data-label="Розмір" class="sku-cell--size"><strong>{{ sku.size_label }}</strong></td>
                 {% endif %}
-                <td data-label="Партія">{{ sku.min_party }} шт</td>
+                {% if show_pack_qty and not show_foam_glue_dims %}
+                <td data-label="Упак." class="sku-cell--pack">
+                  {% if sku.pack_qty %}<span class="sku-pack">{{ sku.pack_qty }}&nbsp;шт</span>{% else %}—{% endif %}
+                </td>
+                {% endif %}
+                <td data-label="Мін." class="sku-cell--min"><span class="sku-min">{{ sku.min_party }}&nbsp;шт</span></td>
                 <td data-label="Наявність">
                   {% if sku.stock_status == "in_stock" %}
                     <span class="badge--ok">є в наявності</span>
@@ -229,24 +239,42 @@
                   {% endif %}
                 </td>
                 <td data-label="Ціна (баз)" class="sku-cell--price">
-                  <strong>{{ sku.price }} ₴</strong>
-                  <span class="sku-price-unit">{{ price_unit }}</span>
+                  <div class="sku-price">
+                    {% if sku.sale_price %}
+                      <div class="sku-price__row">
+                        <strong class="sku-price__value">{{ sku.sale_price }}&nbsp;₴</strong>
+                        <span class="sku-price__unit">{{ price_unit|cut:"грн " }}</span>
+                      </div>
+                      <span class="sku-price__was">{{ sku.price }}&nbsp;₴</span>
+                    {% else %}
+                      <div class="sku-price__row">
+                        <strong class="sku-price__value">{{ sku.price }}&nbsp;₴</strong>
+                        <span class="sku-price__unit">{{ price_unit|cut:"грн " }}</span>
+                      </div>
+                    {% endif %}
+                  </div>
                 </td>
-                <td data-label="Ціна (пар)" class="sku-cell--price sku-cell--party-price">
-                  {% if sku.party_price is not None %}
-                    <strong>{{ sku.party_price }} ₴</strong>
-                    <span class="sku-price-unit">{{ party_price_unit|default:price_unit }}</span>
+                <td data-label="Ціна (опт)" class="sku-cell--price sku-cell--party-price">
+                  {% if sku.party_price is not None and sku.wholesale_from_qty %}
+                    <div class="sku-price sku-price--opt">
+                      <div class="sku-price__row">
+                        <strong class="sku-price__value">{{ sku.party_price }}&nbsp;₴</strong>
+                        <span class="sku-price__unit">{{ party_price_unit|default:price_unit|cut:"грн " }}</span>
+                      </div>
+                      <span class="sku-price__meta">від&nbsp;{{ sku.wholesale_from_qty }}&nbsp;шт</span>
+                    </div>
                   {% else %}
                     <span class="sku-price-empty">—</span>
                   {% endif %}
                 </td>
-                <td data-label="" class="sku-cell--actions">
+                <td data-label="Купити" class="sku-cell--actions">
                   <div class="sku-actions">
                     <form
-                      class="qty-form"
+                      class="qty-form qty-form--stepper"
                       method="post"
                       action="{% url 'cart:add' %}"
                       data-qa="cart-add"
+                      data-cart-qty="local"
                       hx-post="{% url 'cart:add' %}"
                       hx-target="next [data-action-note]"
                       hx-swap="innerHTML"
@@ -254,7 +282,33 @@
                       {% csrf_token %}
                       <input type="hidden" name="sku_id" value="{{ sku.id }}">
                       <input type="hidden" name="next" value="{{ request.path }}">
-                      <input type="number" name="qty" value="{{ sku.min_party }}" min="{{ sku.min_party }}" step="{{ sku.min_party }}" inputmode="numeric" aria-label="Кількість">
+                      <div class="qty-stepper" role="group" aria-label="Кількість">
+                        <button
+                          class="qty-stepper__btn"
+                          type="button"
+                          data-qty-delta="-1"
+                          aria-label="Зменшити"
+                          disabled
+                        >−</button>
+                        <input
+                          class="qty-stepper__input"
+                          type="number"
+                          name="qty"
+                          value="{{ sku.min_party }}"
+                          min="{{ sku.min_party }}"
+                          step="1"
+                          inputmode="numeric"
+                          enterkeyhint="done"
+                          aria-label="Кількість"
+                          data-qty-input
+                        >
+                        <button
+                          class="qty-stepper__btn"
+                          type="button"
+                          data-qty-delta="1"
+                          aria-label="Збільшити"
+                        >+</button>
+                      </div>
                       <button class="btn btn--sm" type="submit">У кошик</button>
                     </form>
                     {% include "includes/wishlist_button.html" with sku=sku %}
@@ -263,7 +317,7 @@
                 </td>
               </tr>
             {% empty %}
-              <tr class="sku-row--empty"><td colspan="{% if show_foam_glue_dims %}11{% elif show_bearing_dims or show_auto_screw_dims or show_wedge_dims %}10{% elif show_mesh_dims %}9{% else %}8{% endif %}">Немає активних SKU.</td></tr>
+              <tr class="sku-row--empty"><td colspan="{% if show_foam_glue_dims %}11{% elif show_bearing_dims or show_auto_screw_dims or show_wedge_dims %}{% if show_pack_qty %}11{% else %}10{% endif %}{% elif show_mesh_dims %}{% if show_pack_qty %}10{% else %}9{% endif %}{% else %}{% if show_pack_qty %}9{% else %}8{% endif %}{% endif %}">Немає активних SKU.</td></tr>
             {% endfor %}
             </tbody>
           </table>

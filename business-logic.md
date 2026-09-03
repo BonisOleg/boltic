@@ -18,9 +18,9 @@ HTTP/HTMX → View → Service → QuerySet/Model → Template / partial / redir
 
 | # | Питання | Рішення |
 |---|---------|---------|
-| 1 | Кількість vs `min_party` | `qty >= min_party` **і** `qty % min_party == 0`. Степер ± = крок `min_party`. |
+| 1 | Кількість vs `min_party` | `qty >= min_party`, крок = **1**. Опт від окремого `wholesale_from_qty`. |
 | 2 | Наявність на PDP | Усі **active** SKU видимі. `in_stock` — звичайна кнопка; `on_order` — бейдж «Під замовлення», кнопка **активна** (передзамовлення). Немає окремого «немає» в MVP — якщо треба зняти з продажу → `is_active=False`. |
-| 3 | Оплата | **Онлайн** (провайдер: **LiqPay**). Замовлення створюється → редірект на оплату → webhook підтверджує. |
+| 3 | Оплата | Замовлення створюється з `payment_status=pending`. **LiqPay** — модуль є, підключення до checkout пізніше. |
 | 4 | Документація | Цей файл + `tables.md`. |
 
 ---
@@ -93,18 +93,29 @@ HTTP/HTMX → View → Service → QuerySet/Model → Template / partial / redir
 | `on_order` | бейдж «Під замовлення» | так |
 | `is_active=False` | не показувати | — |
 
-Якщо задано `stock_qty` — показувати як інфо, **не** блокувати кнопку в MVP (резерв складу — поза MVP).
+Якщо задано `stock_qty` — обмежує qty у кошику; при `place_order` залишок **списується** атомарно (`select_for_update` + `F()`).
 
 ### `CartService.add` з рядка (рішення #1)
 
 ```
 valid_qty(sku, qty):
-  qty >= sku.min_party AND qty % sku.min_party == 0
+  qty >= sku.min_party   # крок = 1
 ```
 
-- Інакше 400 + повідомлення («кратність партії N»).
-- UI: `−` / `+` кроком `min_party`; input blur → snap до найближчого валідного ≥ min.
-- Якщо рядок у кошику є: `new_qty = old + qty`, знову `valid_qty`.
+- UI: `−` / `+` кроком **1**; input blur → clamp ≥ min і ≤ stock.
+- Якщо рядок у кошику є: `new_qty = old + qty`, знову нормалізація.
+
+### Ціна рядка
+
+```
+unit_price_for_qty(sku, qty):
+  if party_price and wholesale_from_qty and qty >= wholesale_from_qty:
+      return party_price          # грн/шт, без sale
+  return sale_price or price      # роздріб
+line = unit_price * qty
+```
+
+`pack_qty` — лише display на картці.
 
 ---
 
@@ -126,14 +137,14 @@ valid_qty(sku, qty):
 ### `CartService.resolve(request)`
 - Auth → cart by `user` (get_or_create).
 - Anon → `session_key` (форсувати session).
-- **Login merge:** session items → user cart (`qty` сумувати, потім `normalize_qty` під кратність); session cart видалити.
+- **Login merge:** session items → user cart (`qty` сумувати, потім `normalize_qty` / clamp); session cart видалити.
 
 ### Sync при відкритті кошика
 - Неактивний SKU → прибрати + flash.
-- Якщо `qty` стала невалідною відносно нового `min_party` → підняти до найменшого валідного ≥ поточного (або = min_party).
+- Якщо `qty` стала невалідною відносно нового `min_party` / stock → підняти або clamp.
 
 ### Totals
-- `line = qty * sku.price` (жива ціна).
+- `line = qty * unit_price_for_qty(sku, qty)` (жива ціна).
 - `subtotal = sum(lines)`.
 
 ### Wishlist
@@ -210,11 +221,13 @@ URL (карта + доповнення):
 
 | Контекст | Правило |
 |----------|---------|
-| Вітрина / кошик | показувати `sku.price` |
+| Вітрина / кошик | `unit_price_for_qty(sku, qty)` |
 | Підпис | якщо `price_includes_vat`: «в т.ч. ПДВ {vat_rate}%» |
 | Net (звіти) | `price / (1 + vat_rate/100)` |
-| Checkout | рахувати `price * qty`; `party_price` лише display на PDP |
-| LiqPay amount | = `order.total` (UAH) |
+| Checkout | знімок `unit_price` / `line_total` у `OrderItem` |
+| Опт | `party_price` грн/шт при `qty ≥ wholesale_from_qty` |
+| Акція | `sale_price` лише в роздробі (нижче порога опту) |
+| LiqPay amount | = `order.total` (UAH), коли підключать checkout |
 
 ---
 
@@ -247,15 +260,14 @@ URL (карта + доповнення):
 
 ```python
 def normalize_qty(qty: int, min_party: int) -> int:
+    if min_party < 1:
+        min_party = 1
     if qty < min_party:
         return min_party
-    remainder = qty % min_party
-    if remainder == 0:
-        return qty
-    return qty + (min_party - remainder)  # вверх до кратності
+    return int(qty)
 ```
 
-`add`/`update`: або reject невалідного, або auto-normalize — **MVP: auto-normalize + toast** («кількість змінено до кратності партії»).
+`add`/`update`: auto-normalize до `≥ min_party` і clamp по `stock_qty`.
 
 ---
 
@@ -287,7 +299,7 @@ def normalize_qty(qty: int, min_party: int) -> int:
 
 ## 10. Що поза цією логікою (наступні етапи)
 
-- Резерв складу / зменшення `stock_qty` після оплати
+- Підключення LiqPay до checkout (модуль уже є)
 - Нова Пошта API
 - Refund flow UI
 - i18n `/uk/` `/ru/`

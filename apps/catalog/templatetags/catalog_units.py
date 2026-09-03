@@ -17,7 +17,7 @@ def price_unit(group) -> str:
 
 @register.filter
 def party_price_unit(group) -> str:
-    """Підпис оптової ціни (упаковка для піни/клеїв/герметиків)."""
+    """Підпис оптової ціни — завжди за шт (як і роздріб у розділі)."""
     if group_is_foam_glue_sealant(group):
         return party_price_unit_for_group(group)
     return price_unit_for_group(group)
