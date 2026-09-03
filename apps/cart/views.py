@@ -11,6 +11,7 @@ from apps.cart.services import (
     resolve_cart,
     sync_cart,
     update_item,
+    update_items,
     wishlist_qs,
     wishlist_sku_ids,
     wishlist_toggle,
@@ -86,6 +87,25 @@ def cart_update(request, item_id: int):
             remove_item(request, item_id=item_id)
         else:
             update_item(request, item_id=item_id, qty=qty)
+    except CartError as exc:
+        messages.error(request, str(exc))
+    return redirect("cart:detail")
+
+
+@require_POST
+def cart_update_all(request):
+    quantities: dict[int, int] = {}
+    for key, value in request.POST.items():
+        if not key.startswith("qty_"):
+            continue
+        try:
+            item_id = int(key.removeprefix("qty_"))
+            quantities[item_id] = int(value or 0)
+        except (TypeError, ValueError):
+            continue
+    try:
+        update_items(request, quantities)
+        messages.success(request, "Кошик оновлено")
     except CartError as exc:
         messages.error(request, str(exc))
     return redirect("cart:detail")

@@ -125,18 +125,20 @@
       });
     }
 
-    form.addEventListener("submit", function () {
-      form.dataset.submitting = "1";
-      var min = parseIntSafe(input && input.getAttribute("min"), 1);
-      if (input) applyValue(form, parseIntSafe(input.value, min), false);
-    });
+    if (form.tagName === "FORM") {
+      form.addEventListener("submit", function () {
+        form.dataset.submitting = "1";
+        var min = parseIntSafe(input && input.getAttribute("min"), 1);
+        if (input) applyValue(form, parseIntSafe(input.value, min), false);
+      });
+    }
 
     syncButtons(form);
   }
 
   function init() {
-    var forms = document.querySelectorAll("form[data-cart-qty]");
-    for (var i = 0; i < forms.length; i++) bindForm(forms[i]);
+    var nodes = document.querySelectorAll("[data-cart-qty]");
+    for (var i = 0; i < nodes.length; i++) bindForm(nodes[i]);
   }
 
   if (document.readyState === "loading") {

@@ -2,13 +2,18 @@
 {% load static %}
 {% block title %}Кошик — {{ site_settings.site_name }}{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+<link rel="stylesheet" href="{% static 'css/cart.css' %}?v=20260903d">
 {% endblock %}
 {% block content %}
 <div class="container" data-qa="cart-page">
   <div class="section-card">
     <div class="section-head"><h1 class="is-upper">Кошик</h1></div>
     <div class="section-body">
+      {% if lines %}
+      <form id="cart-update-form" method="post" action="{% url 'cart:update_all' %}">
+        {% csrf_token %}
+      </form>
+      {% endif %}
       <div class="table-wrap">
         <table class="data-table">
           <thead>
@@ -32,8 +37,7 @@
                 {% endif %}
               </td>
               <td>
-                <form class="qty-form qty-form--stepper" method="post" action="{% url 'cart:update' row.item.id %}" data-cart-qty>
-                  {% csrf_token %}
+                <div class="qty-form qty-form--stepper" data-cart-qty="local">
                   <div class="qty-stepper" role="group" aria-label="Кількість">
                     <button
                       class="qty-stepper__btn"
@@ -44,8 +48,9 @@
                     >−</button>
                     <input
                       class="qty-stepper__input"
+                      form="cart-update-form"
                       type="number"
-                      name="qty"
+                      name="qty_{{ row.item.id }}"
                       value="{{ row.item.quantity }}"
                       step="1"
                       min="{{ sku.min_party }}"
@@ -63,7 +68,7 @@
                       {% if row.max_qty is not None and row.item.quantity >= row.max_qty %}disabled{% endif %}
                     >+</button>
                   </div>
-                </form>
+                </div>
                 {% if row.available_qty is not None %}
                 <div
                   class="qty-stock-hint"
@@ -88,18 +93,23 @@
         </table>
       </div>
       {% if lines %}
-      <p class="cart-total">Разом: <strong>{{ subtotal }} грн</strong></p>
-      {% if can_checkout %}
-      <a class="btn" href="{% url 'orders:checkout' %}" data-qa="checkout-cta">Оформити замовлення</a>
-      {% else %}
-      <p class="cart-min-order" role="status">
-        Мінімальна сума замовлення — {{ min_order|floatformat:0 }} грн.
-        Додайте ще на {{ min_order_shortfall|floatformat:0 }} грн.
-      </p>
-      <button class="btn btn--disabled" type="button" disabled aria-disabled="true" data-qa="checkout-cta">
-        Оформити замовлення
-      </button>
-      {% endif %}
+      <div class="cart-actions">
+        <p class="cart-total">Разом: <strong>{{ subtotal }} грн</strong></p>
+        <button class="btn btn--ghost" type="submit" form="cart-update-form" data-qa="cart-update">
+          Оновити кошик
+        </button>
+        {% if can_checkout %}
+        <a class="btn" href="{% url 'orders:checkout' %}" data-qa="checkout-cta">Оформити замовлення</a>
+        {% else %}
+        <p class="cart-min-order" role="status">
+          Мінімальна сума замовлення — {{ min_order|floatformat:0 }} грн.
+          Додайте ще на {{ min_order_shortfall|floatformat:0 }} грн.
+        </p>
+        <button class="btn btn--disabled" type="button" disabled aria-disabled="true" data-qa="checkout-cta">
+          Оформити замовлення
+        </button>
+        {% endif %}
+      </div>
       {% else %}
       <a class="btn" href="{% url 'catalog:root' %}">До каталогу</a>
       {% endif %}
@@ -108,5 +118,5 @@
 </div>
 {% endblock %}
 {% block extra_js %}
-<script src="{% static 'js/cart-qty.js' %}?v=20260903b" defer></script>
+<script src="{% static 'js/cart-qty.js' %}?v=20260903c" defer></script>
 {% endblock %}

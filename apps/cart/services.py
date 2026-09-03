@@ -145,6 +145,28 @@ def update_item(request, *, item_id: int, qty: int) -> CartItem:
 
 
 @transaction.atomic
+def update_items(request, quantities: dict[int, int]) -> None:
+    """Оновити кілька позицій за один раз. qty <= 0 — видалити."""
+    cart = resolve_cart(request)
+    items = {
+        item.pk: item
+        for item in cart.items.select_related("sku").filter(pk__in=quantities.keys())
+    }
+    for item_id, qty in quantities.items():
+        item = items.get(item_id)
+        if item is None:
+            continue
+        qty = int(qty)
+        if qty <= 0:
+            item.delete()
+            continue
+        item.quantity = _enforce_stock(item.sku, qty)
+        item.save(update_fields=["quantity"])
+    cart.updated_at = timezone.now()
+    cart.save(update_fields=["updated_at"])
+
+
+@transaction.atomic
 def remove_item(request, *, item_id: int) -> None:
     cart = resolve_cart(request)
     deleted, _ = CartItem.objects.filter(pk=item_id, cart=cart).delete()
