@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
 from apps.catalog.models import Category
-from apps.content.models import StaticPage
+from apps.content.static_page_defaults import ensure_static_pages
 from apps.core.models import SiteSettings
 
 TREE = [
@@ -76,18 +76,6 @@ TREE = [
     ),
 ]
 
-STATIC_PAGES = [
-    ("oplata-i-dostavka", "Оплата і доставка", "Текст про оплату та доставку."),
-    ("povernennya-ta-obmin", "Повернення та обмін", "Повернення протягом 14 днів."),
-    ("publichnyy-dohovir", "Публічний договір", "Текст оферти."),
-    (
-        "polityka-konfidentsiynosti",
-        "Політика конфіденційності",
-        "Політика обробки персональних даних.",
-    ),
-]
-
-
 class Command(BaseCommand):
     help = "Seed категорій каталогу + базові static pages"
 
@@ -119,9 +107,10 @@ class Command(BaseCommand):
                         "is_active": True,
                     },
                 )
-        for slug, title, body in STATIC_PAGES:
-            StaticPage.objects.update_or_create(
-                slug=slug,
-                defaults={"title": title, "body": body, "is_published": True},
+        stats = ensure_static_pages()
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Seed OK "
+                f"(pages +{stats['created']} ~{stats['updated']} skip={stats['skipped']})"
             )
-        self.stdout.write(self.style.SUCCESS("Seed OK"))
+        )
