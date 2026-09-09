@@ -1,11 +1,13 @@
 from django.urls import path
 
 from apps.catalog import views
+from apps.catalog.google_feed import google_merchant_feed
 from apps.core import urlconverters  # noqa: F401 — register uslug
 
 app_name = "catalog"
 
 urlpatterns = [
+    path("feeds/google.xml", google_merchant_feed, name="google_feed"),
     path("katalog/", views.CatalogRootView.as_view(), name="root"),
     path("katalog/search/", views.search, name="search"),
     path("katalog/<path:path>/", views.CategoryView.as_view(), name="category"),

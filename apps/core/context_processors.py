@@ -25,6 +25,7 @@ def site_settings(request):
         "site_blocks": load_site_blocks(),
         "seo_canonical": f"{base}{request.path}",
         "seo_description_default": meta,
+        "gtm_container_id": getattr(dj_settings, "GTM_CONTAINER_ID", "") or "",
     }
 
 

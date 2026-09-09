@@ -118,6 +118,16 @@ class CheckoutFlowTests(TestCase):
         subjects = {m.subject for m in mail.outbox}
         self.assertTrue(any(order.number in s for s in subjects))
 
+        success = self.client.get(resp.url)
+        self.assertEqual(success.status_code, 200)
+        body = success.content.decode()
+        self.assertIn('id="gtm-purchase"', body)
+        self.assertIn('"event": "purchase"', body)
+        self.assertIn(order.number, body)
+        self.assertIn("GTM-M63C7Z3F", body)
+        again = self.client.get(resp.url)
+        self.assertNotIn('id="gtm-purchase"', again.content.decode())
+
     def test_contact_validation(self):
         self.client.post(
             "/koshyk/add/",

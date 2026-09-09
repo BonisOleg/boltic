@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from csp.constants import NONCE
 from decouple import config
 from django.templatetags.static import static
 
@@ -98,22 +99,49 @@ if not _admin_path or _admin_path.lower() == "admin":
 ADMIN_URL = f"{_admin_path}/"
 
 # SEC-csp / project_structure §8.5 — Unfold needs CSP exempt (Alpine unsafe-eval)
+# GTM (nonce на інлайн-сніпеті) + Ads/Analytics пікселі. Без прямого gtag.js.
+_GTM_HOSTS = (
+    "https://www.googletagmanager.com",
+    "https://*.googletagmanager.com",
+    "https://tagmanager.google.com",
+)
+_GA_ADS_HOSTS = (
+    "https://www.google-analytics.com",
+    "https://*.google-analytics.com",
+    "https://analytics.google.com",
+    "https://*.analytics.google.com",
+    "https://www.googleadservices.com",
+    "https://googleads.g.doubleclick.net",
+    "https://*.g.doubleclick.net",
+    "https://www.google.com",
+    "https://www.google.com.ua",
+    "https://*.google.com",
+    "https://*.google.com.ua",
+)
 CONTENT_SECURITY_POLICY = {
     "EXCLUDE_URL_PREFIXES": (f"/{_admin_path}/", "/tinymce/"),
     "DIRECTIVES": {
         "default-src": ["'self'"],
-        "script-src": ["'self'"],
+        "script-src": ["'self'", NONCE, *_GTM_HOSTS, *_GA_ADS_HOSTS],
         # style= legacy + theme :root block; cleanup ≠ SEC-csp scope. ERR-106: no HTMX inject.
-        "style-src": ["'self'", "'unsafe-inline'"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://tagmanager.google.com"],
         "font-src": ["'self'", "data:"],
-        "img-src": ["'self'", "data:", "blob:"],
-        "connect-src": ["'self'"],
+        "img-src": ["'self'", "data:", "blob:", *_GTM_HOSTS, *_GA_ADS_HOSTS],
+        "connect-src": ["'self'", *_GTM_HOSTS, *_GA_ADS_HOSTS],
+        "frame-src": [
+            "https://www.googletagmanager.com",
+            "https://td.doubleclick.net",
+            "https://www.google.com",
+        ],
         "frame-ancestors": ["'none'"],
         "base-uri": ["'self'"],
         "form-action": ["'self'", "https://www.liqpay.ua", "https://www.liqpay.com"],
         "object-src": ["'none'"],
     },
 }
+
+GTM_CONTAINER_ID = config("GTM_CONTAINER_ID", default="GTM-M63C7Z3F").strip()
+GOOGLE_FEED_CACHE_SECONDS = config("GOOGLE_FEED_CACHE_SECONDS", default=1800, cast=int)
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/kabinet/"

@@ -4,6 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  {% if gtm_container_id %}
+  <script nonce="{{ request.csp_nonce }}">window.dataLayer = window.dataLayer || [];</script>
+  {% block data_layer %}{% endblock %}
+  {% include "includes/gtm_head.html" %}
+  {% endif %}
   <title>{% block title %}{{ site_settings.site_name }}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ seo_description_default }}{% endblock %}">
   <link rel="canonical" href="{% block canonical %}{{ seo_canonical }}{% endblock %}">
@@ -48,6 +53,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% include "includes/gtm_noscript.html" %}
   {% include "includes/header.html" %}
   {% if messages %}
   <ul class="messages container">

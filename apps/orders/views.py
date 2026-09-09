@@ -17,6 +17,7 @@ from apps.orders.checkout_session import (
 from apps.orders.constants import MIN_ORDER_AMOUNT, SHIPPING_METHOD_LABELS
 from apps.orders.forms import ContactForm, DeliveryForm, pickup_is_enabled
 from apps.orders import nova_poshta
+from apps.orders.gtm_purchase import consume_purchase_payload, mark_purchase_pending
 from apps.orders.services import assert_min_order_amount, get_order_for_success, place_order
 
 
@@ -183,6 +184,7 @@ def checkout_confirm(request):
         except OrderError as exc:
             messages.error(request, str(exc))
             return redirect("cart:detail")
+        mark_purchase_pending(request, order)
         clear_checkout(request)
         messages.success(request, f"Замовлення {order.number} прийнято")
         return redirect(
@@ -241,4 +243,11 @@ def order_success(request, number: str):
     except OrderError:
         messages.error(request, "Замовлення не знайдено")
         return redirect("content:home")
-    return render(request, "orders/success.html", {"order": order})
+    return render(
+        request,
+        "orders/success.html",
+        {
+            "order": order,
+            "gtm_purchase": consume_purchase_payload(request, order),
+        },
+    )

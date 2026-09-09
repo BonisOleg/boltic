@@ -73,3 +73,24 @@ class Err26HtmxStaticTests(TestCase):
         self.assertNotIn("htmx.org", html)
         self.assertNotIn("cdn.jsdelivr", html)
         self.assertNotIn("django_htmx/htmx.min.js", html)
+
+
+class GtmContainerTests(TestCase):
+    def test_home_has_gtm_not_standalone_gtag(self):
+        response = self.client.get(reverse("content:home"))
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("GTM-M63C7Z3F", html)
+        self.assertIn("googletagmanager.com/gtm.js", html)
+        self.assertIn("googletagmanager.com/ns.html?id=GTM-M63C7Z3F", html)
+        self.assertNotIn("AW-18430256521", html)
+        self.assertNotIn("gtag/js?id=", html)
+        csp = response.headers.get("Content-Security-Policy", "")
+        self.assertIn("googletagmanager.com", csp)
+        self.assertIn("nonce-", csp)
+
+    def test_empty_container_id_hides_snippets(self):
+        with override_settings(GTM_CONTAINER_ID=""):
+            html = self.client.get(reverse("content:home")).content.decode()
+        self.assertNotIn("googletagmanager.com/gtm.js", html)
+        self.assertNotIn("GTM-M63C7Z3F", html)

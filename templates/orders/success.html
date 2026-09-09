@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Замовлення {{ order.number }} — {{ site_settings.site_name }}{% endblock %}
+{% block data_layer %}
+{% if gtm_purchase %}
+{{ gtm_purchase|json_script:"gtm-purchase" }}
+<script nonce="{{ request.csp_nonce }}">
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({ecommerce: null});
+window.dataLayer.push(JSON.parse(document.getElementById("gtm-purchase").textContent));
+</script>
+{% endif %}
+{% endblock %}
 {% block content %}
 <div class="container">
   <div class="section-card section-card--xl">
