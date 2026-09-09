@@ -39,8 +39,9 @@ done
 
 echo "==> inventory"
 missing=0
+running_services="$("${COMPOSE[@]}" ps --status running --services 2>/dev/null || true)"
 for svc in "${SERVICES[@]}"; do
-  if "${COMPOSE[@]}" ps "$svc" 2>/dev/null | grep -q "running"; then
+  if printf '%s\n' "$running_services" | grep -qx "$svc"; then
     echo "OK: $svc"
   else
     echo "MISSING: $svc"

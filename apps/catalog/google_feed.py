@@ -11,7 +11,7 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.html import strip_tags
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
 
 from apps.catalog.models import ProductImage, ProductSKU
 from apps.catalog.pricing import retail_unit_price
@@ -215,17 +215,26 @@ def build_google_feed_xml() -> str:
     return "".join(chunks)
 
 
-@require_GET
+def _feed_headers(ttl: int) -> dict[str, str]:
+    if ttl > 0:
+        return {"Cache-Control": f"public, max-age={ttl}"}
+    return {"Cache-Control": "no-store"}
+
+
+@require_http_methods(["GET", "HEAD"])
 def google_merchant_feed(request):
     ttl = int(getattr(settings, "GOOGLE_FEED_CACHE_SECONDS", 0) or 0)
+    if request.method == "HEAD":
+        response = HttpResponse(status=200, content_type="application/xml; charset=utf-8")
+        for key, value in _feed_headers(ttl).items():
+            response[key] = value
+        return response
     xml = cache.get(_CACHE_KEY) if ttl > 0 else None
     if not xml:
         xml = build_google_feed_xml()
         if ttl > 0:
             cache.set(_CACHE_KEY, xml, ttl)
     response = HttpResponse(xml, content_type="application/xml; charset=utf-8")
-    if ttl > 0:
-        response["Cache-Control"] = f"public, max-age={ttl}"
-    else:
-        response["Cache-Control"] = "no-store"
+    for key, value in _feed_headers(ttl).items():
+        response[key] = value
     return response

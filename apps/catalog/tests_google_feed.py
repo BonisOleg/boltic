@@ -121,3 +121,10 @@ class GoogleMerchantFeedTests(TestCase):
         self.assertIn("<g:availability>in_stock</g:availability>", xml)
         self.assertIn("<g:identifier_exists>no</g:identifier_exists>", xml)
         self.assertIn("<g:condition>new</g:condition>", xml)
+
+    def test_head_allowed_without_body(self):
+        self._sku()
+        resp = self.client.head(reverse("catalog:google_feed"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("application/xml", resp["Content-Type"])
+        self.assertEqual(resp.content, b"")
