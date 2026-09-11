@@ -22,10 +22,21 @@
   var whRef = whWrap && whWrap.querySelector('input[name="np_warehouse_ref"]');
   var whList = whWrap && whWrap.querySelector("[data-np-list]");
 
+  var errorEl = root.querySelector("[data-np-error]");
   var cityTimer = null;
   var whTimer = null;
   var abortCity = null;
   var abortWh = null;
+
+  function showNpError(msg) {
+    if (!errorEl) return;
+    errorEl.textContent = msg || "";
+    errorEl.hidden = !msg;
+  }
+
+  function clearNpError() {
+    showNpError("");
+  }
 
   function selectedMethod() {
     var el = root.querySelector('input[name="shipping_method"]:checked');
@@ -58,7 +69,11 @@
     if (!list) return;
     list.innerHTML = "";
     if (!items.length) {
-      list.hidden = true;
+      var empty = document.createElement("li");
+      empty.className = "np-suggest__empty";
+      empty.textContent = "Нічого не знайдено";
+      list.appendChild(empty);
+      list.hidden = false;
       return;
     }
     items.forEach(function (item) {
@@ -99,6 +114,7 @@
     }
     if (abortCity) abortCity.abort();
     abortCity = new AbortController();
+    clearNpError();
     fetchJson(
       cfg.npCitiesUrl + "?q=" + encodeURIComponent(q.trim()),
       abortCity.signal
@@ -116,6 +132,7 @@
       .catch(function (err) {
         if (err.name === "AbortError") return;
         hideList(cityList);
+        showNpError(err.message || "Не вдалося завантажити міста");
       });
   }
 
@@ -134,6 +151,7 @@
       encodeURIComponent(selectedType()) +
       "&q=" +
       encodeURIComponent(q.trim());
+    clearNpError();
     fetchJson(url, abortWh.signal)
       .then(function (items) {
         renderList(whList, items, function (item) {
@@ -144,6 +162,7 @@
       .catch(function (err) {
         if (err.name === "AbortError") return;
         hideList(whList);
+        showNpError(err.message || "Не вдалося завантажити відділення");
       });
   }
 

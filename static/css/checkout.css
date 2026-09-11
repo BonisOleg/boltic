@@ -232,6 +232,12 @@
   display: none;
 }
 
+.np-suggest__empty {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
 .np-suggest__item {
   display: block;
   width: 100%;
