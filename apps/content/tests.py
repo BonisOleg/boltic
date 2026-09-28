@@ -75,6 +75,15 @@ class Err26HtmxStaticTests(TestCase):
         self.assertNotIn("django_htmx/htmx.min.js", html)
 
 
+def _csp_directives(header: str) -> dict[str, list[str]]:
+    directives: dict[str, list[str]] = {}
+    for part in header.split(";"):
+        bits = part.strip().split()
+        if bits:
+            directives[bits[0]] = bits[1:]
+    return directives
+
+
 class GtmContainerTests(TestCase):
     def test_home_has_gtm_not_standalone_gtag(self):
         response = self.client.get(reverse("content:home"))
@@ -88,6 +97,11 @@ class GtmContainerTests(TestCase):
         csp = response.headers.get("Content-Security-Policy", "")
         self.assertIn("googletagmanager.com", csp)
         self.assertIn("nonce-", csp)
+        directives = _csp_directives(csp)
+        self.assertIn("https://ad.doubleclick.net", directives["connect-src"])
+        self.assertIn("https://ad.doubleclick.net", directives["img-src"])
+        self.assertNotIn("https://ad.doubleclick.net", directives["script-src"])
+        self.assertIn("https://*.g.doubleclick.net", directives["connect-src"])
 
     def test_empty_container_id_hides_snippets(self):
         with override_settings(GTM_CONTAINER_ID=""):

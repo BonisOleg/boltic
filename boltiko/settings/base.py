@@ -111,12 +111,15 @@ _GA_ADS_HOSTS = (
     "https://analytics.google.com",
     "https://*.analytics.google.com",
     "https://www.googleadservices.com",
-    "https://googleads.g.doubleclick.net",
     "https://*.g.doubleclick.net",
     "https://www.google.com",
     "https://www.google.com.ua",
     "https://*.google.com",
     "https://*.google.com.ua",
+)
+# Піксель і beacon Google Ads. Не в script-src: хост не віддає скрипти.
+_ADS_PIXEL_HOSTS = (
+    "https://ad.doubleclick.net",
 )
 CONTENT_SECURITY_POLICY = {
     "EXCLUDE_URL_PREFIXES": (f"/{_admin_path}/", "/tinymce/"),
@@ -126,8 +129,8 @@ CONTENT_SECURITY_POLICY = {
         # style= legacy + theme :root block; cleanup ≠ SEC-csp scope. ERR-106: no HTMX inject.
         "style-src": ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://tagmanager.google.com"],
         "font-src": ["'self'", "data:"],
-        "img-src": ["'self'", "data:", "blob:", *_GTM_HOSTS, *_GA_ADS_HOSTS],
-        "connect-src": ["'self'", *_GTM_HOSTS, *_GA_ADS_HOSTS],
+        "img-src": ["'self'", "data:", "blob:", *_GTM_HOSTS, *_GA_ADS_HOSTS, *_ADS_PIXEL_HOSTS],
+        "connect-src": ["'self'", *_GTM_HOSTS, *_GA_ADS_HOSTS, *_ADS_PIXEL_HOSTS],
         "frame-src": [
             "https://www.googletagmanager.com",
             "https://td.doubleclick.net",
