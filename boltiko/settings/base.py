@@ -121,20 +121,62 @@ _GA_ADS_HOSTS = (
 _ADS_PIXEL_HOSTS = (
     "https://ad.doubleclick.net",
 )
+# Google Ads / Floodlight / Merchant Center (img + connect). Не в script-src.
+_ADS_SYNDICATION_HOSTS = (
+    "https://pagead2.googlesyndication.com",
+    "https://googleads.g.doubleclick.net",
+)
+_FLOODLIGHT_IMG_HOSTS = (
+    "https://ade.googlesyndication.com",
+    "https://adservice.google.com",
+)
+_MERCHANT_CENTER_HOSTS = (
+    "https://*.merchant-center-analytics.goog",
+)
+# GTM Preview Mode static assets
+_GTM_PREVIEW_IMG_HOSTS = (
+    "https://ssl.gstatic.com",
+    "https://www.gstatic.com",
+)
 CONTENT_SECURITY_POLICY = {
     "EXCLUDE_URL_PREFIXES": (f"/{_admin_path}/", "/tinymce/"),
     "DIRECTIVES": {
         "default-src": ["'self'"],
         "script-src": ["'self'", NONCE, *_GTM_HOSTS, *_GA_ADS_HOSTS],
         # style= legacy + theme :root block; cleanup ≠ SEC-csp scope. ERR-106: no HTMX inject.
-        "style-src": ["'self'", "'unsafe-inline'", "https://www.googletagmanager.com", "https://tagmanager.google.com"],
-        "font-src": ["'self'", "data:"],
-        "img-src": ["'self'", "data:", "blob:", *_GTM_HOSTS, *_GA_ADS_HOSTS, *_ADS_PIXEL_HOSTS],
-        "connect-src": ["'self'", *_GTM_HOSTS, *_GA_ADS_HOSTS, *_ADS_PIXEL_HOSTS],
+        "style-src": [
+            "'self'",
+            "'unsafe-inline'",
+            "https://www.googletagmanager.com",
+            "https://tagmanager.google.com",
+            "https://fonts.googleapis.com",
+        ],
+        "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
+        "img-src": [
+            "'self'",
+            "data:",
+            "blob:",
+            *_GTM_HOSTS,
+            *_GA_ADS_HOSTS,
+            *_ADS_PIXEL_HOSTS,
+            *_ADS_SYNDICATION_HOSTS,
+            *_FLOODLIGHT_IMG_HOSTS,
+            *_MERCHANT_CENTER_HOSTS,
+            *_GTM_PREVIEW_IMG_HOSTS,
+        ],
+        "connect-src": [
+            "'self'",
+            *_GTM_HOSTS,
+            *_GA_ADS_HOSTS,
+            *_ADS_PIXEL_HOSTS,
+            *_ADS_SYNDICATION_HOSTS,
+            *_MERCHANT_CENTER_HOSTS,
+        ],
         "frame-src": [
             "https://www.googletagmanager.com",
             "https://td.doubleclick.net",
             "https://www.google.com",
+            "https://*.fls.doubleclick.net",
         ],
         "frame-ancestors": ["'none'"],
         "base-uri": ["'self'"],

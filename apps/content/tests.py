@@ -103,6 +103,76 @@ class GtmContainerTests(TestCase):
         self.assertNotIn("https://ad.doubleclick.net", directives["script-src"])
         self.assertIn("https://*.g.doubleclick.net", directives["connect-src"])
 
+    def test_home_csp_allows_gtm_ga4_ads_floodlight_merchant(self):
+        response = self.client.get(reverse("content:home"))
+        self.assertEqual(response.status_code, 200)
+        csp = response.headers.get("Content-Security-Policy", "")
+        directives = _csp_directives(csp)
+
+        for host in (
+            "https://ad.doubleclick.net",
+            "https://www.googletagmanager.com",
+            "https://*.google-analytics.com",
+            "https://*.analytics.google.com",
+            "https://*.g.doubleclick.net",
+            "https://www.googleadservices.com",
+            "https://www.google.com",
+            "https://pagead2.googlesyndication.com",
+            "https://googleads.g.doubleclick.net",
+            "https://*.merchant-center-analytics.goog",
+        ):
+            self.assertIn(host, directives["connect-src"], host)
+
+        for host in (
+            "https://ad.doubleclick.net",
+            "https://www.googletagmanager.com",
+            "https://*.google-analytics.com",
+            "https://*.g.doubleclick.net",
+            "https://www.googleadservices.com",
+            "https://www.google.com",
+            "https://pagead2.googlesyndication.com",
+            "https://googleads.g.doubleclick.net",
+            "https://ade.googlesyndication.com",
+            "https://adservice.google.com",
+            "https://ssl.gstatic.com",
+            "https://www.gstatic.com",
+            "https://*.merchant-center-analytics.goog",
+        ):
+            self.assertIn(host, directives["img-src"], host)
+
+        for host in (
+            "https://www.googletagmanager.com",
+            "https://www.googleadservices.com",
+            "https://www.google.com",
+            "https://*.g.doubleclick.net",
+        ):
+            self.assertIn(host, directives["script-src"], host)
+        self.assertTrue(
+            any("nonce-" in v for v in directives["script-src"]),
+            directives["script-src"],
+        )
+        self.assertNotIn("https://ad.doubleclick.net", directives["script-src"])
+
+        for host in (
+            "https://www.googletagmanager.com",
+            "https://td.doubleclick.net",
+            "https://www.google.com",
+            "https://*.fls.doubleclick.net",
+        ):
+            self.assertIn(host, directives["frame-src"], host)
+
+        self.assertIn("https://fonts.googleapis.com", directives["style-src"])
+        self.assertIn("https://fonts.gstatic.com", directives["font-src"])
+
+        for name, values in directives.items():
+            joined = " ".join(values)
+            if name != "style-src":
+                self.assertNotIn("unsafe-", joined, name)
+            self.assertNotIn(" *", f" {joined} ", name)
+            self.assertNotIn("* ", f" {joined} ", name)
+            for token in values:
+                self.assertNotEqual(token, "*", name)
+
     def test_empty_container_id_hides_snippets(self):
         with override_settings(GTM_CONTAINER_ID=""):
             html = self.client.get(reverse("content:home")).content.decode()
