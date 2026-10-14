@@ -5,6 +5,7 @@ from .category import Category
 from .collection import Collection
 from .facet import FacetAttribute, FacetValue, SKUFacet
 from .product import ProductDocument, ProductGroup, ProductImage, ProductSKU
+from .slug_history import ProductSlugHistory
 
 __all__ = [
     "Brand",
@@ -17,5 +18,6 @@ __all__ = [
     "ProductGroup",
     "ProductImage",
     "ProductSKU",
+    "ProductSlugHistory",
     "SKUFacet",
 ]

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Сторінку не знайдено — {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 3rem 1rem; text-align: center;">
+  <h1>Сторінку не знайдено</h1>
+  <p>Можливо, товар переїхав на нову адресу або посилання застаріле.</p>
+  <p>
+    <a href="{% url 'content:home' %}">На головну</a>
+    ·
+    <a href="{% url 'catalog:root' %}">До каталогу</a>
+  </p>
+</section>
+{% endblock %}

@@ -13,6 +13,7 @@ from apps.catalog.models import (
     ProductGroup,
     ProductImage,
     ProductSKU,
+    ProductSlugHistory,
     SKUFacet,
 )
 from apps.core.admin_utils import ImagePreviewMixin, TinyMCEAdminMixin
@@ -315,3 +316,19 @@ class SKUFacetAdmin(ModelAdmin):
     list_display = ("sku", "value")
     search_fields = ("sku__article", "value__value")
     raw_id_fields = ("sku", "value")
+
+
+@admin.register(ProductSlugHistory)
+class ProductSlugHistoryAdmin(ModelAdmin):
+    list_display = ("old_slug", "product", "created_at")
+    search_fields = ("old_slug", "product__name", "product__slug")
+    list_filter = ("created_at",)
+    autocomplete_fields = ("product",)
+    readonly_fields = ("old_slug", "product", "created_at")
+    ordering = ("-created_at",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

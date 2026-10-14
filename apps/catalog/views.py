@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import Http404
+from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views import View
 from django.views.decorators.http import require_GET, require_http_methods
 from django.views.generic import TemplateView
@@ -20,9 +21,20 @@ from apps.catalog.foam_glue_dims import (
     group_is_foam_glue_sealant,
     party_price_unit_for_group,
 )
+from apps.catalog.models.slug_history import (
+    lookup_product_by_old_slug,
+    resolve_product_slug,
+)
 from apps.core.exceptions import ReviewError
 from apps.orders.forms import ReviewForm
 from apps.reviews.services import create_pending_review
+
+
+def _permanent_redirect_preserving_qs(request, url: str) -> HttpResponsePermanentRedirect:
+    qs = request.META.get("QUERY_STRING", "")
+    if qs:
+        url = f"{url}?{qs}"
+    return HttpResponsePermanentRedirect(url)
 
 
 class CatalogRootView(TemplateView):
@@ -79,6 +91,10 @@ class ProductDetailView(View):
     def get(self, request, slug: str):
         group = selectors.get_pdp(slug)
         if group is None:
+            hist_product = lookup_product_by_old_slug(slug)
+            if hist_product is not None:
+                url = reverse("catalog:product", kwargs={"slug": hist_product.slug})
+                return _permanent_redirect_preserving_qs(request, url)
             raise Http404
         highlight = request.GET.get("sku", "")
         reviews = [r for r in group.reviews.all() if r.is_published]
@@ -124,6 +140,13 @@ class SKUDetailView(View):
     def get(self, request, slug: str, article: str):
         sku = selectors.get_sku(slug, article)
         if sku is None:
+            hist_product = lookup_product_by_old_slug(slug)
+            if hist_product is not None:
+                url = reverse(
+                    "catalog:sku_detail",
+                    kwargs={"slug": hist_product.slug, "article": article},
+                )
+                return _permanent_redirect_preserving_qs(request, url)
             raise Http404
         _mark_wishlist(request, [sku])
         return render(
@@ -148,18 +171,19 @@ class SKUDetailView(View):
 @login_required
 @require_http_methods(["POST"])
 def product_review(request, slug: str):
+    current_slug = resolve_product_slug(slug) or slug
     form = ReviewForm(request.POST)
     if form.is_valid():
         try:
             create_pending_review(
                 user=request.user,
-                group_slug=slug,
+                group_slug=current_slug,
                 rating=form.cleaned_data["rating"],
                 body=form.cleaned_data["body"],
             )
         except ReviewError:
             pass
-    return redirect("catalog:product", slug=slug)
+    return redirect("catalog:product", slug=current_slug)
 
 
 @require_GET

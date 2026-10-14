@@ -67,7 +67,24 @@ class ProductGroup(models.Model):
     def save(self, *args, **kwargs) -> None:
         if not self.slug:
             self.slug = slugify(self.name, allow_unicode=True)
+
+        update_fields = kwargs.get("update_fields")
+        slug_will_save = update_fields is None or "slug" in update_fields
+        old_slug = None
+        if self.pk and slug_will_save:
+            old_slug = (
+                type(self)
+                .objects.filter(pk=self.pk)
+                .values_list("slug", flat=True)
+                .first()
+            )
+
         super().save(*args, **kwargs)
+
+        if old_slug and old_slug != self.slug:
+            from apps.catalog.models.slug_history import record_slug_change
+
+            record_slug_change(product=self, old_slug=old_slug)
 
 
 class ProductSKU(models.Model):

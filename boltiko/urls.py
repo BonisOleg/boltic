@@ -7,6 +7,8 @@ from django.urls import include, path
 from apps.core.sitemaps import SITEMAPS
 from apps.core.views import RobotsTxtView, healthz
 
+handler404 = "apps.core.views.page_not_found"
+
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     # ERR-132: Unfold only on ADMIN_URL — never mount or redirect from /admin/
