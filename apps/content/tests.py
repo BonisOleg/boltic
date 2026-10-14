@@ -178,3 +178,15 @@ class GtmContainerTests(TestCase):
             html = self.client.get(reverse("content:home")).content.decode()
         self.assertNotIn("googletagmanager.com/gtm.js", html)
         self.assertNotIn("GTM-M63C7Z3F", html)
+
+
+class CoopHeaderTests(TestCase):
+    """Tag Assistant needs COOP same-origin-allow-popups (not default same-origin)."""
+
+    def test_home_coop_allows_popups(self):
+        response = self.client.get(reverse("content:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.headers.get("Cross-Origin-Opener-Policy"),
+            "same-origin-allow-popups",
+        )

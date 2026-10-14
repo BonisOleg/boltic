@@ -98,6 +98,9 @@ if not _admin_path or _admin_path.lower() == "admin":
     _admin_path = "manage"
 ADMIN_URL = f"{_admin_path}/"
 
+# Tag Assistant (GTM Preview): default Django "same-origin" blocks the popup.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
 # SEC-csp / project_structure §8.5 — Unfold needs CSP exempt (Alpine unsafe-eval)
 # GTM (nonce на інлайн-сніпеті) + Ads/Analytics пікселі. Без прямого gtag.js.
 _GTM_HOSTS = (
