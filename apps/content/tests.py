@@ -181,12 +181,9 @@ class GtmContainerTests(TestCase):
 
 
 class CoopHeaderTests(TestCase):
-    """Tag Assistant needs COOP same-origin-allow-popups (not default same-origin)."""
+    """Tag Assistant needs window.opener: no Cross-Origin-Opener-Policy header at all."""
 
-    def test_home_coop_allows_popups(self):
+    def test_home_has_no_coop_header(self):
         response = self.client.get(reverse("content:home"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.headers.get("Cross-Origin-Opener-Policy"),
-            "same-origin-allow-popups",
-        )
+        self.assertNotIn("Cross-Origin-Opener-Policy", response.headers)
