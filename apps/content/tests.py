@@ -145,19 +145,36 @@ class GtmContainerTests(TestCase):
             "https://www.googleadservices.com",
             "https://www.google.com",
             "https://*.g.doubleclick.net",
+            "https://*.googleadservices.com",
+            "https://*.doubleclick.net",
+            "https://*.googletagmanager.com",
+            "https://*.google-analytics.com",
+            "https://*.google.com",
         ):
             self.assertIn(host, directives["script-src"], host)
         self.assertTrue(
             any("nonce-" in v for v in directives["script-src"]),
             directives["script-src"],
         )
-        self.assertNotIn("https://ad.doubleclick.net", directives["script-src"])
+        self.assertNotIn("'unsafe-inline'", directives["script-src"])
+        self.assertNotIn("'unsafe-eval'", directives["script-src"])
+
+        for host in (
+            "https://*.googleadservices.com",
+            "https://*.doubleclick.net",
+            "https://*.googletagmanager.com",
+            "https://*.google-analytics.com",
+            "https://*.google.com",
+        ):
+            self.assertIn(host, directives["img-src"], host)
+            self.assertIn(host, directives["connect-src"], host)
 
         for host in (
             "https://www.googletagmanager.com",
             "https://td.doubleclick.net",
             "https://www.google.com",
             "https://*.fls.doubleclick.net",
+            "https://*.doubleclick.net",
         ):
             self.assertIn(host, directives["frame-src"], host)
 

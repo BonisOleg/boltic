@@ -120,7 +120,7 @@ _GA_ADS_HOSTS = (
     "https://*.google.com",
     "https://*.google.com.ua",
 )
-# Піксель і beacon Google Ads. Не в script-src: хост не віддає скрипти.
+# Піксель і beacon Google Ads (img/connect). script-src покриває *.doubleclick.net нижче.
 _ADS_PIXEL_HOSTS = (
     "https://ad.doubleclick.net",
 )
@@ -141,11 +141,16 @@ _GTM_PREVIEW_IMG_HOSTS = (
     "https://ssl.gstatic.com",
     "https://www.gstatic.com",
 )
+# Google Ads conversion / remarketing host wildcards (script, img, connect).
+_GOOGLE_WILDCARD_HOSTS = (
+    "https://*.googleadservices.com",
+    "https://*.doubleclick.net",
+)
 CONTENT_SECURITY_POLICY = {
     "EXCLUDE_URL_PREFIXES": (f"/{_admin_path}/", "/tinymce/"),
     "DIRECTIVES": {
         "default-src": ["'self'"],
-        "script-src": ["'self'", NONCE, *_GTM_HOSTS, *_GA_ADS_HOSTS],
+        "script-src": ["'self'", NONCE, *_GTM_HOSTS, *_GA_ADS_HOSTS, *_GOOGLE_WILDCARD_HOSTS],
         # style= legacy + theme :root block; cleanup ≠ SEC-csp scope. ERR-106: no HTMX inject.
         "style-src": [
             "'self'",
@@ -166,6 +171,7 @@ CONTENT_SECURITY_POLICY = {
             *_FLOODLIGHT_IMG_HOSTS,
             *_MERCHANT_CENTER_HOSTS,
             *_GTM_PREVIEW_IMG_HOSTS,
+            *_GOOGLE_WILDCARD_HOSTS,
         ],
         "connect-src": [
             "'self'",
@@ -174,12 +180,14 @@ CONTENT_SECURITY_POLICY = {
             *_ADS_PIXEL_HOSTS,
             *_ADS_SYNDICATION_HOSTS,
             *_MERCHANT_CENTER_HOSTS,
+            *_GOOGLE_WILDCARD_HOSTS,
         ],
         "frame-src": [
             "https://www.googletagmanager.com",
             "https://td.doubleclick.net",
             "https://www.google.com",
             "https://*.fls.doubleclick.net",
+            "https://*.doubleclick.net",
         ],
         "frame-ancestors": ["'none'"],
         "base-uri": ["'self'"],
